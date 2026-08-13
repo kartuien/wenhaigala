@@ -20,6 +20,7 @@ var ITEM_CONFIG = {
   plant_specimen: { id: "plant_specimen", name: "植物标本", desc: "一片精心制作的银杏叶标本", usable: true, useEvent: "examine_specimen" },
   golden_pen:     { id: "golden_pen",     name: "金笔",     desc: "一支刻着「文海」的金色钢笔，意义非凡", usable: true, useEvent: "use_golden_pen" },
   hachi_hat:      { id: "hachi_hat",      name: "哈基高的斗笠", desc: "哈基高大师留下的斗笠，似乎蕴含着某种力量", usable: false },
+  hachi_book:     { id: "hachi_book",     name: "哈基高的哈气秘籍", desc: "这东西似乎记载了些神秘的东西", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -33,6 +34,7 @@ var ACHIEVEMENT_CONFIG = {
   hachi_legend: { id: "hachi_legend", name: "哈气大师传说", desc: "这段是不是我在哪看过", icon: "🌀" },
   so_free:      { id: "so_free",      name: "你真闲啊", desc: "你真闲啊", icon: "😮‍💨" },
   toilet_lover: { id: "toilet_lover", name: "喜欢蹲坑", desc: "你真的这么喜欢拉屎吗", icon: "🚽" },
+  fly_higher:   { id: "fly_higher",   name: "我要飞得更高", desc: "中国人能飞中国人能飞", icon: "🚀" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -108,6 +110,7 @@ var SCENE_CONFIG = {
     desc: "这里……是哪里……|居然是文海中学吗……|真是好久没见了呢……要不，进去看看？",
     buttons: [
       { text: "抬头看天", target: "gate_look" },
+      { text: "都说中国人能飞，我也要飞！！！", target: "gate_fly" },
       { text: "去教学楼吧", popup: "前面的地点以后再去探索吧！" },
       { text: "欸……左边的小树林里似乎有异动", popup: "前面的地点以后再去探索吧！" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
@@ -296,7 +299,7 @@ var SCENE_CONFIG = {
   victory_2: {
     id: "victory_2", name: "胜利", img: "victory.jpg",
     desc: "哈基高...消失了呢......",
-    getItem: "hachi_hat",
+    getItem: "hachi_hat,hachi_book",
     autoNext: "victory_3",
     buttons: []
   },
@@ -349,6 +352,14 @@ var SCENE_CONFIG = {
     autoJump: "hermit_3",
     buttons: []
   },
+  space: {
+    id: "space", name: "外太空", img: "space.jpg",
+    desc: "飞到外太空了😰！！|要去哪呢.......",
+    unlockAch: "fly_higher",
+    buttons: [
+      { text: "还是返程吧", target: "gate" },
+    ]
+  },
 };
 
 // ============================================================
@@ -386,6 +397,19 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.4.13.1", date: "2026-08-13", items: [
+    "图片加载深度优化：link preload 预加载头 + decode 解码 + rAF 切换 + CSS 硬件加速",
+    "图片切换零延迟：智能同图闪切，异图直接切换，消除 setTimeout 10ms 延迟",
+    "图片标签添加 loading=eager + decoding=sync 属性",
+    "图片区域添加 will-change 硬件加速 + opacity 淡入过渡",
+  ]},
+  { version: "v1.4.13", date: "2026-08-13", items: [
+    "校门口飞行按钮升级：拥有哈气秘籍后可飞往外太空",
+    "新增场景：外太空",
+    "新增成就：我要飞得更高",
+    "新增道具：哈基高的哈气秘籍（击败哈基高获得）",
+    "修复击败哈基高后无法获得道具的bug",
+  ]},
   { version: "v1.3.91.flash", date: "2026-08-13", items: [
     "图片预加载优化：页面加载时自动缓存所有场景图片，切换场景秒加载",
     "标题更名为「文海gala」",
@@ -435,6 +459,15 @@ var CHANGELOG = [
     "字幕改为逐句替换显示，不再叠加",
   ]}
 ];
+
+// 添加道具（支持逗号分隔多个）
+function addItems(itemStr) {
+  if (!itemStr) return;
+  var items = itemStr.split(",");
+  for (var i = 0; i < items.length; i++) {
+    addItem(items[i].trim());
+  }
+}
 
 // 添加道具
 function addItem(itemId) {
@@ -488,9 +521,21 @@ var currentSentenceIndex = 0;
 var currentCharIndex = 0;
 var typewriterDone = false;
 var showButtonsAfter = false;  // 是否在打完当前句后显示按钮
+var currentImgSrc = "";        // 当前显示的图片路径，用于快速切换
 
 // 渲染当前场景
 function renderScene(sceneId) {
+  // 飞行路由：检查是否有哈气秘籍
+  if (sceneId === "gate_fly") {
+    if (hasItem("hachi_book")) {
+      renderScene("space");
+    } else {
+      showPopupModal("你还不够强，击败哈基高拿下哈气秘籍之后再来吧");
+      renderScene("gate");
+    }
+    return;
+  }
+
   var scene = SCENE_CONFIG[sceneId];
   if (!scene) return;
 
@@ -512,13 +557,17 @@ function renderScene(sceneId) {
   } else {
     imageArea.style.display = "flex";
     if (scene.img) {
-      img.style.display = "none";
-      img.src = "";
-      // 强制刷新，防止同一图片路径不触发重载
-      setTimeout(function() {
+      // 智能切换：同一图片闪一下刷新，不同图片直接切换（预加载已缓存）
+      if (scene.img === currentImgSrc) {
+        img.src = "";
+        requestAnimationFrame(function() {
+          img.src = scene.img;
+        });
+      } else {
         img.src = scene.img;
-        img.style.display = "block";
-      }, 10);
+        currentImgSrc = scene.img;
+      }
+      img.style.display = "block";
       placeholder.style.display = "none";
     } else {
       img.style.display = "none";
@@ -553,7 +602,7 @@ function renderScene(sceneId) {
   actionsArea.style.display = "none";
 
   // 打字机效果显示描述
-  startTypewriter(scene.desc, scene.autoNext, scene.autoJump);
+  startTypewriter(scene.desc, scene.autoNext, scene.autoJump, scene.getItem);
 
   // 御前决斗战斗场景特殊处理
   if (sceneId === "duel_battle") {
@@ -596,7 +645,7 @@ function stopTypewriter() {
 }
 
 // 开始打字机
-function startTypewriter(text, autoNext, autoJump) {
+function startTypewriter(text, autoNext, autoJump, getItem) {
   // 检测到下一个场景标记，去除后设置标志
   showButtonsAfter = false;
   if (text.indexOf("（到下一个场景）") !== -1) {
@@ -631,11 +680,11 @@ function startTypewriter(text, autoNext, autoJump) {
   descArea.innerHTML = "<span class=\"cursor\"></span>";
   descArea.onclick = null;
 
-  typeNextChar(autoNext, autoJump);
+  typeNextChar(autoNext, autoJump, getItem);
 }
 
 // 打字下一个字
-function typeNextChar(autoNext, autoJump) {
+function typeNextChar(autoNext, autoJump, getItem) {
   var descArea = document.getElementById("description-area");
   if (currentSentenceIndex >= currentSentences.length) {
     // 所有句子打完
@@ -643,9 +692,11 @@ function typeNextChar(autoNext, autoJump) {
     descArea.innerHTML = descArea.innerHTML.replace("<span class=\"cursor\"></span>", "");
     if (autoJump) {
       // 自动跳转场景
+      if (getItem) addItems(getItem);
       setTimeout(function() { renderScene(autoJump); }, 800);
     } else if (autoNext) {
       // 点击继续后跳转场景
+      if (getItem) addItems(getItem);
       descArea.innerHTML += "<span class=\"tap-hint\">▼ 点击继续</span>";
       descArea.onclick = function() {
         descArea.onclick = null;
@@ -670,7 +721,7 @@ function typeNextChar(autoNext, autoJump) {
     var typed = sentence.substring(0, currentCharIndex + 1);
     descArea.innerHTML = typed + "<span class=\"cursor\"></span>";
     currentCharIndex++;
-    typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump); }, 50);
+    typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump, getItem); }, 50);
   } else {
     // 当前句子打完，等待点击
     descArea.innerHTML = sentence + "<span class=\"tap-hint\">▼ 点击继续</span>";
@@ -679,7 +730,7 @@ function typeNextChar(autoNext, autoJump) {
       currentSentenceIndex++;
       currentCharIndex = 0;
       descArea.innerHTML = "<span class=\"cursor\"></span>";
-      typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump); }, 50);
+      typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump, getItem); }, 50);
     };
   }
 }
@@ -699,7 +750,7 @@ function handleAction(btn) {
 
   // 获得道具
   if (btn.getItem) {
-    addItem(btn.getItem);
+    addItems(btn.getItem);
   }
 
   // 解锁成就
@@ -1134,12 +1185,23 @@ function startGame() {
 (function() {
   var loaded = {};
   var sceneIds = Object.keys(SCENE_CONFIG);
+  var head = document.head || document.getElementsByTagName("head")[0];
   for (var i = 0; i < sceneIds.length; i++) {
     var imgPath = SCENE_CONFIG[sceneIds[i]].img;
     if (imgPath && !loaded[imgPath]) {
       loaded[imgPath] = true;
+      // 添加 <link rel="preload"> 让浏览器最早开始加载
+      var link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = imgPath;
+      head.appendChild(link);
+      // 同时用 Image 对象预加载并解码
       var preImg = new Image();
       preImg.src = imgPath;
+      if (preImg.decode) {
+        preImg.decode().catch(function(){});
+      }
     }
   }
 })();
