@@ -20,7 +20,8 @@
       <img src="cover.png" alt="文海校园">
     </div>
     <button id="start-btn" onclick="startGame()">开 始 探 索</button>
-    <div id="version-tag">v1.2</div>
+    <button id="tips-btn" onclick="showTips()">游 玩 提 示</button>
+    <div id="version-tag">v1.3.91</div>
   </div>
 
   <!-- 顶部地点名 -->
@@ -41,6 +42,7 @@
   <!-- 悬浮按钮 -->
   <div id="float-btns" style="display:none">
     <div class="float-left">
+      <button class="float-btn" id="btn-portal" onclick="openPortal()" title="传送门">🌀</button>
       <button class="float-btn" id="btn-changelog" onclick="openChangelog()">📋</button>
     </div>
     <div class="float-right">

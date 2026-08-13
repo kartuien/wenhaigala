@@ -19,22 +19,20 @@ var ITEM_CONFIG = {
   medal:          { id: "medal",          name: "荣誉奖章", desc: "文海中学优秀学生的荣誉证明", usable: false },
   plant_specimen: { id: "plant_specimen", name: "植物标本", desc: "一片精心制作的银杏叶标本", usable: true, useEvent: "examine_specimen" },
   golden_pen:     { id: "golden_pen",     name: "金笔",     desc: "一支刻着「文海」的金色钢笔，意义非凡", usable: true, useEvent: "use_golden_pen" },
+  hachi_hat:      { id: "hachi_hat",      name: "哈基高的斗笠", desc: "哈基高大师留下的斗笠，似乎蕴含着某种力量", usable: false },
 };
 
 // ==================== 成就配置 ====================
 // id: 唯一标识, name: 名称, desc: 解锁后显示的描述, icon: 图标
 var ACHIEVEMENT_CONFIG = {
-  first_step:   { id: "first_step",   name: "初入文海", desc: "第一次踏入文海中学的校门", icon: "🚪" },
-  bookworm:     { id: "bookworm",     name: "书虫",     desc: "成功进入图书馆，知识的大门已打开", icon: "📚" },
-  athlete:      { id: "athlete",      name: "运动健将", desc: "来到操场，挥洒青春汗水", icon: "⚽" },
-  gourmet:      { id: "gourmet",      name: "美食家",   desc: "光顾食堂，品尝校园美食", icon: "🍜" },
-  scholar:      { id: "scholar",      name: "学霸",     desc: "进入实验室，探索科学奥秘", icon: "🔬" },
-  green_thumb:  { id: "green_thumb",  name: "园艺达人", desc: "漫步花园，感受自然之美", icon: "🌿" },
-  explorer:     { id: "explorer",     name: "探险家",   desc: "探索了文海中学的每一个角落", icon: "🗺️" },
-  collector:    { id: "collector",    name: "收藏家",   desc: "集齐了所有隐藏道具", icon: "💎" },
-  note_reader:  { id: "note_reader",  name: "解密者",   desc: "阅读了神秘纸条上的内容", icon: "📜" },
-  honor_student:{ id: "honor_student",name: "三好学生", desc: "获得了荣誉奖章", icon: "🏅" },
   flying_pig:   { id: "flying_pig",   name: "飞天之猪", desc: "见证了神秘猪猪拉屎之地", icon: "🐷" },
+  hachi_king:   { id: "hachi_king",   name: "哈气之王", desc: "在御前决斗中击败了哈基高大师", icon: "👑" },
+  not_strong:   { id: "not_strong",   name: "你还不够强！", desc: "在御前决斗中败给了哈基高大师", icon: "💔" },
+  retry_courage:{ id: "retry_courage",name: "再来一次的勇气", desc: "在御前决斗中落败仍然不认输", icon: "💪" },
+  drunk_dream:  { id: "drunk_dream",  name: "疑似杭二新生", desc: "这家伙在幻想些什么呢", icon: "🤔" },
+  hachi_legend: { id: "hachi_legend", name: "哈气大师传说", desc: "这段是不是我在哪看过", icon: "🌀" },
+  so_free:      { id: "so_free",      name: "你真闲啊", desc: "你真闲啊", icon: "😮‍💨" },
+  toilet_lover: { id: "toilet_lover", name: "喜欢蹲坑", desc: "你真的这么喜欢拉屎吗", icon: "🚽" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -67,6 +65,10 @@ var EVENT_CONFIG = {
   lab_event: {
     id: "lab_event", title: "实验室发现", icon: "⚗️",
     text: "实验室里摆满了各种仪器。在实验台抽屉里，你发现了一支刻着「文海」的金色钢笔。<br><br>这支笔看起来不同寻常！"
+  },
+  toilet_stay: {
+    id: "toilet_stay", title: "再蹲一会", icon: "🚽",
+    text: "腿好麻啊……"
   },
   complete_event: {
     id: "complete_event", title: "探索完成", icon: "🎉",
@@ -154,6 +156,7 @@ var SCENE_CONFIG = {
     desc: "欸……瓦达西，怎么到……厕所了？！",
     buttons: [
       { text: "走出厕所", target: "window_scene" },
+      { text: "再蹲一会", event: "toilet_stay", unlockAch: "toilet_lover" },
     ]
   },
   window_scene: {
@@ -166,6 +169,7 @@ var SCENE_CONFIG = {
   drunk: {
     id: "drunk", name: "喝大了", img: "drunk.jpg",
     desc: "欸……瓦达西……怎么到这了……|难道……我成为了一名杭二的学生？！|头……还是好晕",
+    unlockAch: "drunk_dream",
     shakeHard: true,
     autoJump: "gate",
     buttons: []
@@ -189,6 +193,7 @@ var SCENE_CONFIG = {
       { text: "肯定……要跑路啊", target: "hermit_run" },
       { text: "肯定要……哈气啊！", target: "hermit_hachi" },
       { text: "只要虚心求教就可以了吧", target: "hermit_ask" },
+      { text: "发起御前决斗", target: "hermit_duel_1", cls: "special" },
     ]
   },
   hermit_run: {
@@ -219,103 +224,130 @@ var SCENE_CONFIG = {
   hermit_ha: {
     id: "hermit_ha", name: "一位隐士的地方", img: "hachi_ha.png",
     desc: "哈基高：哈！！！！！！！！",
+    unlockAch: "hachi_legend",
     shakeHard: true,
     autoJump: "gate",
     buttons: []
   },
-  teaching_building: {
-    id: "teaching_building", name: "教学楼", img: "",
-    placeholder: "📷 教学楼照片",
-    desc: "明亮的走廊里回荡着朗朗读书声。教室门口贴着课程表，墙上的公告栏贴着各种社团活动通知。在走廊尽头的失物招领处，似乎有什么东西……",
+  // ----- 御前决斗对话 -----
+  hermit_duel_1: {
+    id: "hermit_duel_1", name: "一位隐士的地方", img: "walking2.png",
+    desc: "你这家伙，是不是太狂妄了点啊",
+    autoNext: "hermit_duel_2",
+    buttons: []
+  },
+  hermit_duel_2: {
+    id: "hermit_duel_2", name: "一位隐士的地方", img: "walking2.png",
+    desc: "哈基高：欸？",
+    shake: true,
+    autoNext: "hermit_duel_3",
+    buttons: []
+  },
+  hermit_duel_3: {
+    id: "hermit_duel_3", name: "一位隐士的地方", img: "duel1.jpg",
+    desc: "我避你锋芒？",
+    autoNext: "hermit_duel_4",
+    buttons: []
+  },
+  hermit_duel_4: {
+    id: "hermit_duel_4", name: "一位隐士的地方", img: "walking2.png",
+    desc: "哈基高：区区蝼蚁，也敢与我哈气大师对决？",
+    autoNext: "hermit_duel_5",
+    buttons: []
+  },
+  hermit_duel_5: {
+    id: "hermit_duel_5", name: "一位隐士的地方", img: "walking2.png",
+    desc: "可不要小瞧了我啊，我可是很强的",
+    autoNext: "hermit_duel_6",
+    buttons: []
+  },
+  hermit_duel_6: {
+    id: "hermit_duel_6", name: "一位隐士的地方", img: "walking2.png",
+    desc: "哈基高：那就来较量一场吧，我会赌上哈气大师之名的",
+    autoNext: "hermit_duel_7",
+    buttons: []
+  },
+  hermit_duel_7: {
+    id: "hermit_duel_7", name: "一位隐士的地方", img: "walking2.png",
+    desc: "要上了！！！",
+    shake: true,
+    autoJump: "duel_battle",
+    buttons: []
+  },
+  // ----- 御前决斗战斗 -----
+  duel_battle: {
+    id: "duel_battle", name: "御前决斗", img: "walking2.png",
+    desc: "",  // 战斗场景特殊处理
+    buttons: []
+  },
+  duel_victory: {
+    id: "duel_victory", name: "胜利", img: "duel_result.png",
+    desc: "你击败了哈基高大师！御前决斗的胜者！",
+    autoJump: "victory_1",
+    buttons: []
+  },
+  victory_1: {
+    id: "victory_1", name: "胜利", img: "duel_result.png",
+    desc: "哈基高：怎么会.....我堂堂哈气大师....怎么会输...|哈基高：一定是你作弊了，你作弊了，我没有输，我没有输......|去天堂说去吧.....",
+    shakeHard: true,
+    autoNext: "victory_2",
+    buttons: []
+  },
+  victory_2: {
+    id: "victory_2", name: "胜利", img: "victory.jpg",
+    desc: "哈基高...消失了呢......",
+    getItem: "hachi_hat",
+    autoNext: "victory_3",
+    buttons: []
+  },
+  victory_3: {
+    id: "victory_3", name: "胜利", img: "victory.jpg",
+    desc: "该回校门口了，走吧",
+    shake: true,
+    autoJump: "gate",
+    buttons: []
+  },
+  duel_defeat: {
+    id: "duel_defeat", name: "失败", img: "duel_result.png",
+    desc: "你败给了哈基高大师……御前决斗的败者……",
+    autoJump: "defeat_1",
+    buttons: []
+  },
+  defeat_1: {
+    id: "defeat_1", name: "失败", img: "duel_result.png",
+    desc: "难道……还是做不到吗……|哈基高：投降吧！胜利，已经注定了……|不……还没有结束|哈基高：真是倔强呢……",
+    autoNext: "defeat_2",
+    buttons: []
+  },
+  defeat_2: {
+    id: "defeat_2", name: "失败", img: "defeat2.jpg",
+    desc: "哈基高：投降吧，你赢的概率，连百分之一也没有",
+    shake: true,
     buttons: [
-      { text: "查看失物招领处", target: "teaching_building", getItem: "library_card", event: null },
-      { text: "前往图书馆", target: "library", condition: "library_card" },
-      { text: "前往实验室", target: "lab", condition: "student_card" },
-      { text: "返回校门口", target: "gate" },
-      { text: "前往花园", target: "garden" },
+      { text: "这还说啥了投降了", target: "defeat_surrender" },
+      { text: "但是我拒绝", target: "defeat_refuse" },
     ]
   },
-  library: {
-    id: "library", name: "图书馆", img: "",
-    placeholder: "📷 图书馆照片",
-    desc: "高大的书架直通天花板，空气中弥漫着旧书特有的香气。阳光透过彩色玻璃窗洒在阅览桌上。角落里，一本泛黄的古书引起了你的注意……",
-    buttons: [
-      { text: "翻阅那本古书", target: "library", event: "library_event", getItem: "mysterious_note", unlockAch: "bookworm" },
-      { text: "返回教学楼", target: "teaching_building" },
-      { text: "前往礼堂", target: "auditorium" },
-    ]
+  defeat_surrender: {
+    id: "defeat_surrender", name: "失败", img: "defeat2.jpg",
+    desc: "哈基高：我不吃牛肉|（你被打晕了过去。。。）",
+    shakeHard: true,
+    autoJump: "gate",
+    buttons: []
   },
-  playground: {
-    id: "playground", name: "操场", img: "",
-    placeholder: "📷 操场照片",
-    desc: "宽阔的操场上，同学们正在上体育课。跑道上有人挥汗如雨，篮球场上传来阵阵欢呼。操场边的看台上，几个学生在聊天休息。",
-    buttons: [
-      { text: "加入篮球赛", target: "playground", unlockAch: "athlete" },
-      { text: "返回校门口", target: "gate" },
-      { text: "前往食堂", target: "cafeteria" },
-      { text: "前往体育馆", target: "gym" },
-    ]
+  defeat_refuse: {
+    id: "defeat_refuse", name: "再来一次的勇气", img: "refuse1.jpg",
+    desc: "搭嘎，扣豆瓦鲁。",
+    unlockAch: "retry_courage",
+    autoNext: "defeat_refuse_2",
+    buttons: []
   },
-  cafeteria: {
-    id: "cafeteria", name: "食堂", img: "",
-    placeholder: "📷 食堂照片",
-    desc: "飘来阵阵饭菜香，食堂阿姨正在窗口忙碌。今天的特色菜是红烧肉和糖醋排骨。墙上贴着「光盘行动」的标语，学生们排队有序。",
-    buttons: [
-      { text: "排队打饭", target: "cafeteria", unlockAch: "gourmet" },
-      { text: "返回校门口", target: "gate" },
-      { text: "前往操场", target: "playground" },
-      { text: "前往体育馆", target: "gym" },
-    ]
-  },
-  lab: {
-    id: "lab", name: "实验室", img: "",
-    placeholder: "📷 实验室照片",
-    desc: "实验室里整齐排列着实验台，烧杯、试管、显微镜一应俱全。墙上挂着科学家的画像，黑板上的公式还没有擦掉。实验台抽屉里似乎有什么东西……",
-    buttons: [
-      { text: "打开实验台抽屉", target: "lab", event: "lab_event", getItem: "golden_pen", unlockAch: "scholar" },
-      { text: "返回教学楼", target: "teaching_building" },
-    ]
-  },
-  garden: {
-    id: "garden", name: "花园", img: "",
-    placeholder: "📷 花园照片",
-    desc: "这里是校园里最安静的角落。百年银杏树洒下斑驳的树影，花坛里各色鲜花竞相开放。石板小径蜿蜒曲折，通向一个小凉亭。树下有一片特别的银杏叶……",
-    buttons: [
-      { text: "拾起银杏叶", target: "garden", getItem: "plant_specimen", unlockAch: "green_thumb" },
-      { text: "返回教学楼", target: "teaching_building" },
-      { text: "前往礼堂", target: "auditorium" },
-    ]
-  },
-  auditorium: {
-    id: "auditorium", name: "礼堂", img: "",
-    placeholder: "📷 礼堂照片",
-    desc: "庄严的礼堂里，舞台上挂着「文海中学」的校徽。台下是一排排整齐的座椅。陈列柜里展示着学校历年获得的荣誉。角落里有一枚奖章闪闪发光……",
-    buttons: [
-      { text: "查看陈列柜", target: "auditorium", event: "found_medal", getItem: "medal", unlockAch: "honor_student" },
-      { text: "前往图书馆", target: "library" },
-      { text: "前往花园", target: "garden" },
-    ]
-  },
-  admin_building: {
-    id: "admin_building", name: "行政楼", img: "",
-    placeholder: "📷 行政楼照片",
-    desc: "行政楼是学校的办公中心，老师们在这里批改作业、准备教案。走廊里偶尔有老师匆匆走过。公告栏上贴着最新的校园通知。",
-    buttons: [
-      { text: "查看公告栏", target: "admin_building" },
-      { text: "返回校门口", target: "gate" },
-      { text: "前往体育馆", target: "gym" },
-    ]
-  },
-  gym: {
-    id: "gym", name: "体育馆", img: "",
-    placeholder: "📷 体育馆照片",
-    desc: "体育馆里传来羽毛球拍击球的声音。场地宽敞明亮，可以打篮球、羽毛球和乒乓球。墙上挂着「友谊第一，比赛第二」的横幅。",
-    buttons: [
-      { text: "打一场羽毛球", target: "gym" },
-      { text: "前往操场", target: "playground" },
-      { text: "前往食堂", target: "cafeteria" },
-      { text: "前往行政楼", target: "admin_building" },
-    ]
+  defeat_refuse_2: {
+    id: "defeat_refuse_2", name: "再来一次的勇气", img: "refuse2.jpg",
+    desc: "杀手皇后，第三炸弹，败者食尘！！！！!",
+    shakeHard: true,
+    autoJump: "hermit_3",
+    buttons: []
   },
 };
 
@@ -339,6 +371,13 @@ var gameState = {
   newAchievements: [],       // 本次新解锁的成就(用于提醒)
 };
 
+// 御前决斗战斗状态
+var battleState = {
+  playerKi: 0,      // 玩家气
+  hachiKi: 0,       // 哈基高气
+  inBattle: false,  // 是否在战斗中
+};
+
 // 检查是否有某道具
 function hasItem(itemId) { return gameState.inventory.indexOf(itemId) !== -1; }
 
@@ -347,14 +386,50 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
-  { version: "v1.0", date: "2026-08-13", items: [
+  { version: "v1.3.91", date: "2026-08-13", items: [
+    "厕所场景新增「再蹲一会」选项",
+    "新增成就：喜欢蹲坑",
+  ]},
+  { version: "v1.3.78.1", date: "2026-08-13", items: [
+    "新增成就：你真闲啊（集齐所有成就后解锁）",
+  ]},
+  { version: "v1.3.78.05", date: "2026-08-13", items: [
+    "新增成就：哈气大师传说",
+    "删除传送门中未使用的场景（教学楼/图书馆/操场/食堂/实验室/花园/礼堂/行政楼/体育馆）",
+  ]},
+  { version: "v1.3.78", date: "2026-08-13", items: [
+    "新增传送门功能（左上角按钮，按标题分组跳转任意场景）",
+    "新增游玩提示（开始页面「游玩提示」按钮）",
+    "新增成就：疑似杭二新生",
+    "新增胜利结局完整剧情线（哈基高崩溃 → 获得斗笠 → 回校门口）",
+    "新增失败结局完整剧情线（投降路线 + 拒绝路线）",
+    "新增成就：再来一次的勇气",
+    "哈基高战斗新增台词（防下了！/天翔哈闪！/哈之呼吸法！）",
+    "新增道具：哈基高的斗笠",
+    "修复哈基高没气时AI不会呼吸的问题",
+  ]},
+  { version: "v1.3.0", date: "2026-08-13", items: [
     "首次发布文海校园大探险",
-    "新增开场剧情（nia~头好晕）",
-    "新增校门口场景及三个分支选择",
+    "新增开场剧情（nia~头好晕 → 文海学校 → 校门口）",
+    "新增校门口场景及分支选择（教学楼/小树林/十字路口）",
     "新增隐士之地（哈基高大师）完整剧情线",
-    "新增打字机字幕效果，支持 | 分段",
+    "新增打字机字幕效果，支持 | 分段，逐句替换显示",
     "新增屏幕震动特效（普通/剧烈）",
+    "新增抬头看天剧情线（校门口 → 猪猪拉屎之地 → 厕所 → 喝大了）",
+    "新增神秘猪猪拉屎之地场景（三连猪猪 + 剧烈震动）",
+    "新增厕所场景及窗外回忆剧情",
+    "新增喝大了场景（杭二学生剧情）",
+    "新增成就：飞天之猪",
+    "新增场景触发成就弹窗功能",
     "新增更新日志功能",
+    "新增版本号显示",
+    "新增御前决斗系统（回合制战斗：哈气/格挡/呼吸）",
+    "新增御前决斗对话剧情线（7个场景）",
+    "新增战斗HUD显示（气量实时显示）",
+    "新增成就：哈气之王、你还不够强！",
+    "隐士之地新增「发起御前决斗」选项",
+    "修复图片切换不稳定的缓存问题",
+    "字幕改为逐句替换显示，不再叠加",
   ]}
 ];
 
@@ -365,8 +440,6 @@ function addItem(itemId) {
     var item = ITEM_CONFIG[itemId];
     showToast("获得道具：" + item.name);
     updateBackpackBadge();
-    // 检查收藏家成就
-    checkCollectorAchievement();
   }
 }
 
@@ -376,31 +449,22 @@ function unlockAchievement(achId) {
     gameState.achievements.push(achId);
     gameState.newAchievements.push(achId);
     var ach = ACHIEVEMENT_CONFIG[achId];
+    if (!ach) return;
     showToast("成就解锁：" + ach.name);
     updateAchievementBadge();
-    // 检查探险家成就
-    checkExplorerAchievement();
+    // 检查是否集齐所有成就（排除"你真闲啊"自身）
+    if (achId !== "so_free") checkAllAchievements();
   }
 }
 
-// 检查收藏家成就
-function checkCollectorAchievement() {
-  var allItemIds = Object.keys(ITEM_CONFIG);
-  var allCollected = allItemIds.every(function(id) { return hasItem(id); });
-  if (allCollected) {
-    unlockAchievement("collector");
+// 检查是否集齐所有成就
+function checkAllAchievements() {
+  var allAchIds = Object.keys(ACHIEVEMENT_CONFIG);
+  for (var i = 0; i < allAchIds.length; i++) {
+    if (allAchIds[i] === "so_free") continue;
+    if (!hasAchievement(allAchIds[i])) return;
   }
-}
-
-// 检查探险家成就
-function checkExplorerAchievement() {
-  var allSceneIds = Object.keys(SCENE_CONFIG);
-  var allVisited = allSceneIds.every(function(id) { return gameState.visitedScenes.indexOf(id) !== -1; });
-  if (allVisited) {
-    unlockAchievement("explorer");
-    // 触发完成事件
-    showEventModal("complete_event");
-  }
+  unlockAchievement("so_free");
 }
 
 // 记录访问场景
@@ -487,6 +551,12 @@ function renderScene(sceneId) {
 
   // 打字机效果显示描述
   startTypewriter(scene.desc, scene.autoNext, scene.autoJump);
+
+  // 御前决斗战斗场景特殊处理
+  if (sceneId === "duel_battle") {
+    renderBattle();
+    return;
+  }
 
   // 场景解锁成就
   if (scene.unlockAch) {
@@ -833,6 +903,215 @@ function showToast(msg) {
   toast.classList.add("show");
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(function() { toast.classList.remove("show"); }, 2000);
+}
+
+// ===== 御前决斗战斗系统 =====
+function renderBattle() {
+  battleState.inBattle = true;
+  battleState.playerKi = 0;
+  battleState.hachiKi = 0;
+
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+
+  updateBattleHUD();
+
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+
+  // 哈气按钮
+  var haBtn = document.createElement("button");
+  haBtn.className = "action-btn battle-btn";
+  haBtn.textContent = "哈气（消耗1气，造成伤害）";
+  haBtn.addEventListener("click", function() { handleBattleAction("哈气"); });
+  actionsArea.appendChild(haBtn);
+
+  // 格挡按钮
+  var geBtn = document.createElement("button");
+  geBtn.className = "action-btn battle-btn";
+  geBtn.textContent = "格挡（免消耗，抵挡攻击）";
+  geBtn.addEventListener("click", function() { handleBattleAction("格挡"); });
+  actionsArea.appendChild(geBtn);
+
+  // 呼吸按钮
+  var huBtn = document.createElement("button");
+  huBtn.className = "action-btn battle-btn";
+  huBtn.textContent = "呼吸（积累1气）";
+  huBtn.addEventListener("click", function() { handleBattleAction("呼吸"); });
+  actionsArea.appendChild(huBtn);
+
+  // 规则按钮
+  var ruleBtn = document.createElement("button");
+  ruleBtn.className = "action-btn";
+  ruleBtn.style.cssText = "background:linear-gradient(135deg,#555,#444);color:#aaa;";
+  ruleBtn.textContent = "📖 查看规则";
+  ruleBtn.addEventListener("click", function() {
+    showPopupModal("【御前决斗规则】<br><br>⚔️ 哈气：消耗1气攻击对手，对手未格挡则出局<br>🛡️ 格挡：免消耗，抵挡对手的哈气<br>💨 呼吸：积累1气<br><br>哈基高会随机选择行动，但没气时不会哈气。");
+  });
+  actionsArea.appendChild(ruleBtn);
+}
+
+function updateBattleHUD() {
+  var descArea = document.getElementById("description-area");
+  descArea.innerHTML =
+    '<div class="battle-hud">' +
+    '<div class="battle-ki">你的气：<span class="ki-num">' + battleState.playerKi + '</span></div>' +
+    '<div class="battle-ki">哈基高的气：<span class="ki-num">' + battleState.hachiKi + '</span></div>' +
+    '<div class="battle-round">选择你的行动</div>' +
+    '</div>';
+  descArea.onclick = null;
+}
+
+function handleBattleAction(action) {
+  if (!battleState.inBattle) return;
+
+  // 检查哈气是否够气
+  if (action === "哈气" && battleState.playerKi < 1) {
+    showPopupModal("气不够！请先使用「呼吸」积累气。");
+    return;
+  }
+
+  // 哈基高选择行动
+  var hachiAction = hachiChoose();
+
+  // 执行玩家行动
+  if (action === "哈气") battleState.playerKi--;
+  if (action === "呼吸") battleState.playerKi++;
+
+  // 执行哈基高行动
+  if (hachiAction === "哈气") battleState.hachiKi--;
+  if (hachiAction === "呼吸") battleState.hachiKi++;
+
+  // 判断结果
+  var hachiSay = "";
+  if (hachiAction === "格挡") hachiSay = "「防下了！！！」";
+  else if (hachiAction === "哈气") hachiSay = "「天翔哈闪！！！」";
+  else if (hachiAction === "呼吸") hachiSay = "「哈之呼吸法！！！」";
+
+  var resultMsg = "";
+  resultMsg += "【你的行动】" + action + "<br>";
+  resultMsg += "【哈基高的行动】" + hachiAction + " " + hachiSay + "<br><br>";
+
+  // 玩家哈气判定
+  if (action === "哈气") {
+    if (hachiAction === "格挡") {
+      resultMsg += "哈基高格挡了你的攻击！毫发无伤。";
+    } else {
+      resultMsg += "哈基高被你的哈气击中！哈基高出局！";
+      battleState.inBattle = false;
+      showPopupModal(resultMsg);
+      setTimeout(function() {
+        unlockAchievement("hachi_king");
+        var achCfg = ACHIEVEMENT_CONFIG["hachi_king"];
+        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+        setTimeout(function() { renderScene("duel_victory"); }, 400);
+      }, 400);
+      return;
+    }
+  }
+
+  // 哈基高哈气判定
+  if (hachiAction === "哈气") {
+    if (action === "格挡") {
+      resultMsg += "你格挡了哈基高的攻击！毫发无伤。";
+    } else {
+      resultMsg += "你被哈基高的哈气击中！你出局了！";
+      battleState.inBattle = false;
+      showPopupModal(resultMsg);
+      setTimeout(function() {
+        unlockAchievement("not_strong");
+        var achCfg = ACHIEVEMENT_CONFIG["not_strong"];
+        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+        setTimeout(function() { renderScene("duel_defeat"); }, 400);
+      }, 400);
+      return;
+    }
+  }
+
+  // 双方都格挡或都呼吸
+  if (action === "格挡" && hachiAction === "格挡") {
+    resultMsg += "双方都摆出了格挡架势……无事发生。";
+  }
+  if (action === "呼吸" && hachiAction === "呼吸") {
+    resultMsg += "双方都深吸一口气……各自蓄力。";
+  }
+  if (action === "呼吸" && hachiAction === "格挡") {
+    resultMsg += "你深吸一口气，哈基高摆出格挡架势。";
+  }
+  if (action === "格挡" && hachiAction === "呼吸") {
+    resultMsg += "哈基高深吸一口气，你摆出格挡架势。";
+  }
+
+  showPopupModal(resultMsg);
+  updateBattleHUD();
+}
+
+function hachiChoose() {
+  var options = [];
+  // 格挡和呼吸始终可选
+  options.push("格挡");
+  options.push("呼吸");
+  // 有气才能哈气
+  if (battleState.hachiKi >= 1) {
+    options.push("哈气");
+  }
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// ===== 游玩提示 =====
+function showTips() {
+  showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络游戏，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
+}
+
+// ===== 传送门 =====
+function openPortal() {
+  var overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  // 按标题分组场景
+  var groups = {};
+  var sceneIds = Object.keys(SCENE_CONFIG);
+  for (var i = 0; i < sceneIds.length; i++) {
+    var sid = sceneIds[i];
+    var scene = SCENE_CONFIG[sid];
+    var name = scene.name || "未命名";
+    if (!groups[name]) groups[name] = [];
+    groups[name].push({ id: sid, name: name });
+  }
+
+  var html = '<div class="modal"><div class="modal-header">🌀 传送门</div>';
+  html += '<div class="modal-body"><div class="portal-list">';
+
+  var groupNames = Object.keys(groups);
+  for (var g = 0; g < groupNames.length; g++) {
+    var gname = groupNames[g];
+    var scenes = groups[gname];
+    html += '<div class="portal-group"><div class="portal-group-name">' + gname + '</div>';
+    for (var s = 0; s < scenes.length; s++) {
+      var sc = scenes[s];
+      html += '<button class="portal-scene-btn" data-scene="' + sc.id + '">' + gname + '<span class="portal-scene-id">' + sc.id + '</span></button>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div></div>';
+  html += '<div class="modal-footer"><button class="modal-close-btn" id="portal-close-btn">关 闭</button></div></div>';
+  overlay.innerHTML = html;
+  document.body.appendChild(overlay);
+
+  // 绑定场景按钮点击
+  overlay.querySelectorAll(".portal-scene-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var sceneId = btn.dataset.scene;
+      overlay.remove();
+      stopTypewriter();
+      renderScene(sceneId);
+    });
+  });
+
+  overlay.querySelector("#portal-close-btn").addEventListener("click", function() { overlay.remove(); });
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.remove(); });
 }
 
 // 开始游戏

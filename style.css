@@ -288,9 +288,71 @@ body {
 }
 #start-btn:active { transform: scale(0.95); }
 
+#tips-btn {
+  padding: 10px 40px; font-size: 14px; font-weight: 500; letter-spacing: 2px;
+  border: 1px solid rgba(232,213,183,0.3); border-radius: 20px; cursor: pointer;
+  background: transparent; color: rgba(232,213,183,0.6);
+  -webkit-tap-highlight-color: transparent; transition: all 0.2s;
+  margin-top: 10px;
+}
+#tips-btn:active { background: rgba(232,213,183,0.1); color: #e8d5b7; }
+
 #version-tag {
   text-align: center; font-size: 11px; color: rgba(232,213,183,0.35);
   margin-top: 12px; letter-spacing: 1px;
+}
+
+/* ===== 御前决斗战斗UI ===== */
+.battle-hud {
+  text-align: center; padding: 8px 0;
+}
+.battle-ki {
+  font-size: 16px; font-weight: 600; color: #e8d5b7;
+  margin: 6px 0; letter-spacing: 1px;
+}
+.ki-num {
+  display: inline-block; min-width: 24px; text-align: center;
+  font-size: 22px; font-weight: 800; color: #e94560;
+  text-shadow: 0 0 10px rgba(233,69,96,0.5);
+}
+.battle-round {
+  font-size: 13px; color: rgba(232,213,183,0.5);
+  margin-top: 8px; letter-spacing: 2px;
+}
+.battle-btn {
+  background: linear-gradient(135deg, #e94560, #c23152) !important;
+  color: #fff !important;
+  font-size: 15px !important;
+}
+.battle-btn:nth-child(2) {
+  background: linear-gradient(135deg, #0f3460, #16213e) !important;
+  border: 2px solid rgba(232,213,183,0.3) !important;
+  color: #e8d5b7 !important;
+}
+.battle-btn:nth-child(3) {
+  background: linear-gradient(135deg, #2d6a4f, #1b4332) !important;
+  color: #fff !important;
+}
+
+/* ===== 传送门样式 ===== */
+.portal-list { text-align: left; }
+.portal-group { margin-bottom: 12px; }
+.portal-group-name {
+  font-size: 13px; font-weight: 700; color: #c9a96e;
+  padding: 6px 0 4px; letter-spacing: 1px;
+  border-bottom: 1px solid rgba(232,213,183,0.1);
+}
+.portal-scene-btn {
+  display: block; width: 100%; padding: 10px 14px; margin: 4px 0;
+  font-size: 14px; text-align: left; border: none; border-radius: 8px;
+  cursor: pointer; background: rgba(255,255,255,0.04);
+  color: #c0c8d8; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.portal-scene-btn:hover { background: rgba(232,213,183,0.1); color: #e8d5b7; }
+.portal-scene-btn:active { background: rgba(232,213,183,0.2); }
+.portal-scene-btn .portal-scene-id {
+  font-size: 11px; color: rgba(232,213,183,0.3); margin-left: 8px;
 }
 
 /* ===== Toast 提示 ===== */
