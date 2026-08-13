@@ -386,7 +386,10 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
-  { version: "v1.3.91", date: "2026-08-13", items: [
+  { version: "v1.3.91.flash", date: "2026-08-13", items: [
+    "图片预加载优化：页面加载时自动缓存所有场景图片，切换场景秒加载",
+    "标题更名为「文海gala」",
+    "游玩提示更新内容",
     "厕所场景新增「再蹲一会」选项",
     "新增成就：喜欢蹲坑",
   ]},
@@ -409,7 +412,7 @@ var CHANGELOG = [
     "修复哈基高没气时AI不会呼吸的问题",
   ]},
   { version: "v1.3.0", date: "2026-08-13", items: [
-    "首次发布文海校园大探险",
+    "首次发布文海gala",
     "新增开场剧情（nia~头好晕 → 文海学校 → 校门口）",
     "新增校门口场景及分支选择（教学楼/小树林/十字路口）",
     "新增隐士之地（哈基高大师）完整剧情线",
@@ -513,7 +516,7 @@ function renderScene(sceneId) {
       img.src = "";
       // 强制刷新，防止同一图片路径不触发重载
       setTimeout(function() {
-        img.src = scene.img + "?t=" + Date.now();
+        img.src = scene.img;
         img.style.display = "block";
       }, 10);
       placeholder.style.display = "none";
@@ -1060,7 +1063,7 @@ function hachiChoose() {
 
 // ===== 游玩提示 =====
 function showTips() {
-  showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络游戏，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
+  showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
 }
 
 // ===== 传送门 =====
@@ -1126,3 +1129,17 @@ function startGame() {
   gameState.newAchievements = [];
   renderScene("opening_1");
 }
+
+// ===== 预加载所有场景图片 =====
+(function() {
+  var loaded = {};
+  var sceneIds = Object.keys(SCENE_CONFIG);
+  for (var i = 0; i < sceneIds.length; i++) {
+    var imgPath = SCENE_CONFIG[sceneIds[i]].img;
+    if (imgPath && !loaded[imgPath]) {
+      loaded[imgPath] = true;
+      var preImg = new Image();
+      preImg.src = imgPath;
+    }
+  }
+})();
