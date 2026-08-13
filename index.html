@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>文海校园大探险</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Toast 提示 -->
+<div id="toast"></div>
+
+<!-- 游戏容器 -->
+<div id="game-container">
+  <!-- 开始界面 -->
+  <div id="start-screen">
+    <div id="start-title">文海校园大探险</div>
+    <div id="start-image">
+      <img src="cover.png" alt="文海校园">
+    </div>
+    <button id="start-btn" onclick="startGame()">开 始 探 索</button>
+  </div>
+
+  <!-- 顶部地点名 -->
+  <div id="location-name"></div>
+
+  <!-- 中部图片 -->
+  <div id="image-area">
+    <img id="scene-img" src="" alt="" style="display:none" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div id="scene-placeholder" class="placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%"></div>
+  </div>
+
+  <!-- 描述区 -->
+  <div id="description-area"></div>
+
+  <!-- 底部按钮 -->
+  <div id="actions-area"></div>
+
+  <!-- 悬浮按钮 -->
+  <div id="float-btns" style="display:none">
+    <button class="float-btn" id="btn-backpack" onclick="openBackpack()">
+      🎒
+      <span class="badge" id="backpack-count" style="display:none">0</span>
+    </button>
+    <button class="float-btn" id="btn-achievement" onclick="openAchievements()">
+      🏆
+      <span class="badge" id="ach-new" style="display:none">!</span>
+    </button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
