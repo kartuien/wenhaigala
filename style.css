@@ -117,8 +117,17 @@ body {
 
 /* ===== 悬浮按钮 ===== */
 #float-btns {
-  position: absolute; top: 14px; right: 14px;
-  display: flex; gap: 8px; z-index: 10;
+  position: absolute; top: 14px; left: 0; right: 0;
+  display: flex; justify-content: space-between; z-index: 10;
+  padding: 0 14px; pointer-events: none;
+}
+#float-btns > * { pointer-events: auto; }
+.float-left {
+  display: flex; gap: 8px;
+}
+.float-right {
+  display: flex; gap: 8px;
+  margin-left: auto;
 }
 .float-btn {
   width: 42px; height: 42px; border-radius: 50%;
@@ -173,6 +182,27 @@ body {
   color: #1a1a2e; -webkit-tap-highlight-color: transparent;
 }
 .modal-close-btn:active { transform: scale(0.97); }
+
+/* ===== 更新日志样式 ===== */
+.changelog-list { text-align: left; }
+.changelog-entry { margin-bottom: 16px; }
+.changelog-entry:last-child { margin-bottom: 0; }
+.changelog-ver {
+  font-size: 15px; font-weight: 700; color: #e8d5b7; margin-bottom: 6px;
+}
+.changelog-date {
+  font-size: 12px; font-weight: 400; color: rgba(232,213,183,0.5); margin-left: 8px;
+}
+.changelog-items {
+  list-style: none; padding: 0; margin: 0;
+}
+.changelog-items li {
+  padding: 4px 0 4px 16px; font-size: 14px; color: rgba(232,213,183,0.8);
+  position: relative; line-height: 1.5;
+}
+.changelog-items li::before {
+  content: "·"; position: absolute; left: 0; color: #c9a96e; font-weight: bold;
+}
 
 /* ===== 背包道具样式 ===== */
 .item-card {
@@ -257,6 +287,11 @@ body {
   transition: all 0.2s;
 }
 #start-btn:active { transform: scale(0.95); }
+
+#version-tag {
+  text-align: center; font-size: 11px; color: rgba(232,213,183,0.35);
+  margin-top: 12px; letter-spacing: 1px;
+}
 
 /* ===== Toast 提示 ===== */
 #toast {

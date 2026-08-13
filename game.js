@@ -34,6 +34,7 @@ var ACHIEVEMENT_CONFIG = {
   collector:    { id: "collector",    name: "收藏家",   desc: "集齐了所有隐藏道具", icon: "💎" },
   note_reader:  { id: "note_reader",  name: "解密者",   desc: "阅读了神秘纸条上的内容", icon: "📜" },
   honor_student:{ id: "honor_student",name: "三好学生", desc: "获得了荣誉奖章", icon: "🏅" },
+  flying_pig:   { id: "flying_pig",   name: "飞天之猪", desc: "见证了神秘猪猪拉屎之地", icon: "🐷" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -104,10 +105,70 @@ var SCENE_CONFIG = {
     placeholder: "📷 校门口照片",
     desc: "这里……是哪里……|居然是文海中学吗……|真是好久没见了呢……要不，进去看看？",
     buttons: [
+      { text: "抬头看天", target: "gate_look" },
       { text: "去教学楼吧", popup: "前面的地点以后再去探索吧！" },
       { text: "欸……左边的小树林里似乎有异动", popup: "前面的地点以后再去探索吧！" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
     ]
+  },
+  gate_look: {
+    id: "gate_look", name: "校门口", img: "start.jpg",
+    desc: "你真的要抬头吗",
+    buttons: [
+      { text: "抬头", target: "gate_confirm" },
+      { text: "不抬头", target: "gate" },
+    ]
+  },
+  gate_confirm: {
+    id: "gate_confirm", name: "校门口", img: "start.jpg",
+    desc: "你确定吗",
+    buttons: [
+      { text: "确定", target: "pig_1" },
+      { text: "不确定", target: "gate" },
+    ]
+  },
+  pig_1: {
+    id: "pig_1", name: "神秘猪猪拉屎之地", img: "pig1.jpg",
+    desc: "好多……好多猪哇！！！！",
+    unlockAch: "flying_pig",
+    shakeHard: true,
+    autoJump: "pig_2",
+    buttons: []
+  },
+  pig_2: {
+    id: "pig_2", name: "神秘猪猪拉屎之地", img: "pig2.jpg",
+    desc: "他们……他们开始拉屎了！！！！！",
+    shakeHard: true,
+    autoJump: "pig_3",
+    buttons: []
+  },
+  pig_3: {
+    id: "pig_3", name: "神秘猪猪拉屎之地", img: "pig3.jpg",
+    desc: "越来越多了……快跑啊！！！！",
+    shakeHard: true,
+    autoJump: "toilet",
+    buttons: []
+  },
+  toilet: {
+    id: "toilet", name: "厕所", img: "toilet.jpg",
+    desc: "欸……瓦达西，怎么到……厕所了？！",
+    buttons: [
+      { text: "走出厕所", target: "window_scene" },
+    ]
+  },
+  window_scene: {
+    id: "window_scene", name: "厕所", img: "window.jpg",
+    desc: "窗外……是小学啊……|真是怀念呢……那时候快乐的时光……|（你非常念旧）|嘶……头有点晕……",
+    shakeHard: true,
+    autoJump: "drunk",
+    buttons: []
+  },
+  drunk: {
+    id: "drunk", name: "喝大了", img: "drunk.jpg",
+    desc: "欸……瓦达西……怎么到这了……|难道……我成为了一名杭二的学生？！|头……还是好晕",
+    shakeHard: true,
+    autoJump: "gate",
+    buttons: []
   },
   hermit_1: {
     id: "hermit_1", name: "一位隐士的地方", img: "hermit.jpg",
@@ -284,6 +345,19 @@ function hasItem(itemId) { return gameState.inventory.indexOf(itemId) !== -1; }
 // 检查是否解锁某成就
 function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !== -1; }
 
+// ===== 更新日志配置 =====
+var CHANGELOG = [
+  { version: "v1.0", date: "2026-08-13", items: [
+    "首次发布文海校园大探险",
+    "新增开场剧情（nia~头好晕）",
+    "新增校门口场景及三个分支选择",
+    "新增隐士之地（哈基高大师）完整剧情线",
+    "新增打字机字幕效果，支持 | 分段",
+    "新增屏幕震动特效（普通/剧烈）",
+    "新增更新日志功能",
+  ]}
+];
+
 // 添加道具
 function addItem(itemId) {
   if (!hasItem(itemId)) {
@@ -371,8 +445,13 @@ function renderScene(sceneId) {
   } else {
     imageArea.style.display = "flex";
     if (scene.img) {
-      img.src = scene.img;
-      img.style.display = "block";
+      img.style.display = "none";
+      img.src = "";
+      // 强制刷新，防止同一图片路径不触发重载
+      setTimeout(function() {
+        img.src = scene.img + "?t=" + Date.now();
+        img.style.display = "block";
+      }, 10);
       placeholder.style.display = "none";
     } else {
       img.style.display = "none";
@@ -408,6 +487,15 @@ function renderScene(sceneId) {
 
   // 打字机效果显示描述
   startTypewriter(scene.desc, scene.autoNext, scene.autoJump);
+
+  // 场景解锁成就
+  if (scene.unlockAch) {
+    unlockAchievement(scene.unlockAch);
+    var achCfg = ACHIEVEMENT_CONFIG[scene.unlockAch];
+    if (achCfg) {
+      showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+    }
+  }
 
   // 屏幕震动
   if (scene.shake) {
@@ -596,6 +684,31 @@ function showPopupModal(message) {
   overlay.addEventListener("click", function(e) {
     if (e.target === overlay) overlay.remove();
   });
+}
+
+// 打开更新日志
+function openChangelog() {
+  var overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  var html = '<div class="modal changelog-modal"><div class="modal-header">📋 更新日志</div>';
+  html += '<div class="modal-body"><div class="changelog-list">';
+  for (var i = 0; i < CHANGELOG.length; i++) {
+    var log = CHANGELOG[i];
+    html += '<div class="changelog-entry">';
+    html += '<div class="changelog-ver">' + log.version + ' <span class="changelog-date">' + log.date + '</span></div>';
+    html += '<ul class="changelog-items">';
+    for (var j = 0; j < log.items.length; j++) {
+      html += '<li>' + log.items[j] + '</li>';
+    }
+    html += '</ul></div>';
+  }
+  html += '</div></div>';
+  html += '<div class="modal-footer"><button class="modal-close-btn" id="changelog-close-btn">关 闭</button></div></div>';
+  overlay.innerHTML = html;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector("#changelog-close-btn").addEventListener("click", function() { overlay.remove(); });
+  overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.remove(); });
 }
 
 // 打开背包

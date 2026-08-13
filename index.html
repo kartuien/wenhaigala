@@ -20,6 +20,7 @@
       <img src="cover.png" alt="文海校园">
     </div>
     <button id="start-btn" onclick="startGame()">开 始 探 索</button>
+    <div id="version-tag">v1.2</div>
   </div>
 
   <!-- 顶部地点名 -->
@@ -39,14 +40,19 @@
 
   <!-- 悬浮按钮 -->
   <div id="float-btns" style="display:none">
-    <button class="float-btn" id="btn-backpack" onclick="openBackpack()">
-      🎒
-      <span class="badge" id="backpack-count" style="display:none">0</span>
-    </button>
-    <button class="float-btn" id="btn-achievement" onclick="openAchievements()">
-      🏆
-      <span class="badge" id="ach-new" style="display:none">!</span>
-    </button>
+    <div class="float-left">
+      <button class="float-btn" id="btn-changelog" onclick="openChangelog()">📋</button>
+    </div>
+    <div class="float-right">
+      <button class="float-btn" id="btn-backpack" onclick="openBackpack()">
+        🎒
+        <span class="badge" id="backpack-count" style="display:none">0</span>
+      </button>
+      <button class="float-btn" id="btn-achievement" onclick="openAchievements()">
+        🏆
+        <span class="badge" id="ach-new" style="display:none">!</span>
+      </button>
+    </div>
   </div>
 </div>
 
