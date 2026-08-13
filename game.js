@@ -521,7 +521,7 @@ var currentSentenceIndex = 0;
 var currentCharIndex = 0;
 var typewriterDone = false;
 var showButtonsAfter = false;  // 是否在打完当前句后显示按钮
-var currentImgSrc = "";        // 当前显示的图片路径，用于快速切换
+
 
 // 渲染当前场景
 function renderScene(sceneId) {
@@ -557,16 +557,7 @@ function renderScene(sceneId) {
   } else {
     imageArea.style.display = "flex";
     if (scene.img) {
-      // 智能切换：同一图片闪一下刷新，不同图片直接切换（预加载已缓存）
-      if (scene.img === currentImgSrc) {
-        img.src = "";
-        requestAnimationFrame(function() {
-          img.src = scene.img;
-        });
-      } else {
-        img.src = scene.img;
-        currentImgSrc = scene.img;
-      }
+      img.src = scene.img;
       img.style.display = "block";
       placeholder.style.display = "none";
     } else {
@@ -1181,27 +1172,25 @@ function startGame() {
   renderScene("opening_1");
 }
 
-// ===== 预加载所有场景图片 =====
+// ===== 预加载所有场景图片（带状态追踪） =====
+var imageCache = {};
 (function() {
-  var loaded = {};
   var sceneIds = Object.keys(SCENE_CONFIG);
-  var head = document.head || document.getElementsByTagName("head")[0];
   for (var i = 0; i < sceneIds.length; i++) {
     var imgPath = SCENE_CONFIG[sceneIds[i]].img;
-    if (imgPath && !loaded[imgPath]) {
-      loaded[imgPath] = true;
-      // 添加 <link rel="preload"> 让浏览器最早开始加载
-      var link = document.createElement("link");
-      link.rel = "preload";
-      link.as = "image";
-      link.href = imgPath;
-      head.appendChild(link);
-      // 同时用 Image 对象预加载并解码
+    if (imgPath && !imageCache[imgPath]) {
+      imageCache[imgPath] = { loaded: false };
       var preImg = new Image();
+      preImg.onload = function() {
+        var key = this.getAttribute("data-key");
+        if (imageCache[key]) imageCache[key].loaded = true;
+      };
+      preImg.onerror = function() {
+        var key = this.getAttribute("data-key");
+        if (imageCache[key]) imageCache[key].loaded = true;
+      };
+      preImg.setAttribute("data-key", imgPath);
       preImg.src = imgPath;
-      if (preImg.decode) {
-        preImg.decode().catch(function(){});
-      }
     }
   }
 })();
