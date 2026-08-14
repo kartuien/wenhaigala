@@ -21,6 +21,8 @@ var ITEM_CONFIG = {
   golden_pen:     { id: "golden_pen",     name: "金笔",     desc: "一支刻着「文海」的金色钢笔，意义非凡", usable: true, useEvent: "use_golden_pen" },
   hachi_hat:      { id: "hachi_hat",      name: "哈基高的斗笠", desc: "哈基高大师留下的斗笠，似乎蕴含着某种力量", usable: false },
   hachi_book:     { id: "hachi_book",     name: "哈基高的哈气秘籍", desc: "这东西似乎记载了些神秘的东西", usable: false },
+  bag:            { id: "bag",            name: "袋子",     desc: "可用于捕捉神兽", usable: false },
+  desert_pig:     { id: "desert_pig",     name: "溜达猪",   desc: "稀有神兽，喜欢在沙漠溜达", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -38,6 +40,10 @@ var ACHIEVEMENT_CONFIG = {
   stuck_in_backrooms: { id: "stuck_in_backrooms", name: "卡进后室了", desc: "怎么卡进后室了！", icon: "🟨" },
   red_room:           { id: "red_room",           name: "误入红室", desc: "你死了", icon: "🟥" },
   starved_to_death:   { id: "starved_to_death",   name: "饥渴而死", desc: "在后室中饥渴而死……", icon: "💀" },
+  heavy_taste:        { id: "heavy_taste",        name: "重口味", desc: "翻垃圾桶翻出了个袋子", icon: "🗑️" },
+  flat_fall:          { id: "flat_fall",          name: "平地摔", desc: "哈哈哈笑死我了你个小丑", icon: "🤡" },
+  desert_pig_sight:   { id: "desert_pig_sight",   name: "目睹沙漠溜达猪", desc: "看到了传说中的沙漠溜达猪！", icon: "🐷" },
+  capture_pig:        { id: "capture_pig",        name: "捕捉神兽溜达猪", desc: "成功捕捉了稀有神兽溜达猪！", icon: "🐗" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -115,7 +121,7 @@ var SCENE_CONFIG = {
       { text: "抬头看天", target: "gate_look" },
       { text: "都说中国人能飞，我也要飞！！！", target: "gate_fly" },
       { text: "去教学楼吧", popup: "前面的地点以后再去探索吧！" },
-      { text: "欸……左边的小树林里似乎有异动", popup: "前面的地点以后再去探索吧！" },
+      { text: "欸……左边的小树林里似乎有异动", target: "path_to_grove" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
     ]
   },
@@ -408,6 +414,105 @@ var SCENE_CONFIG = {
     autoJump: "gate",
     buttons: []
   },
+  // ----- 小树林路线（校门口触发） -----
+  path_to_grove: {
+    id: "path_to_grove", name: "去小树林的路上", img: "path_to_grove.jpg",
+    desc: "（走路ing......)|前面还有垃圾桶欸，要不要去看看.....",
+    buttons: [
+      { text: "去看看垃圾桶", target: "trash_can" },
+      { text: "不去，继续走", target: "path_to_grove_2" },
+    ]
+  },
+  path_to_grove_2: {
+    id: "path_to_grove_2", name: "去小树林的路上", img: "path_to_grove.jpg",
+    desc: "走路.ing",
+    autoNext: "grove_arrive",
+    buttons: []
+  },
+  grove_arrive: {
+    id: "grove_arrive", name: "去小树林的路上", img: "grove_arrive.jpg",
+    desc: "就是这里..........",
+    autoNext: "grove_encounter",
+    buttons: []
+  },
+  grove_encounter: {
+    id: "grove_encounter", name: "沙漠溜达猪栖息之地", img: "grove_encounter.jpg",
+    desc: "居然是沙漠溜达猪！！！！|这可是非常稀有的神兽！！！！",
+    unlockAch: "desert_pig_sight",
+    shakeHard: true,
+    autoNext: "grove_capture_check",
+    buttons: []
+  },
+  grove_captured: {
+    id: "grove_captured", name: "沙漠溜达猪栖息之地", img: "grove_captured.jpg",
+    desc: "终于抓住稀有溜达猪了........",
+    unlockAch: "capture_pig",
+    getItem: "desert_pig",
+    buttons: [
+      { text: "继续往前吧", target: "grove_end" },
+      { text: "返回校门口", target: "gate" },
+    ]
+  },
+  trash_can: {
+    id: "trash_can", name: "垃圾桶", img: "trash_can.jpg",
+    desc: "好臭啊......|为什么我要过来看垃圾桶",
+    buttons: [
+      { text: "不管了，垃圾桶里可能有好吃的，掀开看看", target: "trash_dig" },
+      { text: "直接离开", target: "path_to_grove_2" },
+      { text: "转头前往地下室", target: "sandbag" },
+    ]
+  },
+  trash_dig: {
+    id: "trash_dig", name: "翻垃圾桶", img: "trash_dig.jpg",
+    desc: "好臭啊......|欸....那里还有个袋子....|不管了先带上吧[获得物品袋子]可用于捕捉神兽",
+    unlockAch: "heavy_taste",
+    getItem: "bag",
+    autoJump: "path_to_grove_2",
+    buttons: []
+  },
+  sandbag: {
+    id: "sandbag", name: "沙包", img: "sandbag.jpg",
+    desc: "欸.....这里有沙包......|记得之前经常站在这上面看教室里的人|（爬上沙包）",
+    autoNext: "sandbag_peek",
+    buttons: []
+  },
+  sandbag_peek: {
+    id: "sandbag_peek", name: "偷窥中", img: "sandbag_peek.jpg",
+    desc: "根本看不清呢......|里面似乎早就已经改成会议室了|本来还想进去看看的.........",
+    autoNext: "basement_door",
+    buttons: []
+  },
+  basement_door: {
+    id: "basement_door", name: "地下室门口", img: "basement_door.jpg",
+    desc: "这就是地下室了吗.....",
+    buttons: [
+      { text: "不走下去", target: "basement_door_no" },
+      { text: "走下去", target: "basement_slip" },
+    ]
+  },
+  basement_slip: {
+    id: "basement_slip", name: "要滑倒了", img: "basement_slip.jpg",
+    desc: "欸欸欸？！！",
+    shakeHard: true,
+    autoJump: "basement_fall",
+    buttons: []
+  },
+  basement_fall: {
+    id: "basement_fall", name: "地下室", img: "basement_fall.jpg",
+    desc: "啊！！！！！|这里怎么有个水坑啊....|呜.........|好疼......",
+    unlockAch: "flat_fall",
+    impactEffect: true,
+    autoJump: "basement",
+    buttons: []
+  },
+  basement: {
+    id: "basement", name: "地下室", img: "basement.jpg",
+    desc: "要不要下去呢",
+    buttons: [
+      { text: "下去", popup: "前面的地方以后再去探索吧！" },
+      { text: "不下去", target: "basement_no" },
+    ]
+  },
 };
 
 // ============================================================
@@ -446,6 +551,22 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.10", date: "2026-08-14", items: [
+    "新增沙漠溜达猪神兽遭遇剧情：小树林深处触发",
+    "新增场景：小树林深处、沙漠溜达猪栖息之地",
+    "新增成就：目睹沙漠溜达猪、捕捉神兽溜达猪",
+    "新增道具：溜达猪",
+    "新增捕捉神兽小游戏：进度条 + 点击10次捕捉溜达猪",
+  ]},
+  { version: "v1.5.0", date: "2026-08-14", items: [
+    "开放小树林路线：校门口新增小树林入口",
+    "新增垃圾桶探索路线：翻垃圾桶获得袋子",
+    "新增地下室路线：沙包→偷窥→地下室→滑倒撞击",
+    "新增场景：去小树林的路上、垃圾桶、翻垃圾桶、沙包、偷窥中、地下室门口、要滑倒了、地下室",
+    "新增成就：重口味、平地摔",
+    "新增道具：袋子",
+    "新增撞击特效：闪白 + 震动 + 音效",
+  ]},
   { version: "v1.14.137", date: "2026-08-14", items: [
     "新增后室剧情线：厕所蹲坑两次触发，进入后室level0",
     "新增场景：厕所深处、后室level0、后室探索、红室、饥渴而死",
@@ -601,6 +722,48 @@ function renderScene(sceneId) {
     return;
   }
 
+  // 地下室不走下去 → 返回小树林
+  if (sceneId === "basement_door_no") {
+    var descArea = document.getElementById("description-area");
+    descArea.innerHTML = "我还是去看看小树林吧......";
+    setTimeout(function() { renderScene("path_to_grove_2"); }, 1200);
+    return;
+  }
+  if (sceneId === "basement_no") {
+    var descArea = document.getElementById("description-area");
+    descArea.innerHTML = "我还是去看看小树林吧.........";
+    setTimeout(function() { renderScene("path_to_grove_2"); }, 1200);
+    return;
+  }
+
+  // 溜达猪捕捉检查：有袋子 → 捕捉小游戏，无袋子 → 返回垃圾桶
+  if (sceneId === "grove_capture_check") {
+    if (hasItem("bag")) {
+      renderCaptureGame();
+    } else {
+      var descArea = document.getElementById("description-area");
+      descArea.innerHTML = "可恶啊我没有袋子....我没法捕捉这么稀有的神兽<br>我得回垃圾桶那里找找。";
+      var actionsArea = document.getElementById("actions-area");
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      var btn = document.createElement("button");
+      btn.className = "action-btn";
+      btn.textContent = "返回垃圾桶";
+      btn.onclick = function() { renderScene("trash_can"); };
+      actionsArea.appendChild(btn);
+    }
+    return;
+  }
+
+  // 溜达猪捕捉完成 → 提示并传送回校门口
+  if (sceneId === "grove_end") {
+    showPopupModal("前面的区域以后再来探索吧");
+    setTimeout(function() {
+      openPortal();
+    }, 1500);
+    return;
+  }
+
   // 飞行路由：检查是否有哈气秘籍
   if (sceneId === "gate_fly") {
     if (hasItem("hachi_book")) {
@@ -683,6 +846,9 @@ function renderScene(sceneId) {
   }
   actionsArea.style.display = "none";
 
+  // 处理道具获取（无论场景类型，都先添加道具）
+  if (scene.getItem) addItems(scene.getItem);
+
   // 打字机效果显示描述
   startTypewriter(scene.desc, scene.autoNext, scene.autoJump, scene.getItem);
 
@@ -712,6 +878,13 @@ function renderScene(sceneId) {
     gc.classList.add("shake-hard");
     setTimeout(function() { gc.classList.remove("shake-hard"); }, 2000);
   }
+  // 撞击特效（震动 + 闪白 + 音效）
+  if (scene.impactEffect) {
+    var gc = document.getElementById("game-container");
+    gc.classList.add("impact");
+    playImpactSound();
+    setTimeout(function() { gc.classList.remove("impact"); }, 600);
+  }
 
   updateBackpackBadge();
   updateAchievementBadge();
@@ -738,6 +911,83 @@ function triggerFadeEffect(callback) {
       if (callback) callback();
     }, 1500);
   }, 1500);
+}
+
+// 撞击音效（Web Audio API 生成）
+function playImpactSound() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    // 低频撞击感
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.6, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch(e) {}
+}
+
+// 捕捉神兽小游戏
+function renderCaptureGame() {
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var locationName = document.getElementById("location-name");
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+  var imageArea = document.getElementById("image-area");
+
+  // 设置图片
+  imageArea.style.display = "flex";
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "grove_encounter.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+
+  locationName.textContent = "沙漠溜达猪栖息之地";
+
+  // 进度条和提示
+  descArea.innerHTML = "<div style=\"text-align:center;margin-bottom:12px;color:#e8d5b7;font-weight:700;\">疯狂点击捕捉按钮抓住溜达猪吧！！！</div>"
+    + "<div style=\"background:rgba(255,255,255,0.1);border-radius:8px;height:20px;overflow:hidden;margin:0 20px;\">"
+    + "<div id=\"capture-bar\" style=\"background:linear-gradient(90deg,#e8d5b7,#c9a96e);height:100%;width:0%;transition:width 0.1s;\"></div></div>"
+    + "<div id=\"capture-count\" style=\"text-align:center;margin-top:8px;color:#c0c8d8;font-size:14px;\">0 / 10</div>";
+
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+
+  var captureBtn = document.createElement("button");
+  captureBtn.className = "action-btn";
+  captureBtn.textContent = "点击捕捉！";
+  captureBtn.style.background = "linear-gradient(135deg, #ff6b6b, #ee5a24)";
+  captureBtn.style.color = "#fff";
+  captureBtn.style.fontSize = "20px";
+  captureBtn.style.padding = "18px";
+
+  var clickCount = 0;
+  captureBtn.onclick = function() {
+    clickCount++;
+    var bar = document.getElementById("capture-bar");
+    var countEl = document.getElementById("capture-count");
+    if (bar) bar.style.width = (clickCount * 10) + "%";
+    if (countEl) countEl.textContent = clickCount + " / 10";
+    if (clickCount >= 10) {
+      captureBtn.disabled = true;
+      captureBtn.textContent = "捕捉成功！";
+      captureBtn.style.background = "linear-gradient(135deg, #27ae60, #2ecc71)";
+      setTimeout(function() {
+        renderScene("grove_captured");
+      }, 800);
+    }
+  };
+  actionsArea.appendChild(captureBtn);
 }
 
 // 开始打字机
