@@ -23,6 +23,7 @@ var ITEM_CONFIG = {
   hachi_book:     { id: "hachi_book",     name: "哈基高的哈气秘籍", desc: "这东西似乎记载了些神秘的东西", usable: false },
   bag:            { id: "bag",            name: "袋子",     desc: "可用于捕捉神兽", usable: false },
   desert_pig:     { id: "desert_pig",     name: "溜达猪",   desc: "稀有神兽，喜欢在沙漠溜达", usable: false },
+  almond_water:   { id: "almond_water",   name: "杏仁水",   desc: "后室中珍贵的饮用水，感觉很清醒", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -44,6 +45,15 @@ var ACHIEVEMENT_CONFIG = {
   flat_fall:          { id: "flat_fall",          name: "平地摔", desc: "哈哈哈笑死我了你个小丑", icon: "🤡" },
   desert_pig_sight:   { id: "desert_pig_sight",   name: "目睹沙漠溜达猪", desc: "看到了传说中的沙漠溜达猪！", icon: "🐷" },
   capture_pig:        { id: "capture_pig",        name: "捕捉神兽溜达猪", desc: "成功捕捉了稀有神兽溜达猪！", icon: "🐗" },
+  confucius_bless:    { id: "confucius_bless",    name: "儒学滋养", desc: "真喜欢拜访孔子", icon: "🙏" },
+  little_greedy_cat:  { id: "little_greedy_cat",  name: "小馋猫", desc: "吃完了所有的小草，真好吃！", icon: "🐱" },
+  eat_to_death:       { id: "eat_to_death",       name: "吃死了", desc: "吃到了毒草被毒死了", icon: "☠️" },
+  nasa_detected:      { id: "nasa_detected",      name: "老美的nasa这么厉害", desc: "老美的nasa这么厉害给我探测出来了", icon: "🛸" },
+  beat_alien:         { id: "beat_alien",         name: "击败外星人", desc: "在石头剪刀布中击败了外星人", icon: "👽" },
+  pooped_on:          { id: "pooped_on",          name: "被拉shi了", desc: "被外星人在头上拉屎了", icon: "💩" },
+  level1:             { id: "level1",             name: "level1", desc: "进入层级level1", icon: "🚪" },
+  unhygienic:         { id: "unhygienic",         name: "不讲卫生", desc: "妈妈没教过你不能喝陌生的水吗", icon: "🤢" },
+  skin_stealer:       { id: "skin_stealer",       name: "偶遇窃皮者", desc: "在level1遇到了窃皮者", icon: "🫥" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -123,6 +133,7 @@ var SCENE_CONFIG = {
       { text: "去教学楼吧", popup: "前面的地点以后再去探索吧！" },
       { text: "欸……左边的小树林里似乎有异动", target: "path_to_grove" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
+      { text: "去拜访孔子像", target: "confucius_1" },
     ]
   },
   gate_look: {
@@ -365,9 +376,44 @@ var SCENE_CONFIG = {
     id: "space", name: "外太空", img: "space.jpg",
     desc: "飞到外太空了😰！！|要去哪呢.......",
     unlockAch: "fly_higher",
+    autoNext: "alien_encounter",
+    buttons: []
+  },
+  alien_encounter: {
+    id: "alien_encounter", name: "外星人", img: "alien_1.jpg",
+    desc: "外星人：我去老美的nasa这么厉害给我探测出来了|这算哪门子外星人啊|外星人：我去你居然这么不尊重我|外星人：你激怒我了地球人",
+    unlockAch: "nasa_detected",
+    shake: true,
+    autoNext: "alien_taunt",
+    buttons: []
+  },
+  alien_taunt: {
+    id: "alien_taunt", name: "外星人", img: "alien_2.jpg",
+    desc: "外星人：我要在你的头上拉屎！！！！！|（没绷住）|外星人：笑什么!!!我可是很严肃的！！！！！|呜.....哈哈哈哈哈哈......啊哈哈哈哈哈哈哈哈哈哈|外星人：气死我了！！！你真的惹怒我了，我要和你决斗！！！|决斗啥啊|外星人：石头剪刀布|。。。sb|外星人：我很认真的啊喂！！！！|好好好我陪你玩我陪你玩",
+    shakeHard: true,
+    autoNext: "alien_game",
+    buttons: []
+  },
+  alien_win: {
+    id: "alien_win", name: "外星人", img: "alien_2.jpg",
+    desc: "你菜狗吧|外星人：呃啊啊啊啊啊！这次是失误！！！|菜别找借口|外星人：等着！！等我回去修炼再战！！！",
+    unlockAch: "beat_alien",
+    autoNext: "alien_win_space",
+    buttons: []
+  },
+  alien_win_space: {
+    id: "alien_win_space", name: "外太空", img: "space.jpg",
+    desc: "不是这什么菜狗外星人",
     buttons: [
-      { text: "还是返程吧", target: "gate" },
+      { text: "回到校门口", target: "gate" },
     ]
+  },
+  alien_lose: {
+    id: "alien_lose", name: "外星人", img: "alien_1.jpg",
+    desc: "外星人：哈哈哈哈哈哈哈哈你输啦！！！！|外星人：啊哈哈哈哈哈哈哈我要在你头上拉屎|外星人：啊哈...哈.....呃...呜欸！！！（死了）|不是这什么sb剧情我真玩不下去了|我要回地球了外星人还是太野了",
+    unlockAch: "pooped_on",
+    autoJump: "gate",
+    buttons: []
   },
   // ----- 后室剧情线（厕所蹲坑两次触发） -----
   toilet_deep: {
@@ -395,14 +441,89 @@ var SCENE_CONFIG = {
     id: "backrooms_walk_2", name: "后室level0", img: "backrooms_walk.jpg",
     desc: "走了好久啊.......|要不要休息一会......|这里......好闷......胸口有点痛......会不会有人来害我",
     buttons: [
-      { text: "继续探索", target: "backrooms_red" },
+      { text: "继续探索", target: "backrooms_choice" },
       { text: "停下休息", target: "backrooms_death" },
+    ]
+  },
+  backrooms_choice: {
+    id: "backrooms_choice", name: "后室level0", img: "backrooms_walk.jpg",
+    desc: "往左还是往右呢",
+    buttons: [
+      { text: "往左", target: "backrooms_red" },
+      { text: "往右", target: "backrooms_right" },
     ]
   },
   backrooms_red: {
     id: "backrooms_red", name: "后室level0", img: "backrooms_red.jpg",
     desc: ".......欸？|这里.....是哪里！",
     unlockAch: "red_room",
+    autoJump: "gate",
+    buttons: []
+  },
+  backrooms_right: {
+    id: "backrooms_right", name: "后室level0", img: "backrooms_right.jpg",
+    desc: "好累啊.....|不知道为什么胸没这么闷了|难道我刚才避开了什么东西？",
+    shake: true,
+    impactEffect: true,
+    autoJump: "backrooms_level1",
+    buttons: []
+  },
+  backrooms_level1: {
+    id: "backrooms_level1", name: "后室level1", img: "backrooms_level1.jpg",
+    desc: "好痛....|这是哪......|看来我切入到了一个新的层级",
+    unlockAch: "level1",
+    autoNext: "backrooms_level1_wet",
+    buttons: []
+  },
+  backrooms_level1_wet: {
+    id: "backrooms_level1_wet", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "湿哒哒的....好多水坑|我好渴啊.......",
+    buttons: [
+      { text: "喝水坑里的水", target: "level1_drink" },
+      { text: "继续往前", target: "level1_water" },
+    ]
+  },
+  level1_drink: {
+    id: "level1_drink", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "........好晕....",
+    unlockAch: "unhygienic",
+    autoJump: "gate",
+    buttons: []
+  },
+  level1_water: {
+    id: "level1_water", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "欸那里放了个矿泉水瓶|要不要去拿呢",
+    buttons: [
+      { text: "去拿", target: "level1_grab" },
+      { text: "不去", target: "level1_no_grab" },
+    ]
+  },
+  level1_grab: {
+    id: "level1_grab", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "咕咕咕....终于有水喝了|感觉清醒一点了",
+    getItem: "almond_water",
+    autoNext: "level1_continue",
+    buttons: []
+  },
+  level1_no_grab: {
+    id: "level1_no_grab", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "好渴.....我还是去拿杏仁水吧....|咕咕咕....终于有水喝了|感觉清醒一点了",
+    getItem: "almond_water",
+    autoNext: "level1_continue",
+    buttons: []
+  },
+  level1_continue: {
+    id: "level1_continue", name: "后室level1", img: "backrooms_wet.jpg",
+    desc: "欸.....听到了脚步|远方好像有人影|听说level1有很多人类居住的...|看来我要和幸存者会合了！我有救了",
+    flickerEffect: true,
+    autoNext: "level1_entity",
+    buttons: []
+  },
+  level1_entity: {
+    id: "level1_entity", name: "后室level1", img: "backrooms_entity.jpg",
+    desc: "这....好像不是人。。",
+    unlockAch: "skin_stealer",
+    fadeEffect: true,
     autoJump: "gate",
     buttons: []
   },
@@ -513,6 +634,52 @@ var SCENE_CONFIG = {
       { text: "不下去", target: "basement_no" },
     ]
   },
+  confucius_1: {
+    id: "confucius_1", name: "孔子像", img: "confucius_1.jpg",
+    desc: "居然是孔子像吗，好尊敬啊......",
+    unlockAch: "confucius_bless",
+    autoNext: "confucius_2",
+    buttons: []
+  },
+  confucius_2: {
+    id: "confucius_2", name: "孔子像", img: "confucius_2.jpg",
+    desc: "我正在向你靠近呢，孔子|居然一点都不后退吗，真是胆大呢",
+    autoNext: "confucius_3",
+    buttons: []
+  },
+  confucius_3: {
+    id: "confucius_3", name: "孔子像", img: "confucius_3.jpg",
+    desc: "听说孔子像下面有很多祭品.......|有点想吃......",
+    autoNext: "confucius_4",
+    buttons: []
+  },
+  confucius_4: {
+    id: "confucius_4", name: "孔子像", img: "confucius_4.jpg",
+    desc: "什......什么！！祭品怎么都没了！！|不.....不要啊！！！！我好饿！！！好饿啊！！！！！",
+    shakeHard: true,
+    autoNext: "confucius_5",
+    buttons: []
+  },
+  confucius_5: {
+    id: "confucius_5", name: "孔子像", img: "confucius_grass.jpg",
+    desc: "不管了有啥吃啥吧|我要吃草！！！！！|我要吃草！！！！！",
+    autoNext: "confucius_game",
+    buttons: []
+  },
+  confucius_win: {
+    id: "confucius_win", name: "孔子像", img: "confucius_grass.jpg",
+    desc: "真好吃啊！！！哈哈哈哈哈哈我吃饱啦！！！",
+    unlockAch: "little_greedy_cat",
+    autoJump: "gate",
+    buttons: []
+  },
+  confucius_lose: {
+    id: "confucius_lose", name: "孔子像", img: "confucius_grass.jpg",
+    desc: "呃.....好晕|好像.....吃到毒草了....|这草里，有毒啊！！！！",
+    unlockAch: "eat_to_death",
+    autoJump: "gate",
+    buttons: []
+  },
 };
 
 // ============================================================
@@ -551,6 +718,23 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.3", date: "2026-08-14", items: [
+    "扩展后室剧情线：新增往左/往右选择，往右切入level1",
+    "新增场景：后室选择、后室右转、后室level1、水坑、杏仁水、窃皮者",
+    "新增成就：level1、不讲卫生、偶遇窃皮者",
+    "新增道具：杏仁水",
+    "新增屏幕闪烁特效：level1中遇窃皮者前屏幕闪烁动画",
+  ]},
+  { version: "v1.5.27", date: "2026-08-14", items: [
+    "新增孔子像路线：校门口拜访孔子像，触发吃草小游戏",
+    "新增场景：孔子像×5、吃草小游戏胜利/失败",
+    "新增成就：儒学滋养、小馋猫、吃死了",
+    "新增吃草小游戏：4×4扫雷玩法，2棵毒草，吃完所有小草获胜",
+    "新增外太空外星人剧情线：石头剪刀布决斗",
+    "新增场景：外星人登场、外星人挑衅、石头剪刀布、胜利/失败",
+    "新增成就：老美的nasa这么厉害、击败外星人、被拉shi了",
+    "新增石头剪刀布小游戏：三选一，平局可重试，胜负自动跳转",
+  ]},
   { version: "v1.5.10", date: "2026-08-14", items: [
     "新增沙漠溜达猪神兽遭遇剧情：小树林深处触发",
     "新增场景：小树林深处、沙漠溜达猪栖息之地",
@@ -764,6 +948,18 @@ function renderScene(sceneId) {
     return;
   }
 
+  // 吃草小游戏
+  if (sceneId === "confucius_game") {
+    renderGrassGame();
+    return;
+  }
+
+  // 石头剪刀布小游戏
+  if (sceneId === "alien_game") {
+    renderRPSGame();
+    return;
+  }
+
   // 飞行路由：检查是否有哈气秘籍
   if (sceneId === "gate_fly") {
     if (hasItem("hachi_book")) {
@@ -932,6 +1128,16 @@ function playImpactSound() {
   } catch(e) {}
 }
 
+// 屏幕闪烁特效
+function triggerFlickerEffect(callback) {
+  var container = document.getElementById("game-container");
+  container.classList.add("flicker");
+  setTimeout(function() {
+    container.classList.remove("flicker");
+    if (callback) callback();
+  }, 1500);
+}
+
 // 捕捉神兽小游戏
 function renderCaptureGame() {
   var img = document.getElementById("scene-img");
@@ -988,6 +1194,221 @@ function renderCaptureGame() {
     }
   };
   actionsArea.appendChild(captureBtn);
+}
+
+// 吃草小游戏（4x4扫雷，2个毒草）
+function renderGrassGame() {
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var locationName = document.getElementById("location-name");
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+  var imageArea = document.getElementById("image-area");
+
+  // 设置图片
+  imageArea.style.display = "flex";
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "confucius_grass.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+
+  locationName.textContent = "孔子像";
+
+  // 生成4x4棋盘，随机放置2个毒草
+  var BOARD_SIZE = 4;
+  var POISON_COUNT = 2;
+  var totalCells = BOARD_SIZE * BOARD_SIZE; // 16
+  var safeCount = totalCells - POISON_COUNT; // 14
+
+  // 随机选择毒草位置
+  var poisonIndices = [];
+  while (poisonIndices.length < POISON_COUNT) {
+    var r = Math.floor(Math.random() * totalCells);
+    if (poisonIndices.indexOf(r) === -1) poisonIndices.push(r);
+  }
+
+  // 计算每个格子周围的毒草数
+  function countNeighborPoison(idx) {
+    var row = Math.floor(idx / BOARD_SIZE);
+    var col = idx % BOARD_SIZE;
+    var count = 0;
+    for (var dr = -1; dr <= 1; dr++) {
+      for (var dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        var nr = row + dr;
+        var nc = col + dc;
+        if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+          var nIdx = nr * BOARD_SIZE + nc;
+          if (poisonIndices.indexOf(nIdx) !== -1) count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  var board = [];
+  for (var i = 0; i < totalCells; i++) {
+    board.push({
+      index: i,
+      isPoison: poisonIndices.indexOf(i) !== -1,
+      neighborCount: poisonIndices.indexOf(i) !== -1 ? -1 : countNeighborPoison(i),
+      revealed: false
+    });
+  }
+
+  var revealedCount = 0;
+  var gameOver = false;
+
+  // 渲染游戏UI
+  descArea.innerHTML = "";
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+
+  var gameArea = document.createElement("div");
+  gameArea.id = "grass-game-area";
+  gameArea.innerHTML = "";
+
+  var grid = document.createElement("div");
+  grid.id = "grass-grid";
+
+  board.forEach(function(cell) {
+    var cellEl = document.createElement("div");
+    cellEl.className = "grass-cell";
+    cellEl.textContent = "🌿";
+    cellEl.setAttribute("data-num", cell.neighborCount >= 0 ? cell.neighborCount : "");
+
+    cellEl.onclick = function() {
+      if (gameOver || cell.revealed) return;
+      cell.revealed = true;
+      cellEl.classList.add("revealed");
+
+      if (cell.isPoison) {
+        // 踩到毒草 → 失败
+        gameOver = true;
+        cellEl.classList.add("poison", "poison-reveal");
+        cellEl.textContent = "☠️";
+        // 揭示所有毒草
+        board.forEach(function(c) {
+          if (c.isPoison && c.index !== cell.index) {
+            var otherEl = grid.children[c.index];
+            otherEl.classList.add("poison", "revealed");
+            otherEl.textContent = "☠️";
+          }
+        });
+        setTimeout(function() {
+          renderScene("confucius_lose");
+        }, 1200);
+      } else {
+        // 安全草 → 显示数字
+        if (cell.neighborCount > 0) {
+          cellEl.textContent = cell.neighborCount;
+        } else {
+          cellEl.textContent = "🌱";
+        }
+        revealedCount++;
+        if (revealedCount >= safeCount) {
+          // 吃光所有草 → 胜利
+          gameOver = true;
+          setTimeout(function() {
+            renderScene("confucius_win");
+          }, 800);
+        }
+      }
+    };
+
+    grid.appendChild(cellEl);
+  });
+
+  gameArea.appendChild(grid);
+
+  var rules = document.createElement("div");
+  rules.id = "grass-rules";
+  rules.innerHTML = "🌿 小草：安全的草，数字表示周围毒草数量<br>☠️ 毒草：踩到就会中毒！<br>吃完所有小草即可获胜";
+  gameArea.appendChild(rules);
+
+  actionsArea.appendChild(gameArea);
+}
+
+// 石头剪刀布小游戏
+function renderRPSGame() {
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var locationName = document.getElementById("location-name");
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+  var imageArea = document.getElementById("image-area");
+
+  imageArea.style.display = "flex";
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "alien_2.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+
+  locationName.textContent = "外星人";
+
+  var choices = ["石头", "剪刀", "布"];
+  var emojis = { "石头": "✊", "剪刀": "✌️", "布": "🖐️" };
+
+  descArea.innerHTML = "<div style=\"text-align:center;font-size:18px;font-weight:700;color:#e8d5b7;margin-bottom:8px;\">石头剪刀布！</div>"
+    + "<div id=\"rps-result\" style=\"text-align:center;color:#c0c8d8;min-height:24px;\"></div>";
+
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  actionsArea.style.flexDirection = "row";
+  actionsArea.style.gap = "10px";
+
+  var gameOver = false;
+
+  choices.forEach(function(choice) {
+    var btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = emojis[choice] + " " + choice;
+    btn.style.flex = "1";
+    btn.onclick = function() {
+      if (gameOver) return;
+      var alienChoice = choices[Math.floor(Math.random() * 3)];
+      var resultEl = document.getElementById("rps-result");
+
+      var resultText = "你出了" + choice + "，外星人出了" + alienChoice + " → ";
+
+      if (choice === alienChoice) {
+        resultText += "平局！再来一次！";
+        resultEl.textContent = resultText;
+        return;
+      }
+
+      gameOver = true;
+      actionsArea.querySelectorAll("button").forEach(function(b) { b.disabled = true; });
+
+      var win = false;
+      if ((choice === "石头" && alienChoice === "剪刀") ||
+          (choice === "剪刀" && alienChoice === "布") ||
+          (choice === "布" && alienChoice === "石头")) {
+        win = true;
+      }
+
+      if (win) {
+        resultText += "你赢了！";
+        resultEl.textContent = resultText;
+        resultEl.style.color = "#5cb85c";
+        setTimeout(function() { renderScene("alien_win"); }, 1500);
+      } else {
+        resultText += "你输了！";
+        resultEl.textContent = resultText;
+        resultEl.style.color = "#ff4444";
+        setTimeout(function() { renderScene("alien_lose"); }, 1500);
+      }
+    };
+    actionsArea.appendChild(btn);
+  });
 }
 
 // 开始打字机
@@ -1053,6 +1474,10 @@ function typeNextChar(autoNext, autoJump, getItem) {
         var curScene = SCENE_CONFIG[gameState.currentScene];
         if (curScene && curScene.fadeEffect) {
           triggerFadeEffect(function() {
+            renderScene(autoNext);
+          });
+        } else if (curScene && curScene.flickerEffect) {
+          triggerFlickerEffect(function() {
             renderScene(autoNext);
           });
         } else {
