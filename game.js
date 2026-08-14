@@ -24,6 +24,7 @@ var ITEM_CONFIG = {
   bag:            { id: "bag",            name: "袋子",     desc: "可用于捕捉神兽", usable: false },
   desert_pig:     { id: "desert_pig",     name: "溜达猪",   desc: "稀有神兽，喜欢在沙漠溜达", usable: false },
   almond_water:   { id: "almond_water",   name: "杏仁水",   desc: "后室中珍贵的饮用水，感觉很清醒", usable: false },
+  wire:           { id: "wire",           name: "电线",     desc: "从地下室找到的电线，不知道有什么用", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -54,6 +55,7 @@ var ACHIEVEMENT_CONFIG = {
   level1:             { id: "level1",             name: "level1", desc: "进入层级level1", icon: "🚪" },
   unhygienic:         { id: "unhygienic",         name: "不讲卫生", desc: "妈妈没教过你不能喝陌生的水吗", icon: "🤢" },
   skin_stealer:       { id: "skin_stealer",       name: "偶遇窃皮者", desc: "在level1遇到了窃皮者", icon: "🫥" },
+  past_running_ground:{ id: "past_running_ground",name: "过去跑操的地方", desc: "八年级跑操的回忆", icon: "🏃" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -570,7 +572,7 @@ var SCENE_CONFIG = {
     unlockAch: "capture_pig",
     getItem: "desert_pig",
     buttons: [
-      { text: "继续往前吧", target: "grove_end" },
+      { text: "继续往前吧", target: "running_ground" },
       { text: "返回校门口", target: "gate" },
     ]
   },
@@ -630,8 +632,85 @@ var SCENE_CONFIG = {
     id: "basement", name: "地下室", img: "basement.jpg",
     desc: "要不要下去呢",
     buttons: [
-      { text: "下去", popup: "前面的地方以后再去探索吧！" },
+      { text: "下去", target: "basement_inside" },
       { text: "不下去", target: "basement_no" },
+    ]
+  },
+  basement_inside: {
+    id: "basement_inside", name: "地下室内", img: "basement_inside.jpg",
+    desc: "这里还放着一个红绿灯呢.........",
+    autoNext: "basement_wires",
+    buttons: []
+  },
+  basement_wires: {
+    id: "basement_wires", name: "地下室内", img: "basement_wires.jpg",
+    desc: "里面还有电线......",
+    buttons: [
+      { text: "拿电线", target: "basement_wires_yes" },
+      { text: "不拿", target: "basement_bikes" },
+    ]
+  },
+  basement_wires_yes: {
+    id: "basement_wires_yes", name: "地下室内", img: "basement_wires.jpg",
+    desc: "获得了电线！",
+    getItem: "wire",
+    autoNext: "basement_bikes",
+    buttons: []
+  },
+  basement_bikes: {
+    id: "basement_bikes", name: "地下室内", img: "basement_bikes.jpg",
+    desc: "好多自行车啊......|看来这个学校里还有人在上课|真羡慕他们啊......还能待在文海|现在还在上课的是第几届呢，记不清",
+    autoNext: "basement_skylight",
+    buttons: []
+  },
+  basement_skylight: {
+    id: "basement_skylight", name: "地下室内", img: "basement_skylight.jpg",
+    desc: "这里是天窗啊|（天光穿过蒙尘的玻璃，墙面上流淌着岁月洇染的斑驳痕迹。）|这个塑料瓶在这里待了好久了.....|他不会累吗？|不管了继续走吧",
+    buttons: [
+      { text: "继续往前走", target: "basement_furniture" },
+      { text: "上楼", target: "basement_upstairs" },
+    ]
+  },
+  basement_furniture: {
+    id: "basement_furniture", name: "地下室内", img: "basement_furniture.jpg",
+    desc: "为什么地下车库会有家具啊|看起来像有人住在这里一样|有点诡异........|还是赶紧离开这里吧",
+    autoNext: "basement_stairs",
+    buttons: []
+  },
+  basement_stairs: {
+    id: "basement_stairs", name: "爬楼梯", img: "basement_stairs.jpg",
+    desc: "（爬楼梯ing)",
+    autoNext: "running_ground",
+    buttons: []
+  },
+  running_ground: {
+    id: "running_ground", name: "八年级跑操之地", img: "running_ground.jpg",
+    desc: "（这里是以前跑操的地方）|一个人也没有还是有些不习惯呢.....|算了不管了走吧",
+    unlockAch: "past_running_ground",
+    buttons: [
+      { text: "继续走", popup: "前面的区域以后再来探索吧！" },
+      { text: "回到校门口", target: "gate" },
+    ]
+  },
+  basement_upstairs: {
+    id: "basement_upstairs", name: "爬楼梯", img: "basement_stairs.jpg",
+    desc: "上楼ing",
+    autoNext: "basement_window",
+    buttons: []
+  },
+  basement_window: {
+    id: "basement_window", name: "地下室", img: "basement_window.jpg",
+    desc: "一直不太明白为什么要在这里开一个窗户|在这里看外面就像是下水道里的老鼠窥探别人的青春美好生活|这家伙在说什么呢，不要装作很忧郁的样子啊不管了反正也和现实差不多吧|(怎么和自己吵起来了啊喂)",
+    buttons: [
+      { text: "继续往上走", target: "basement_top" },
+    ]
+  },
+  basement_top: {
+    id: "basement_top", name: "地下室", img: "basement_top.jpg",
+    desc: "上来了.......",
+    buttons: [
+      { text: "往前走去前面的教学楼", popup: "前面的区域以后再来探索吧！" },
+      { text: "往左走去孔子像", target: "confucius_1" },
     ]
   },
   confucius_1: {
@@ -718,6 +797,14 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.4", date: "2026-08-14", items: [
+    "扩展地下室剧情线：地下室内探索、电线收集、自行车群、天窗、家具区、爬楼梯、跑操之地",
+    "新增上楼路线：窗户窥探、教学楼与孔子像分支",
+    "新增场景：地下室内、电线、自行车、天窗、家具区、爬楼梯、跑操之地、窗户、顶部出口",
+    "新增成就：过去跑操的地方",
+    "新增道具：电线",
+    "沙漠溜达猪捕捉后「继续往前吧」衔接至八年级跑操之地",
+  ]},
   { version: "v1.5.3", date: "2026-08-14", items: [
     "扩展后室剧情线：新增往左/往右选择，往右切入level1",
     "新增场景：后室选择、后室右转、后室level1、水坑、杏仁水、窃皮者",
