@@ -34,7 +34,10 @@ var ACHIEVEMENT_CONFIG = {
   hachi_legend: { id: "hachi_legend", name: "哈气大师传说", desc: "这段是不是我在哪看过", icon: "🌀" },
   so_free:      { id: "so_free",      name: "你真闲啊", desc: "你真闲啊", icon: "😮‍💨" },
   toilet_lover: { id: "toilet_lover", name: "喜欢蹲坑", desc: "你真的这么喜欢拉屎吗", icon: "🚽" },
-  fly_higher:   { id: "fly_higher",   name: "我要飞得更高", desc: "中国人能飞中国人能飞", icon: "🚀" },
+  fly_higher:         { id: "fly_higher",         name: "我要飞得更高", desc: "中国人能飞中国人能飞", icon: "🚀" },
+  stuck_in_backrooms: { id: "stuck_in_backrooms", name: "卡进后室了", desc: "怎么卡进后室了！", icon: "🟨" },
+  red_room:           { id: "red_room",           name: "误入红室", desc: "你死了", icon: "🟥" },
+  starved_to_death:   { id: "starved_to_death",   name: "饥渴而死", desc: "在后室中饥渴而死……", icon: "💀" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -159,7 +162,7 @@ var SCENE_CONFIG = {
     desc: "欸……瓦达西，怎么到……厕所了？！",
     buttons: [
       { text: "走出厕所", target: "window_scene" },
-      { text: "再蹲一会", event: "toilet_stay", unlockAch: "toilet_lover" },
+      { text: "再蹲一会", target: "toilet_stay_check" },
     ]
   },
   window_scene: {
@@ -360,6 +363,51 @@ var SCENE_CONFIG = {
       { text: "还是返程吧", target: "gate" },
     ]
   },
+  // ----- 后室剧情线（厕所蹲坑两次触发） -----
+  toilet_deep: {
+    id: "toilet_deep", name: "厕所", img: "toilet_deep.jpg",
+    desc: "好晕啊.....",
+    shakeHard: true,
+    autoJump: "backrooms_level0",
+    buttons: []
+  },
+  backrooms_level0: {
+    id: "backrooms_level0", name: "后室level0", img: "backrooms_level0.jpg",
+    desc: "欸......这是哪里",
+    unlockAch: "stuck_in_backrooms",
+    autoNext: "backrooms_walk",
+    buttons: []
+  },
+  backrooms_walk: {
+    id: "backrooms_walk", name: "后室level0", img: "backrooms_walk.jpg",
+    desc: "好像听到了一些奇怪的动静.....|往前走走看看吧......",
+    fadeEffect: true,
+    autoNext: "backrooms_walk_2",
+    buttons: []
+  },
+  backrooms_walk_2: {
+    id: "backrooms_walk_2", name: "后室level0", img: "backrooms_walk.jpg",
+    desc: "走了好久啊.......|要不要休息一会......|这里......好闷......胸口有点痛......会不会有人来害我",
+    buttons: [
+      { text: "继续探索", target: "backrooms_red" },
+      { text: "停下休息", target: "backrooms_death" },
+    ]
+  },
+  backrooms_red: {
+    id: "backrooms_red", name: "后室level0", img: "backrooms_red.jpg",
+    desc: ".......欸？|这里.....是哪里！",
+    unlockAch: "red_room",
+    autoJump: "gate",
+    buttons: []
+  },
+  backrooms_death: {
+    id: "backrooms_death", name: "后室level0", img: "backrooms_death.jpg",
+    desc: "好困.......眼皮好沉....|要睡着了........好饿.........|.........|唔呃........渴........|oa.pdj....f.nj..o....weon..",
+    unlockAch: "starved_to_death",
+    shake: true,
+    autoJump: "gate",
+    buttons: []
+  },
 };
 
 // ============================================================
@@ -380,6 +428,7 @@ var gameState = {
   achievements: [],          // 已解锁成就ID列表
   visitedScenes: [],         // 访问过的场景ID列表
   newAchievements: [],       // 本次新解锁的成就(用于提醒)
+  toiletStayCount: 0,        // 厕所蹲坑次数
 };
 
 // 御前决斗战斗状态
@@ -397,6 +446,14 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.14.137", date: "2026-08-14", items: [
+    "新增后室剧情线：厕所蹲坑两次触发，进入后室level0",
+    "新增场景：厕所深处、后室level0、后室探索、红室、饥渴而死",
+    "新增成就：卡进后室了、误入红室、饥渴而死",
+    "新增黑幕过渡效果：后室探索中屏幕缓慢变黑再变回",
+    "修复图片切换稳定性：取消旧场景自动跳转定时器，防止覆盖新场景",
+    "修复图片切换稳定性：先清空再设置新图，确保旧图不残留",
+  ]},
   { version: "v1.4.13.1", date: "2026-08-13", items: [
     "图片加载深度优化：link preload 预加载头 + decode 解码 + rAF 切换 + CSS 硬件加速",
     "图片切换零延迟：智能同图闪切，异图直接切换，消除 setTimeout 10ms 延迟",
@@ -527,6 +584,23 @@ var showButtonsAfter = false;  // 是否在打完当前句后显示按钮
 
 // 渲染当前场景
 function renderScene(sceneId) {
+  // 厕所蹲坑计数：第二次点击进入后室剧情
+  if (sceneId === "toilet_stay_check") {
+    gameState.toiletStayCount++;
+    if (gameState.toiletStayCount >= 2) {
+      renderScene("toilet_deep");
+    } else {
+      showEventModal("toilet_stay");
+      unlockAchievement("toilet_lover");
+      var achCfg = ACHIEVEMENT_CONFIG["toilet_lover"];
+      if (achCfg) {
+        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+      }
+      renderScene("toilet");
+    }
+    return;
+  }
+
   // 飞行路由：检查是否有哈气秘籍
   if (sceneId === "gate_fly") {
     if (hasItem("hachi_book")) {
@@ -652,6 +726,20 @@ function stopTypewriter() {
   typewriterDone = false;
 }
 
+// 黑幕过渡效果：缓慢变黑再变回去
+function triggerFadeEffect(callback) {
+  var overlay = document.getElementById("fade-overlay");
+  overlay.classList.add("active");
+  // 变黑后等待1秒再变回去
+  setTimeout(function() {
+    overlay.classList.remove("active");
+    // 变回去后再等1.5秒执行回调
+    setTimeout(function() {
+      if (callback) callback();
+    }, 1500);
+  }, 1500);
+}
+
 // 开始打字机
 function startTypewriter(text, autoNext, autoJump, getItem) {
   // 检测到下一个场景标记，去除后设置标志
@@ -711,7 +799,15 @@ function typeNextChar(autoNext, autoJump, getItem) {
       descArea.innerHTML += "<span class=\"tap-hint\">▼ 点击继续</span>";
       descArea.onclick = function() {
         descArea.onclick = null;
-        renderScene(autoNext);
+        // 检查当前场景是否需要黑幕过渡效果
+        var curScene = SCENE_CONFIG[gameState.currentScene];
+        if (curScene && curScene.fadeEffect) {
+          triggerFadeEffect(function() {
+            renderScene(autoNext);
+          });
+        } else {
+          renderScene(autoNext);
+        }
       };
     } else if (showButtonsAfter) {
       document.getElementById("actions-area").style.display = "flex";
@@ -1189,6 +1285,7 @@ function startGame() {
   gameState.achievements = [];
   gameState.visitedScenes = [];
   gameState.newAchievements = [];
+  gameState.toiletStayCount = 0;
   renderScene("opening_1");
 }
 
