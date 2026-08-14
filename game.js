@@ -516,6 +516,8 @@ function visitScene(sceneId) {
 
 // 类型打字机变量
 var typewriterTimer = null;
+var pendingAutoJumpTimer = null;  // 自动跳转定时器（可取消，防止旧场景覆盖新场景）
+var pendingImageRAF = null;       // 图片切换 rAF（可取消，防止旧场景 rAF 覆盖新图片）
 var currentSentences = [];
 var currentSentenceIndex = 0;
 var currentCharIndex = 0;
@@ -539,8 +541,12 @@ function renderScene(sceneId) {
   var scene = SCENE_CONFIG[sceneId];
   if (!scene) return;
 
-  // 停止之前的打字机
+  // 停止之前的打字机和自动跳转定时器（防止旧场景覆盖新场景）
   stopTypewriter();
+  if (pendingAutoJumpTimer) {
+    clearTimeout(pendingAutoJumpTimer);
+    pendingAutoJumpTimer = null;
+  }
 
   gameState.currentScene = sceneId;
   visitScene(sceneId);
@@ -557,9 +563,20 @@ function renderScene(sceneId) {
   } else {
     imageArea.style.display = "flex";
     if (scene.img) {
-      img.src = scene.img;
-      img.style.display = "block";
-      placeholder.style.display = "none";
+      // 先同步清空旧图，确保不残留上一场景的图片
+      img.src = "";
+      // 取消之前未执行的图片切换 rAF，防止旧场景覆盖新图片
+      if (pendingImageRAF) {
+        cancelAnimationFrame(pendingImageRAF);
+        pendingImageRAF = null;
+      }
+      // 单帧 rAF 后设置新图片，保证浏览器先完成清空渲染再加载新图
+      pendingImageRAF = requestAnimationFrame(function() {
+        pendingImageRAF = null;
+        img.src = scene.img;
+        img.style.display = "block";
+        placeholder.style.display = "none";
+      });
     } else {
       img.style.display = "none";
       placeholder.style.display = "flex";
@@ -684,7 +701,10 @@ function typeNextChar(autoNext, autoJump, getItem) {
     if (autoJump) {
       // 自动跳转场景
       if (getItem) addItems(getItem);
-      setTimeout(function() { renderScene(autoJump); }, 800);
+      pendingAutoJumpTimer = setTimeout(function() {
+        pendingAutoJumpTimer = null;
+        renderScene(autoJump);
+      }, 800);
     } else if (autoNext) {
       // 点击继续后跳转场景
       if (getItem) addItems(getItem);
