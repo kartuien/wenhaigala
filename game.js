@@ -138,6 +138,8 @@ var SCENE_CONFIG = {
       { text: "欸……左边的小树林里似乎有异动", target: "path_to_grove" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
       { text: "去拜访孔子像", target: "confucius_1" },
+      { text: "我要去实验楼耍耍！！！", target: "lab_floor" },
+      { text: "去文海少年科技院（行政楼）看看吧", target: "tech_academy_1" },
     ]
   },
   gate_look: {
@@ -822,6 +824,34 @@ var SCENE_CONFIG = {
     autoJump: "gate",
     buttons: []
   },
+  // 实验楼
+  lab_floor: {
+    id: "lab_floor", name: "实验楼", img: "lab_building.jpg",
+    desc: "去哪楼呢",
+    buttons: [
+      { text: "1F", popup: "前面的区域以后再去探索吧！" },
+      { text: "2F", popup: "前面的区域以后再去探索吧！" },
+      { text: "3F", popup: "前面的区域以后再去探索吧！" },
+      { text: "4F", popup: "前面的区域以后再去探索吧！" },
+      { text: "5F", popup: "前面的区域以后再去探索吧！" },
+      { text: "6F", popup: "前面的区域以后再去探索吧！" },
+      { text: "回到校门口", target: "gate" },
+    ]
+  },
+  // 文海少年科技院
+  tech_academy_1: {
+    id: "tech_academy_1", name: "文海少年科技院", img: "tech_academy_1.jpg",
+    desc: "欸......装修怎么这么豪华.....|进去看看吧",
+    autoNext: "tech_academy_2",
+    buttons: []
+  },
+  tech_academy_2: {
+    id: "tech_academy_2", name: "文海少年科技院", img: "tech_academy_2.jpg",
+    desc: "好大好宽敞|不过这里是干什么用的....",
+    buttons: [
+      { text: "返回校门口", popup: "这里什么都没有哦", popupThen: "gate" },
+    ]
+  },
 };
 
 // ============================================================
@@ -860,6 +890,12 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.76", date: "2026-08-15", items: [
+    "校门口新增实验楼选项：选择楼层1F-6F（待开发）",
+    "校门口新增文海少年科技院（行政楼）路线",
+    "新增场景：实验楼楼层选择、文海少年科技院×2",
+    "新增通用能力：弹窗关闭后自动跳转目标场景（popupThen）",
+  ]},
   { version: "v1.5.45", date: "2026-08-15", items: [
     "家具城新增驻足分支：奇怪的门闪现，探索奇怪的地方",
     "新增场景：奇怪的门、奇怪的地方×5",
@@ -1712,7 +1748,7 @@ function typeNextChar(autoNext, autoJump, getItem) {
 function handleAction(btn) {
   // 弹窗提示
   if (btn.popup) {
-    showPopupModal(btn.popup);
+    showPopupModal(btn.popup, btn.popupThen ? function() { renderScene(btn.popupThen); } : null);
     return;
   }
 
@@ -1763,7 +1799,7 @@ function showEventModal(eventId) {
 }
 
 // 显示提示弹窗
-function showPopupModal(message) {
+function showPopupModal(message, onClose) {
   var overlay = document.createElement("div");
   overlay.className = "modal-overlay event-modal";
   overlay.innerHTML =
@@ -1775,11 +1811,14 @@ function showPopupModal(message) {
     '</div>';
   document.body.appendChild(overlay);
 
-  overlay.querySelector("#popup-close-btn").addEventListener("click", function() {
+  function closePopup() {
     overlay.remove();
-  });
+    if (onClose) onClose();
+  }
+
+  overlay.querySelector("#popup-close-btn").addEventListener("click", closePopup);
   overlay.addEventListener("click", function(e) {
-    if (e.target === overlay) overlay.remove();
+    if (e.target === overlay) closePopup();
   });
 }
 
