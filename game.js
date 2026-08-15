@@ -25,6 +25,7 @@ var ITEM_CONFIG = {
   desert_pig:     { id: "desert_pig",     name: "溜达猪",   desc: "稀有神兽，喜欢在沙漠溜达", usable: false },
   almond_water:   { id: "almond_water",   name: "杏仁水",   desc: "后室中珍贵的饮用水，感觉很清醒", usable: false },
   wire:           { id: "wire",           name: "电线",     desc: "从地下室找到的电线，不知道有什么用", usable: false },
+  mystery_potion: { id: "mystery_potion", name: "神秘药剂", desc: "在化学实验室调配出的神秘药剂，散发着诡异的光芒", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -58,6 +59,11 @@ var ACHIEVEMENT_CONFIG = {
   past_running_ground:{ id: "past_running_ground",name: "过去跑操的地方", desc: "八年级跑操的回忆", icon: "🏃" },
   strange_place:      { id: "strange_place",      name: "到了奇怪的地方", desc: "被吸进了一个奇怪的门里", icon: "❓" },
   eternal_sleep:      { id: "eternal_sleep",      name: "长眠于此", desc: "在奇怪的地方永远睡去了……", icon: "🪦" },
+  lab_1f:             { id: "lab_1f",             name: "实验楼一楼", desc: "进入了实验楼一楼", icon: "🧪" },
+  library_fail:       { id: "library_fail",       name: "拜读未果", desc: "想进图书馆却被锁在门外", icon: "📚" },
+  chem_lab_enter:     { id: "chem_lab_enter",     name: "进入化学实验室", desc: "进入了化学实验室", icon: "⚗️" },
+  beat_bigfoot:       { id: "beat_bigfoot",       name: "战胜大脚鸡", desc: "在化学决斗中击败了大脚鸡", icon: "🐔" },
+  lost_to_bigfoot:    { id: "lost_to_bigfoot",    name: "丢人现眼", desc: "在化学决斗中输给了大脚鸡", icon: "💀" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -829,7 +835,7 @@ var SCENE_CONFIG = {
     id: "lab_floor", name: "实验楼", img: "lab_building.jpg",
     desc: "去哪楼呢",
     buttons: [
-      { text: "1F", popup: "前面的区域以后再去探索吧！" },
+      { text: "1F", target: "lab_1f" },
       { text: "2F", popup: "前面的区域以后再去探索吧！" },
       { text: "3F", popup: "前面的区域以后再去探索吧！" },
       { text: "4F", popup: "前面的区域以后再去探索吧！" },
@@ -837,6 +843,78 @@ var SCENE_CONFIG = {
       { text: "6F", popup: "前面的区域以后再去探索吧！" },
       { text: "回到校门口", target: "gate" },
     ]
+  },
+  lab_1f: {
+    id: "lab_1f", name: "实验楼一楼", img: "lab_1f.jpg",
+    desc: "进实验楼一楼了.....|这里似乎没有留下太多的回忆|我并不知道这里能干什么|要不往前走走",
+    unlockAch: "lab_1f",
+    buttons: [
+      { text: "化学实验室", target: "chem_lab_1" },
+      { text: "图书馆", target: "lab_library_door" },
+    ]
+  },
+  // 化学实验室
+  chem_lab_1: {
+    id: "chem_lab_1", name: "化学实验室", img: "chem_lab_1.jpg",
+    desc: "进来了...化学实验室|（门锁住了进不去,只能找网图了）|ayaaya....没有老师呢...|看来我可以做一些奇怪的化学实验了（坏笑）",
+    unlockAch: "chem_lab_enter",
+    autoNext: "chem_lab_2",
+    buttons: []
+  },
+  chem_lab_2: {
+    id: "chem_lab_2", name: "化学实验室", img: "chem_lab_2.jpg",
+    desc: "大脚鸡：何人在此喧嚣|什....什么....居然是珍惜神兽大脚鸡|大脚鸡：我已经听到了，你要做一些奇怪的实验，我要阻止你！！！",
+    autoNext: "chem_lab_capture",
+    buttons: []
+  },
+  chem_lab_capture: {
+    id: "chem_lab_capture", name: "化学实验室", img: "chem_lab_2.jpg",
+    desc: "不行，我要捕捉你",
+    buttons: function() {
+      var btns = [];
+      if (hasItem("bag")) {
+        btns.push({ text: "用袋子捕捉大脚鸡", action: "chem_capture_fail" });
+      }
+      btns.push({ text: "继续", action: "chem_lab_battle_intro" });
+      return btns;
+    }
+  },
+  chem_capture_fail: {
+    id: "chem_capture_fail", name: "化学实验室", img: "chem_lab_2.jpg",
+    desc: "捕捉失败！大脚鸡挣脱了袋子！",
+    autoNext: "chem_lab_battle_intro",
+    buttons: []
+  },
+  chem_lab_battle_intro: {
+    id: "chem_lab_battle_intro", name: "化学实验室", img: "chem_lab_2.jpg",
+    desc: "大脚鸡：切....就算有袋子，也捕捉不到我的|可恶啊...只能战斗了吗...|大脚鸡：我不会放任你乱做实验的，我要保护这一切！！！|要上了！！[开始震动]|大脚鸡：要上了！！！[开始震动]",
+    buttons: [],
+  },
+  chem_lab_battle: {
+    id: "chem_lab_battle", name: "化学实验决斗", img: "chem_lab_2.jpg",
+    desc: "",
+    buttons: [],
+  },
+  // 决斗胜利
+  chem_lab_win: {
+    id: "chem_lab_win", name: "化学实验室", img: "chem_lab_end.jpg",
+    desc: "",
+    buttons: [],
+  },
+  // 决斗失败
+  chem_lab_lose: {
+    id: "chem_lab_lose", name: "化学实验室", img: "chem_lab_end.jpg",
+    desc: "大脚鸡：你这家伙，技艺不精还敢来挑战我|大脚鸡：真是废物呢.....|可，可恶啊|（被大脚鸡扔出了实验室）",
+    unlockAch: "lost_to_bigfoot",
+    autoJump: "lab_1f",
+    buttons: [],
+  },
+  lab_library_door: {
+    id: "lab_library_door", name: "图书馆门口", img: "lab_library_door.jpg",
+    desc: "被锁上了啊....|还是回到实验楼楼梯间吧",
+    unlockAch: "library_fail",
+    autoJump: "lab_floor",
+    buttons: []
   },
   // 文海少年科技院
   tech_academy_1: {
@@ -890,6 +968,21 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.76.2", date: "2026-08-15", items: [
+    "化学实验室开放：大脚鸡登场 + 化学决斗卡牌系统",
+    "新增8张化学卡牌：注水入浓硫酸、串联酒精灯、手持试管加热、护目镜、清水冲洗、防爆盾牌、投掷烧杯、释放二氧化碳",
+    "新增电线鞭挞技能（拥有电线时每回合额外+1伤害）",
+    "新增决斗胜利/失败路线：震动+黑屏特效、获得神秘药剂/被扔出实验室",
+    "新增成就：进入化学实验室、战胜大脚鸡、丢人现眼",
+    "新增道具：神秘药剂",
+    "修复护目镜减伤逻辑反转bug",
+    "修复 buttons 函数类型检查、SCENES 变量名错误、triggerShake 未定义等bug",
+  ]},
+  { version: "v1.5.76.1", date: "2026-08-15", items: [
+    "实验楼一楼开放：化学实验室（待开发）、图书馆（锁门）",
+    "新增场景：实验楼一楼、图书馆门口",
+    "新增成就：实验楼一楼、拜读未果",
+  ]},
   { version: "v1.5.76", date: "2026-08-15", items: [
     "校门口新增实验楼选项：选择楼层1F-6F（待开发）",
     "校门口新增文海少年科技院（行政楼）路线",
@@ -1153,6 +1246,35 @@ function renderScene(sceneId) {
     return;
   }
 
+  // 化学决斗介绍
+  if (sceneId === "chem_lab_battle_intro") {
+    var scene = SCENE_CONFIG["chem_lab_battle_intro"];
+    // 渲染场景画面
+    var img = document.getElementById("scene-img");
+    img.src = scene.img;
+    document.getElementById("location-name").textContent = scene.name;
+    document.getElementById("description-area").innerHTML = "";
+    document.getElementById("actions-area").style.display = "none";
+    var gc = document.getElementById("game-container");
+    gc.classList.add("shake");
+    setTimeout(function() { gc.classList.remove("shake"); }, 500);
+    setTimeout(function() {
+      startTypewriter(scene.desc, scene.autoNext, scene.autoJump, scene.getItem);
+    }, 500);
+    setTimeout(function() { renderScene("chem_lab_battle"); }, 3000);
+    return;
+  }
+  // 化学决斗
+  if (sceneId === "chem_lab_battle") {
+    startChemDuel();
+    return;
+  }
+  // 化学决斗胜利 → 拆分文案，中间插入震动+黑屏
+  if (sceneId === "chem_lab_win") {
+    renderChemWinSequence();
+    return;
+  }
+
   // 飞行路由：检查是否有哈气秘籍
   if (sceneId === "gate_fly") {
     if (hasItem("hachi_book")) {
@@ -1237,7 +1359,8 @@ function renderScene(sceneId) {
   var actionsArea = document.getElementById("actions-area");
   actionsArea.innerHTML = "";
   if (scene.buttons) {
-    scene.buttons.forEach(function(btn) {
+    var buttons = typeof scene.buttons === "function" ? scene.buttons() : scene.buttons;
+    buttons.forEach(function(btn) {
       var button = document.createElement("button");
       button.className = "action-btn" + (btn.cls ? " " + btn.cls : "");
       button.textContent = btn.text;
@@ -1638,6 +1761,354 @@ function renderRPSGame() {
   });
 }
 
+// ===== 化学决斗系统 =====
+var CHEM_CARDS = [
+  { id: "water_to_acid", name: "注水入浓硫酸", desc: "剧烈飞溅腐蚀，对敌方造成1点伤害，之后敌方受到的伤害额外+1", icon: "💧→🧪" },
+  { id: "alcohol_bomb", name: "串联酒精灯", desc: "大爆炸，造成3点伤害", icon: "💥" },
+  { id: "heat_tube", name: "手持试管对着人加热", desc: "热蒸汽造成1点伤害", icon: "🔥" },
+  { id: "goggles", name: "佩戴护目镜", desc: "本回合减少对方1点伤害", icon: "🥽" },
+  { id: "water_wash", name: "清水冲洗", desc: "回复自己1点生命，去除硫酸腐蚀效果", icon: "💧" },
+  { id: "shield", name: "防爆盾牌", desc: "抵挡敌方全部伤害", icon: "🛡️" },
+  { id: "beaker", name: "投掷烧杯", desc: "对敌方造成1点伤害", icon: "🧪" },
+  { id: "co2", name: "释放大量二氧化碳", desc: "对双方都造成1点伤害", icon: "💨" },
+];
+
+var chemDuelState = null;
+
+function startChemDuel() {
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+
+  // 设置决斗画面
+  var img = document.getElementById("scene-img");
+  img.src = "chem_lab_2.jpg";
+  document.getElementById("location-name").textContent = "化学实验决斗";
+
+  chemDuelState = {
+    playerHP: 5,
+    enemyHP: 5,
+    playerSulfuric: false,  // 硫酸腐蚀debuff
+    playerShield: false,    // 护目镜减伤
+    enemyShield: false,
+    enemySulfuric: false,
+    whipUsed: false,        // 电线鞭挞本回合是否用过
+    turn: 0,
+  };
+
+  descArea.innerHTML = "";
+  renderChemDuelRound();
+}
+
+function renderChemDuelRound() {
+  var ds = chemDuelState;
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+
+  ds.turn++;
+  ds.playerShield = false;
+  ds.enemyShield = false;
+  ds.whipUsed = false;
+
+  // 抽3张牌
+  var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
+  var playerHand = shuffled.slice(0, 3);
+
+  // 大脚鸡随机选1张
+  var enemyCard = CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)];
+
+  // 渲染HP
+  var hpHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
+    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + "</span>"
+    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + "</span>"
+    + "</div>";
+  if (ds.playerSulfuric) {
+    hpHTML += "<div style=\"text-align:center;color:#ff6600;font-size:12px;margin-bottom:4px;\">⚠ 硫酸腐蚀：下次受伤+1</div>";
+  }
+  hpHTML += "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 选择一张卡牌</div>";
+  descArea.innerHTML = hpHTML;
+
+  // 渲染卡牌
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  actionsArea.style.flexDirection = "column";
+  actionsArea.style.gap = "6px";
+
+  playerHand.forEach(function(card) {
+    var btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.style.textAlign = "left";
+    btn.style.padding = "8px 12px";
+    btn.style.fontSize = "13px";
+    btn.innerHTML = "<span style=\"font-size:16px;\">" + card.icon + "</span> <b>" + card.name + "</b><br><span style=\"font-size:11px;color:#aaa;\">" + card.desc + "</span>";
+    btn.onclick = function() {
+      playChemDuelCard(card, enemyCard);
+    };
+    actionsArea.appendChild(btn);
+  });
+
+  // 电线鞭挞按钮
+  if (hasItem("wire") && !ds.whipUsed) {
+    var whipBtn = document.createElement("button");
+    whipBtn.className = "action-btn";
+    whipBtn.style.textAlign = "center";
+    whipBtn.style.padding = "8px 12px";
+    whipBtn.style.fontSize = "13px";
+    whipBtn.style.background = "rgba(255, 200, 50, 0.15)";
+    whipBtn.style.borderColor = "rgba(255, 200, 50, 0.5)";
+    whipBtn.style.color = "#ffc832";
+    whipBtn.innerHTML = "⚡ 使用电线鞭挞（本回合额外造成1点伤害，不影响出牌）";
+    whipBtn.onclick = function() {
+      ds.whipUsed = true;
+      ds.enemyHP--;
+      whipBtn.disabled = true;
+      whipBtn.style.opacity = "0.5";
+      whipBtn.textContent = "⚡ 电线鞭挞已使用";
+      // 更新HP显示
+      var hpEl = descArea.querySelector("div");
+      if (hpEl) {
+        hpEl.innerHTML = "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(Math.max(0, ds.enemyHP)) + "</span>"
+          + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(Math.max(0, ds.playerHP)) + "</span>";
+      }
+      // 如果鞭挞击杀，立即结束
+      if (ds.enemyHP <= 0) {
+        actionsArea.querySelectorAll("button").forEach(function(b) { b.disabled = true; });
+        descArea.innerHTML += "<div style=\"text-align:center;color:#5cb85c;font-size:16px;font-weight:700;margin-top:8px;\">电线鞭挞致命一击！战胜大脚鸡！</div>";
+        setTimeout(function() { chemDuelState = null; renderScene("chem_lab_win"); }, 2000);
+      }
+    };
+    actionsArea.appendChild(whipBtn);
+  }
+}
+
+function playChemDuelCard(playerCard, enemyCard) {
+  var ds = chemDuelState;
+  var descArea = document.getElementById("description-area");
+  var actionsArea = document.getElementById("actions-area");
+
+  // 禁用所有按钮
+  actionsArea.querySelectorAll("button").forEach(function(b) { b.disabled = true; });
+
+  var log = [];
+
+  // === 玩家回合 ===
+  log.push("你使用了：" + playerCard.name);
+
+  var playerDmg = 0;
+  var enemyDmg = 0;
+
+  switch (playerCard.id) {
+    case "water_to_acid":
+      enemyDmg = 1;
+      ds.enemySulfuric = true;
+      log.push("对敌方造成1点伤害，附加硫酸腐蚀！");
+      break;
+    case "alcohol_bomb":
+      enemyDmg = 3;
+      log.push("大爆炸！造成3点伤害！");
+      break;
+    case "heat_tube":
+      enemyDmg = 1;
+      log.push("热蒸汽造成1点伤害");
+      break;
+    case "goggles":
+      ds.playerShield = true;
+      log.push("佩戴护目镜，本回合减少1点伤害");
+      break;
+    case "water_wash":
+      ds.playerHP = Math.min(5, ds.playerHP + 1);
+      ds.playerSulfuric = false;
+      log.push("回复1点生命，去除硫酸腐蚀效果");
+      break;
+    case "shield":
+      ds.playerShield = true;
+      // 防爆盾牌抵挡全部伤害
+      ds.playerShield = "full";
+      log.push("防爆盾牌展开！抵挡全部伤害！");
+      break;
+    case "beaker":
+      enemyDmg = 1;
+      log.push("投掷烧杯造成1点伤害");
+      break;
+    case "co2":
+      enemyDmg = 1;
+      playerDmg = 1;
+      log.push("释放大量二氧化碳，双方各受1点伤害");
+      break;
+  }
+
+  // 硫酸腐蚀加成
+  if (ds.enemySulfuric && enemyDmg > 0) {
+    enemyDmg++;
+    ds.enemySulfuric = false;
+    log.push("敌方硫酸腐蚀触发，额外+1伤害！");
+  }
+
+  // 电线鞭挞额外伤害
+  if (ds.whipUsed) {
+    enemyDmg++;
+    ds.whipUsed = false;
+    log.push("电线鞭挞额外造成1点伤害！");
+  }
+
+  // 应用玩家伤害
+  ds.enemyHP -= enemyDmg;
+
+  // === 大脚鸡回合 ===
+  log.push("大脚鸡使用了：" + enemyCard.name);
+
+  switch (enemyCard.id) {
+    case "water_to_acid":
+      playerDmg += 1;
+      ds.playerSulfuric = true;
+      log.push("大脚鸡对你造成1点伤害，附加硫酸腐蚀！");
+      break;
+    case "alcohol_bomb":
+      playerDmg += 3;
+      log.push("大脚鸡引发大爆炸！造成3点伤害！");
+      break;
+    case "heat_tube":
+      playerDmg += 1;
+      log.push("大脚鸡用热蒸汽造成1点伤害");
+      break;
+    case "goggles":
+      ds.enemyShield = true;
+      log.push("大脚鸡佩戴护目镜，减少1点伤害");
+      break;
+    case "water_wash":
+      ds.enemyHP = Math.min(5, ds.enemyHP + 1);
+      ds.enemySulfuric = false;
+      log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
+      break;
+    case "shield":
+      ds.enemyShield = true;
+      // 大脚鸡的盾牌也抵挡全部
+      playerDmg = 0;
+      log.push("大脚鸡展开防爆盾牌！抵挡全部伤害！");
+      break;
+    case "beaker":
+      playerDmg += 1;
+      log.push("大脚鸡投掷烧杯造成1点伤害");
+      break;
+    case "co2":
+      playerDmg += 1;
+      ds.enemyHP -= 1;
+      log.push("大脚鸡释放二氧化碳，双方各受1点伤害");
+      break;
+  }
+
+  // 大脚鸡硫酸腐蚀加成
+  if (ds.playerSulfuric && playerDmg > 0) {
+    playerDmg++;
+    ds.playerSulfuric = false;
+    log.push("你的硫酸腐蚀触发，额外+1伤害！");
+  }
+
+  // 护目镜减伤
+  if (ds.playerShield === true) {
+    playerDmg = Math.max(0, playerDmg - 1);
+    log.push("护目镜减少1点伤害");
+  } else if (ds.playerShield === "full") {
+    playerDmg = 0;
+    log.push("防爆盾牌抵挡了全部伤害！");
+  }
+  if (ds.enemyShield) {
+    enemyDmg = Math.max(0, enemyDmg - 1);
+    log.push("大脚鸡护目镜减少1点伤害");
+  }
+
+  ds.playerHP -= playerDmg;
+
+  // 显示回合结果
+  var resultHTML = "<div id=\"chem-duel-hp\" style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
+    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(Math.max(0, ds.enemyHP)) + "</span>"
+    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(Math.max(0, ds.playerHP)) + "</span>"
+    + "</div>"
+    + "<div style=\"font-size:12px;color:#c0c8d8;line-height:1.6;margin:8px 0;\">"
+    + log.map(function(l) { return "<div>" + l + "</div>"; }).join("")
+    + "</div>";
+
+  // 检查胜负
+  var gameOver = false;
+  if (ds.enemyHP <= 0 && ds.playerHP <= 0) {
+    resultHTML += "<div style=\"text-align:center;color:#ffc832;font-size:16px;font-weight:700;margin-top:8px;\">同归于尽！</div>";
+    gameOver = true;
+    setTimeout(function() { chemDuelState = null; renderScene("chem_lab_lose"); }, 2000);
+  } else if (ds.enemyHP <= 0) {
+    resultHTML += "<div style=\"text-align:center;color:#5cb85c;font-size:16px;font-weight:700;margin-top:8px;\">你战胜了大脚鸡！</div>";
+    gameOver = true;
+    setTimeout(function() { chemDuelState = null; renderScene("chem_lab_win"); }, 2000);
+  } else if (ds.playerHP <= 0) {
+    resultHTML += "<div style=\"text-align:center;color:#ff4444;font-size:16px;font-weight:700;margin-top:8px;\">你被大脚鸡击败了！</div>";
+    gameOver = true;
+    setTimeout(function() { chemDuelState = null; renderScene("chem_lab_lose"); }, 2000);
+  }
+
+  descArea.innerHTML = resultHTML;
+
+  if (!gameOver) {
+    // 下一回合按钮
+    actionsArea.innerHTML = "";
+    var nextBtn = document.createElement("button");
+    nextBtn.className = "action-btn";
+    nextBtn.textContent = "下一回合";
+    nextBtn.style.width = "100%";
+    nextBtn.onclick = function() { renderChemDuelRound(); };
+    actionsArea.appendChild(nextBtn);
+  } else {
+    actionsArea.innerHTML = "";
+  }
+}
+
+// 化学决斗胜利序列：前半段文案 → 震动 → 黑屏 → 药剂 → 走出实验室
+function renderChemWinSequence() {
+  var scene = SCENE_CONFIG["chem_lab_win"];
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 前半段文案
+  var part1 = "大脚鸡:我.....输了吗.....|（嘴角挑起一抹笑容)真是弱小呢，离开吧|大脚鸡：切.....|（拎起大脚鸡,丢到一旁）|好了....开始实验吧！";
+  var part2 = "终于做好了.....[获得道具，神秘药剂]|(走出实验室)";
+
+  // 先打字前半段
+  startTypewriter(part1, null, null, null);
+
+  // 监听打字完成
+  var checkInterval = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(checkInterval);
+      // 震动
+      var gc = document.getElementById("game-container");
+      gc.classList.add("shake");
+      setTimeout(function() { gc.classList.remove("shake"); }, 500);
+
+      // 黑屏再亮起
+      var fade = document.getElementById("fade-overlay");
+      fade.classList.add("active");
+      setTimeout(function() {
+        fade.classList.remove("active");
+        // 解锁成就 + 获得道具
+        unlockAchievement("beat_bigfoot");
+        addItems("mystery_potion");
+        // 打字后半段
+        startTypewriter(part2, null, null, null);
+        var check2 = setInterval(function() {
+          if (typewriterDone) {
+            clearInterval(check2);
+            setTimeout(function() { renderScene("lab_1f"); }, 1500);
+          }
+        }, 200);
+      }, 2000);
+    }
+  }, 200);
+}
+
 // 开始打字机
 function startTypewriter(text, autoNext, autoJump, getItem) {
   // 检测到下一个场景标记，去除后设置标志
@@ -1770,6 +2241,10 @@ function handleAction(btn) {
   // 跳转场景（如果target与当前相同则刷新当前场景）
   if (btn.target) {
     renderScene(btn.target);
+  }
+  // action 跳转（同 target）
+  if (btn.action) {
+    renderScene(btn.action);
   }
 }
 
