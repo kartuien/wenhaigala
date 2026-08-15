@@ -50,6 +50,7 @@ var ACHIEVEMENT_CONFIG = {
   confucius_bless:    { id: "confucius_bless",    name: "儒学滋养", desc: "真喜欢拜访孔子", icon: "🙏" },
   little_greedy_cat:  { id: "little_greedy_cat",  name: "小馋猫", desc: "吃完了所有的小草，真好吃！", icon: "🐱" },
   eat_to_death:       { id: "eat_to_death",       name: "吃死了", desc: "吃到了毒草被毒死了", icon: "☠️" },
+  grass_king:         { id: "grass_king",         name: "吃草之王", desc: "这傻孩子聪明的欸", icon: "🌿" },
   nasa_detected:      { id: "nasa_detected",      name: "老美的nasa这么厉害", desc: "老美的nasa这么厉害给我探测出来了", icon: "🛸" },
   beat_alien:         { id: "beat_alien",         name: "击败外星人", desc: "在石头剪刀布中击败了外星人", icon: "👽" },
   pooped_on:          { id: "pooped_on",          name: "被拉shi了", desc: "被外星人在头上拉屎了", icon: "💩" },
@@ -65,6 +66,7 @@ var ACHIEVEMENT_CONFIG = {
   beat_bigfoot:       { id: "beat_bigfoot",       name: "战胜大脚鸡", desc: "在化学决斗中击败了大脚鸡", icon: "🐔" },
   easy_bigfoot:       { id: "easy_bigfoot",       name: "简单大脚鸡击败", desc: "你不会是打不过才选的这个吧", icon: "🐣" },
   chem_king:          { id: "chem_king",          name: "化学之王", desc: "击败了将成为神明的超级大脚鸡", icon: "👑" },
+  nightmare_bigfoot:  { id: "nightmare_bigfoot",  name: "噩梦大脚鸡", desc: "击败了不可战胜的噩梦大脚鸡", icon: "👹" },
   lost_to_bigfoot:    { id: "lost_to_bigfoot",    name: "丢人现眼", desc: "在化学决斗中输给了大脚鸡", icon: "💀" },
 };
 
@@ -815,8 +817,16 @@ var SCENE_CONFIG = {
   confucius_5: {
     id: "confucius_5", name: "孔子像", img: "confucius_grass.jpg",
     desc: "不管了有啥吃啥吧|我要吃草！！！！！|我要吃草！！！！！",
-    autoNext: "confucius_game",
+    autoNext: "confucius_difficulty",
     buttons: []
+  },
+  confucius_difficulty: {
+    id: "confucius_difficulty", name: "孔子像", img: "confucius_grass.jpg",
+    desc: "选择吃草难度",
+    buttons: [
+      { text: "普通（4×4棋盘，2个毒草）", action: "confucius_game", setDifficulty: "normal" },
+      { text: "困难（5×5棋盘，3个毒草）", action: "confucius_game", setDifficulty: "hard" },
+    ]
   },
   confucius_win: {
     id: "confucius_win", name: "孔子像", img: "confucius_grass.jpg",
@@ -895,6 +905,7 @@ var SCENE_CONFIG = {
       { text: "简单（大脚鸡4点血）", action: "chem_lab_battle_intro", setDifficulty: "easy" },
       { text: "普通（大脚鸡6点血）", action: "chem_lab_battle_intro", setDifficulty: "normal" },
       { text: "困难（大脚鸡10点血）", action: "chem_lab_battle_intro", setDifficulty: "hard" },
+      { text: "噩梦（大脚鸡15点血，每回合两张牌）", action: "chem_lab_battle_intro", setDifficulty: "nightmare" },
     ]
   },
   chem_lab_battle_intro: {
@@ -963,6 +974,8 @@ var gameState = {
   visitedScenes: [],         // 访问过的场景ID列表
   newAchievements: [],       // 本次新解锁的成就(用于提醒)
   toiletStayCount: 0,        // 厕所蹲坑次数
+  confuciusDifficulty: "normal", // 孔子像吃草难度：normal/hard
+  chemDifficulty: "normal",  // 化学决斗难度：easy/normal/hard/nightmare
 };
 
 // 御前决斗战斗状态
@@ -980,6 +993,11 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.76.45", date: "2026-08-15", items: [
+    "孔子像吃草小游戏新增难度选择：普通（4×4棋盘/2毒草）、困难（5×5棋盘/3毒草）",
+    "新增成就：吃草之王（困难模式通关）",
+    "5×5棋盘动态适配：CSS支持data-num 5/6样式",
+  ]},
   { version: "v1.5.76.33", date: "2026-08-15", items: [
     "化学决斗新增难度选择：简单/普通/困难（4/6/10血）",
     "新增成就：简单大脚鸡击败、化学之王",
@@ -1589,9 +1607,10 @@ function renderGrassGame() {
 
   locationName.textContent = "孔子像";
 
-  // 生成4x4棋盘，随机放置2个毒草
-  var BOARD_SIZE = 4;
-  var POISON_COUNT = 2;
+  // 根据难度生成棋盘：普通=4x4/2毒草，困难=5x5/3毒草
+  var isHard = gameState.confuciusDifficulty === "hard";
+  var BOARD_SIZE = isHard ? 5 : 4;
+  var POISON_COUNT = isHard ? 3 : 2;
   var totalCells = BOARD_SIZE * BOARD_SIZE; // 16
   var safeCount = totalCells - POISON_COUNT; // 14
 
@@ -1645,6 +1664,8 @@ function renderGrassGame() {
 
   var grid = document.createElement("div");
   grid.id = "grass-grid";
+  grid.style.gridTemplateColumns = "repeat(" + BOARD_SIZE + ", 1fr)";
+  grid.style.maxWidth = isHard ? "380px" : "320px";
 
   board.forEach(function(cell) {
     var cellEl = document.createElement("div");
@@ -1684,6 +1705,9 @@ function renderGrassGame() {
         if (revealedCount >= safeCount) {
           // 吃光所有草 → 胜利
           gameOver = true;
+          if (isHard) {
+            unlockAchievement("grass_king");
+          }
           setTimeout(function() {
             renderScene("confucius_win");
           }, 800);
@@ -1698,7 +1722,8 @@ function renderGrassGame() {
 
   var rules = document.createElement("div");
   rules.id = "grass-rules";
-  rules.innerHTML = "🌿 小草：安全的草，数字表示周围毒草数量<br>☠️ 毒草：踩到就会中毒！<br>吃完所有小草即可获胜";
+  var diffLabel = isHard ? "【困难模式】5×5棋盘，3个毒草" : "【普通模式】4×4棋盘，2个毒草";
+  rules.innerHTML = diffLabel + "<br>🌿 小草：安全的草，数字表示周围毒草数量<br>☠️ 毒草：踩到就会中毒！<br>吃完所有小草即可获胜";
   gameArea.appendChild(rules);
 
   actionsArea.appendChild(gameArea);
@@ -1807,7 +1832,7 @@ function startChemDuel() {
 
   chemDuelState = {
     playerHP: 5,
-    enemyHP: gameState.chemDifficulty === "easy" ? 4 : gameState.chemDifficulty === "hard" ? 10 : 6,
+    enemyHP: gameState.chemDifficulty === "easy" ? 4 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "nightmare" ? 15 : 6,
     playerSulfuric: false,  // 硫酸腐蚀debuff
     playerShield: false,    // 护目镜减伤
     enemyShield: false,
@@ -1834,12 +1859,18 @@ function renderChemDuelRound() {
   var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
   var playerHand = shuffled.slice(0, 3);
 
-  // 大脚鸡随机选1张
-  var enemyCard = CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)];
+  // 大脚鸡随机选牌（噩梦模式2张）
+  var isNightmare = gameState.chemDifficulty === "nightmare";
+  var enemyCards = [CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)]];
+  if (isNightmare) {
+    var card2 = CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)];
+    enemyCards.push(card2);
+  }
 
   // 渲染HP
+  var nightmareLabel = isNightmare ? " <span style=\"color:#ff4444;font-size:11px;\">噩梦</span>" : "";
   var hpHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
-    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + "</span>"
+    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + nightmareLabel + "</span>"
     + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + "</span>"
     + "</div>";
   if (ds.playerSulfuric) {
@@ -1862,7 +1893,7 @@ function renderChemDuelRound() {
     btn.style.fontSize = "13px";
     btn.innerHTML = "<span style=\"font-size:16px;\">" + card.icon + "</span> <b>" + card.name + "</b><br><span style=\"font-size:11px;color:#aaa;\">" + card.desc + "</span>";
     btn.onclick = function() {
-      playChemDuelCard(card, enemyCard);
+      playChemDuelCard(card, enemyCards);
     };
     actionsArea.appendChild(btn);
   });
@@ -1888,7 +1919,7 @@ function renderChemDuelRound() {
   }
 }
 
-function playChemDuelCard(playerCard, enemyCard) {
+function playChemDuelCard(playerCard, enemyCards) {
   var ds = chemDuelState;
   var descArea = document.getElementById("description-area");
   var actionsArea = document.getElementById("actions-area");
@@ -1956,45 +1987,48 @@ function playChemDuelCard(playerCard, enemyCard) {
     log.push("电线鞭挞额外造成1点伤害！");
   }
 
-  // === 第二步：大脚鸡出牌效果 ===
-  log.push("大脚鸡使用了：" + enemyCard.name);
+  // === 第二步：大脚鸡出牌效果（噩梦模式多张牌） ===
+  for (var i = 0; i < enemyCards.length; i++) {
+    var enemyCard = enemyCards[i];
+    log.push("大脚鸡使用了" + (enemyCards.length > 1 ? "第" + (i+1) + "张：" : "：") + enemyCard.name);
 
-  switch (enemyCard.id) {
-    case "water_to_acid":
-      playerDmg += 1;
-      ds.playerSulfuric = true;
-      log.push("大脚鸡对你造成1点伤害，附加硫酸腐蚀！");
-      break;
-    case "alcohol_bomb":
-      playerDmg += 3;
-      log.push("大脚鸡引发大爆炸！造成3点伤害！");
-      break;
-    case "heat_tube":
-      playerDmg += 1;
-      log.push("大脚鸡用热蒸汽造成1点伤害");
-      break;
-    case "goggles":
-      ds.enemyShield = true;
-      log.push("大脚鸡佩戴护目镜，减少1点伤害");
-      break;
-    case "water_wash":
-      ds.enemyHP = Math.min(5, ds.enemyHP + 1);
-      ds.enemySulfuric = false;
-      log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
-      break;
-    case "shield":
-      ds.enemyShield = "full";
-      log.push("大脚鸡展开防爆盾牌！抵挡全部伤害！");
-      break;
-    case "beaker":
-      playerDmg += 1;
-      log.push("大脚鸡投掷烧杯造成1点伤害");
-      break;
-    case "co2":
-      playerDmg += 1;
-      enemyDmg += 1;
-      log.push("大脚鸡释放二氧化碳，双方各受1点伤害");
-      break;
+    switch (enemyCard.id) {
+      case "water_to_acid":
+        playerDmg += 1;
+        ds.playerSulfuric = true;
+        log.push("大脚鸡对你造成1点伤害，附加硫酸腐蚀！");
+        break;
+      case "alcohol_bomb":
+        playerDmg += 3;
+        log.push("大脚鸡引发大爆炸！造成3点伤害！");
+        break;
+      case "heat_tube":
+        playerDmg += 1;
+        log.push("大脚鸡用热蒸汽造成1点伤害");
+        break;
+      case "goggles":
+        ds.enemyShield = true;
+        log.push("大脚鸡佩戴护目镜，减少1点伤害");
+        break;
+      case "water_wash":
+        ds.enemyHP = Math.min(gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6, ds.enemyHP + 1);
+        ds.enemySulfuric = false;
+        log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
+        break;
+      case "shield":
+        ds.enemyShield = "full";
+        log.push("大脚鸡展开防爆盾牌！抵挡全部伤害！");
+        break;
+      case "beaker":
+        playerDmg += 1;
+        log.push("大脚鸡投掷烧杯造成1点伤害");
+        break;
+      case "co2":
+        playerDmg += 1;
+        enemyDmg += 1;
+        log.push("大脚鸡释放二氧化碳，双方各受1点伤害");
+        break;
+    }
   }
 
   // 大脚鸡硫酸腐蚀加成
@@ -2109,7 +2143,7 @@ function renderChemWinSequence() {
       setTimeout(function() {
         fade.classList.remove("active");
         // 解锁成就 + 获得道具
-        var achId = gameState.chemDifficulty === "easy" ? "easy_bigfoot" : gameState.chemDifficulty === "hard" ? "chem_king" : "beat_bigfoot";
+        var achId = gameState.chemDifficulty === "easy" ? "easy_bigfoot" : gameState.chemDifficulty === "hard" ? "chem_king" : gameState.chemDifficulty === "nightmare" ? "nightmare_bigfoot" : "beat_bigfoot";
         unlockAchievement(achId);
         addItems("mystery_potion");
         // 打字后半段
@@ -2262,7 +2296,11 @@ function handleAction(btn) {
   if (btn.action) {
     // 设置难度
     if (btn.setDifficulty) {
-      gameState.chemDifficulty = btn.setDifficulty;
+      if (btn.action === "confucius_game") {
+        gameState.confuciusDifficulty = btn.setDifficulty;
+      } else {
+        gameState.chemDifficulty = btn.setDifficulty;
+      }
     }
     renderScene(btn.action);
   }

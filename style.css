@@ -475,6 +475,8 @@ body {
 .grass-cell.revealed[data-num="2"] { color: #f0ad4e; }
 .grass-cell.revealed[data-num="3"] { color: #ff6b6b; }
 .grass-cell.revealed[data-num="4"] { color: #ff3333; }
+.grass-cell.revealed[data-num="5"] { color: #cc0000; }
+.grass-cell.revealed[data-num="6"] { color: #990000; }
 #grass-rules {
   text-align: center; font-size: 13px; color: rgba(232,213,183,0.7);
   line-height: 1.6; padding: 0 16px;
