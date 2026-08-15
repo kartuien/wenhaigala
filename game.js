@@ -56,6 +56,8 @@ var ACHIEVEMENT_CONFIG = {
   unhygienic:         { id: "unhygienic",         name: "不讲卫生", desc: "妈妈没教过你不能喝陌生的水吗", icon: "🤢" },
   skin_stealer:       { id: "skin_stealer",       name: "偶遇窃皮者", desc: "在level1遇到了窃皮者", icon: "🫥" },
   past_running_ground:{ id: "past_running_ground",name: "过去跑操的地方", desc: "八年级跑操的回忆", icon: "🏃" },
+  strange_place:      { id: "strange_place",      name: "到了奇怪的地方", desc: "被吸进了一个奇怪的门里", icon: "❓" },
+  eternal_sleep:      { id: "eternal_sleep",      name: "长眠于此", desc: "在奇怪的地方永远睡去了……", icon: "🪦" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -673,7 +675,68 @@ var SCENE_CONFIG = {
   },
   basement_furniture: {
     id: "basement_furniture", name: "地下室内", img: "basement_furniture.jpg",
-    desc: "为什么地下车库会有家具啊|看起来像有人住在这里一样|有点诡异........|还是赶紧离开这里吧",
+    desc: "为什么地下车库会有家具啊|看起来像有人住在这里一样|有点诡异........",
+    buttons: [
+      { text: "赶紧离开", target: "basement_stairs" },
+      { text: "驻足再看一会", target: "furniture_strange_door" },
+    ]
+  },
+  furniture_strange_door: {
+    id: "furniture_strange_door", name: "地下室内", img: "strange_door.jpg",
+    desc: "欸.....怎么闪出了一个门.......|要不要走进去呢......",
+    buttons: [
+      { text: "走进去", target: "furniture_enter_door" },
+      { text: "不走进去", target: "furniture_sucked_in" },
+    ]
+  },
+  furniture_enter_door: {
+    id: "furniture_enter_door", name: "地下室内", img: "strange_door.jpg",
+    desc: "（走路ing）",
+    autoNext: "strange_place_1",
+    buttons: []
+  },
+  furniture_sucked_in: {
+    id: "furniture_sucked_in", name: "地下室内", img: "strange_door.jpg",
+    desc: "欸.....不受控制的开始往那里移动了|要......要被吸进去了......",
+    shake: true,
+    autoJump: "strange_place_1",
+    buttons: []
+  },
+  strange_place_1: {
+    id: "strange_place_1", name: "奇怪的地方", img: "strange_place_1.jpg",
+    desc: "这里.....是哪里......|我不是在文海吗......|我.....我要回去.....我要回去（转头）",
+    unlockAch: "strange_place",
+    silentAch: true,
+    autoNext: "strange_place_2",
+    buttons: []
+  },
+  strange_place_2: {
+    id: "strange_place_2", name: "奇怪的地方", img: "strange_place_2.jpg",
+    desc: "门....怎么消失了....",
+    autoNext: "strange_place_3",
+    buttons: []
+  },
+  strange_place_3: {
+    id: "strange_place_3", name: "奇怪的地方", img: "strange_place_1.jpg",
+    desc: "好吧....只能往前走了吗......|空气里似乎有些熏香|继续往前走走吧",
+    autoNext: "strange_place_4",
+    buttons: []
+  },
+  strange_place_4: {
+    id: "strange_place_4", name: "奇怪的地方", img: "strange_place_4.jpg",
+    desc: "好像之前来过这里......|这里真好，不用像上面那样孤单.....|(走路ing)",
+    autoNext: "strange_place_5",
+    buttons: []
+  },
+  strange_place_5: {
+    id: "strange_place_5", name: "奇怪的地方", img: "strange_place_5.jpg",
+    desc: "前面....还有好远才到.....|马上就不用孤单了....马上就可以获得永远的陪伴了|我要去...我要去那里...",
+    autoNext: "strange_place_5_fx",
+    buttons: []
+  },
+  furniture_return: {
+    id: "furniture_return", name: "地下室内", img: "basement_furniture.jpg",
+    desc: "回来了吗|刚才我怎么了|好像有点晕",
     autoNext: "basement_stairs",
     buttons: []
   },
@@ -797,6 +860,13 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.45", date: "2026-08-15", items: [
+    "家具城新增驻足分支：奇怪的门闪现，探索奇怪的地方",
+    "新增场景：奇怪的门、奇怪的地方×5",
+    "新增成就：到了奇怪的地方（静默解锁）、长眠于此",
+    "新增特效链：文案结束后触发震动→跌倒撞击→黑屏→成就弹窗",
+    "修复奇怪的地方终幕特效提前触发、图片未正确显示的问题",
+  ]},
   { version: "v1.5.4", date: "2026-08-14", items: [
     "扩展地下室剧情线：地下室内探索、电线收集、自行车群、天窗、家具区、爬楼梯、跑操之地",
     "新增上楼路线：窗户窥探、教学楼与孔子像分支",
@@ -1058,6 +1128,29 @@ function renderScene(sceneId) {
     return;
   }
 
+  // 奇怪的地方终幕特效链（文案结束后触发：震动 → 跌倒 → 黑屏 → 长眠于此）
+  if (sceneId === "strange_place_5_fx") {
+    var gc = document.getElementById("game-container");
+    gc.classList.add("shake");
+    setTimeout(function() {
+      gc.classList.remove("shake");
+      gc.classList.add("impact");
+      playImpactSound();
+      setTimeout(function() {
+        gc.classList.remove("impact");
+        unlockAchievement("eternal_sleep");
+        var achCfg = ACHIEVEMENT_CONFIG["eternal_sleep"];
+        if (achCfg) {
+          showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+        }
+        triggerFadeEffect(function() {
+          renderScene("furniture_return");
+        });
+      }, 600);
+    }, 500);
+    return;
+  }
+
   var scene = SCENE_CONFIG[sceneId];
   if (!scene) return;
 
@@ -1145,9 +1238,20 @@ function renderScene(sceneId) {
   if (scene.unlockAch) {
     unlockAchievement(scene.unlockAch);
     var achCfg = ACHIEVEMENT_CONFIG[scene.unlockAch];
-    if (achCfg) {
+    if (achCfg && !scene.silentAch) {
       showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
     }
+  }
+
+  // 黑屏后回归（长眠特效）
+  if (scene.fadeAndReturn) {
+    var returnTarget = scene.fadeAndReturn;
+    setTimeout(function() {
+      triggerFadeEffect(function() {
+        renderScene(returnTarget);
+      });
+    }, 1000);
+    return;
   }
 
   // 屏幕震动
