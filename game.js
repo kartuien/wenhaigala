@@ -26,6 +26,7 @@ var ITEM_CONFIG = {
   almond_water:   { id: "almond_water",   name: "杏仁水",   desc: "后室中珍贵的饮用水，感觉很清醒", usable: false },
   wire:           { id: "wire",           name: "电线",     desc: "从地下室找到的电线，不知道有什么用", usable: false },
   mystery_potion: { id: "mystery_potion", name: "神秘药剂", desc: "在化学实验室调配出的神秘药剂，散发着诡异的光芒", usable: false },
+  dowsing_rod:    { id: "dowsing_rod",    name: "寻龙尺",   desc: "在草丛中发现的神秘道具，似乎能感应到某种力量", usable: false },
 };
 
 // ==================== 成就配置 ====================
@@ -763,8 +764,36 @@ var SCENE_CONFIG = {
     desc: "（这里是以前跑操的地方）|一个人也没有还是有些不习惯呢.....|算了不管了走吧",
     unlockAch: "past_running_ground",
     buttons: [
-      { text: "继续走", popup: "前面的区域以后再来探索吧！" },
+      { text: "继续往前走吧", target: "runway_1" },
       { text: "回到校门口", target: "gate" },
+    ]
+  },
+  runway_1: {
+    id: "runway_1", name: "靠小学一侧跑道", img: "321e29299155bdb97093546ac769fcc3.jpg",
+    desc: "沿着这里走吧.....|(走路ing)",
+    autoNext: "runway_2",
+    buttons: []
+  },
+  runway_2: {
+    id: "runway_2", name: "靠小学一侧跑道", img: "ea8480d0e94939893762ee580bfe390a.jpg",
+    desc: "（走路ing)",
+    autoNext: "runway_3",
+    buttons: []
+  },
+  runway_3: {
+    id: "runway_3", name: "靠小学一侧跑道", img: "c7414d2245aac8cc73bd11929b365f18.jpg",
+    desc: "这里有个草丛欸.....|要不要检查一下",
+    buttons: [
+      { text: "检查一下", target: "runway_found" },
+      { text: "不检查了", target: "lab_floor" },
+    ]
+  },
+  runway_found: {
+    id: "runway_found", name: "靠小学一侧跑道", img: "79486ed3a532d209183ee37ea3b1bd38.jpg",
+    desc: "我去有个寻龙尺！[获得道具寻龙尺]",
+    getItem: "dowsing_rod",
+    buttons: [
+      { text: "去实验楼", target: "lab_floor" },
     ]
   },
   basement_upstairs: {
@@ -976,6 +1005,8 @@ var gameState = {
   toiletStayCount: 0,        // 厕所蹲坑次数
   confuciusDifficulty: "normal", // 孔子像吃草难度：normal/hard
   chemDifficulty: "normal",  // 化学决斗难度：easy/normal/hard/nightmare
+  lastDuelEnemyHP: 0,        // 上一场决斗大脚鸡剩余血量
+  lastDuelNightmare: false,  // 上一场决斗是否为噩梦模式
 };
 
 // 御前决斗战斗状态
@@ -993,10 +1024,16 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
-  { version: "v1.5.76.45", date: "2026-08-15", items: [
-    "孔子像吃草小游戏新增难度选择：普通（4×4棋盘/2毒草）、困难（5×5棋盘/3毒草）",
+  { version: "v1.5.76.58", date: "2026-08-15", items: [
+    "玩家血量从5点提升至6点",
+    "违反实验规章改为仅取消对方卡牌效果（己方卡牌不受影响）",
+    "电线鞭挞和寻龙尺不受违反实验规章影响",
+    "七年级跑操之地新增跑道探索路线：靠小学一侧跑道→草丛→寻龙尺道具",
+    "新增道具：寻龙尺（化学决斗中50%造成1点伤害/50%减少1点伤害）",
+    "化学决斗新增4张卡牌：违反实验规章、高温坩埚钳、降温冷凝管、我告老师了",
+    "噩梦模式被大脚鸡击败后根据剩余血量显示不同对话和图片",
+    "孔子像吃草小游戏新增难度选择：普通（4×4/2毒草）、困难（5×5/3毒草）",
     "新增成就：吃草之王（困难模式通关）",
-    "5×5棋盘动态适配：CSS支持data-num 5/6样式",
   ]},
   { version: "v1.5.76.33", date: "2026-08-15", items: [
     "化学决斗新增难度选择：简单/普通/困难（4/6/10血）",
@@ -1311,6 +1348,11 @@ function renderScene(sceneId) {
   // 化学决斗胜利 → 拆分文案，中间插入震动+黑屏
   if (sceneId === "chem_lab_win") {
     renderChemWinSequence();
+    return;
+  }
+  // 化学决斗失败 → 噩梦模式根据大脚鸡剩余血量显示不同对话
+  if (sceneId === "chem_lab_lose") {
+    renderChemLoseSequence();
     return;
   }
 
@@ -1817,6 +1859,10 @@ var CHEM_CARDS = [
   { id: "shield", name: "防爆盾牌", desc: "抵挡敌方全部伤害", icon: "🛡️" },
   { id: "beaker", name: "投掷烧杯", desc: "对敌方造成1点伤害", icon: "🧪" },
   { id: "co2", name: "释放大量二氧化碳", desc: "对双方都造成1点伤害", icon: "💨" },
+  { id: "violate_rules", name: "违反实验规章", desc: "双方卡牌本回合无效（电线鞭挞/寻龙尺除外）", icon: "📜" },
+  { id: "hot_crucible", name: "高温坩埚钳", desc: "对敌方造成2点伤害，对自己造成1点伤害", icon: "🔧" },
+  { id: "cooling_tube", name: "降温冷凝管", desc: "回复两点伤害", icon: "🧊" },
+  { id: "tell_teacher", name: "我告老师了", desc: "对方下回合无法行动", icon: "📢" },
 ];
 
 var chemDuelState = null;
@@ -1831,13 +1877,18 @@ function startChemDuel() {
   document.getElementById("location-name").textContent = "化学实验决斗";
 
   chemDuelState = {
-    playerHP: 5,
+    playerHP: 6,
     enemyHP: gameState.chemDifficulty === "easy" ? 4 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "nightmare" ? 15 : 6,
     playerSulfuric: false,  // 硫酸腐蚀debuff
     playerShield: false,    // 护目镜减伤
     enemyShield: false,
     enemySulfuric: false,
     whipUsed: false,        // 电线鞭挞本回合是否用过
+    dowsingUsed: false,     // 寻龙尺本回合是否用过
+    dowsingEffect: null,    // 寻龙尺效果：damage/shield
+    violateRules: false,    // 违反实验规章：双方卡牌无效（电线鞭挞/寻龙尺除外）
+    playerStunned: false,   // 玩家被眩晕（下回合无法行动）
+    enemyStunned: false,    // 敌方被眩晕（下回合无法行动）
     turn: 0,
   };
 
@@ -1854,10 +1905,9 @@ function renderChemDuelRound() {
   ds.playerShield = false;
   ds.enemyShield = false;
   ds.whipUsed = false;
-
-  // 抽3张牌
-  var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
-  var playerHand = shuffled.slice(0, 3);
+  ds.dowsingUsed = false;
+  ds.dowsingEffect = null;
+  ds.violateRules = false;
 
   // 大脚鸡随机选牌（噩梦模式2张）
   var isNightmare = gameState.chemDifficulty === "nightmare";
@@ -1866,6 +1916,33 @@ function renderChemDuelRound() {
     var card2 = CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)];
     enemyCards.push(card2);
   }
+
+  // 玩家被眩晕：跳过出牌，敌方直接行动
+  if (ds.playerStunned) {
+    ds.playerStunned = false;
+    var stunHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
+      + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + "</span>"
+      + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + "</span>"
+      + "</div>"
+      + "<div style=\"text-align:center;color:#ff4444;font-size:15px;margin:8px 0;\">你被老师训话了，本回合无法行动！</div>"
+      + "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 大脚鸡行动中...</div>";
+    descArea.innerHTML = stunHTML;
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "flex";
+    var stunNextBtn = document.createElement("button");
+    stunNextBtn.className = "action-btn";
+    stunNextBtn.textContent = "继续";
+    stunNextBtn.style.width = "100%";
+    stunNextBtn.onclick = function() {
+      playChemDuelCard({ id: "stunned", name: "无法行动", desc: "", icon: "😵" }, enemyCards);
+    };
+    actionsArea.appendChild(stunNextBtn);
+    return;
+  }
+
+  // 抽3张牌
+  var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
+  var playerHand = shuffled.slice(0, 3);
 
   // 渲染HP
   var nightmareLabel = isNightmare ? " <span style=\"color:#ff4444;font-size:11px;\">噩梦</span>" : "";
@@ -1917,6 +1994,27 @@ function renderChemDuelRound() {
     };
     actionsArea.appendChild(whipBtn);
   }
+
+  // 寻龙尺按钮（50%造成1点伤害，50%减少1点伤害）
+  if (hasItem("dowsing_rod") && !ds.dowsingUsed) {
+    var dowsingBtn = document.createElement("button");
+    dowsingBtn.className = "action-btn";
+    dowsingBtn.style.textAlign = "center";
+    dowsingBtn.style.padding = "8px 12px";
+    dowsingBtn.style.fontSize = "13px";
+    dowsingBtn.style.background = "rgba(100, 180, 255, 0.15)";
+    dowsingBtn.style.borderColor = "rgba(100, 180, 255, 0.5)";
+    dowsingBtn.style.color = "#64b4ff";
+    dowsingBtn.innerHTML = "🔮 使用寻龙尺（本回合50%额外造成1点伤害，50%减少1点伤害，不影响出牌）";
+    dowsingBtn.onclick = function() {
+      ds.dowsingUsed = true;
+      ds.dowsingEffect = Math.random() < 0.5 ? "damage" : "shield";
+      dowsingBtn.disabled = true;
+      dowsingBtn.style.opacity = "0.5";
+      dowsingBtn.textContent = "🔮 寻龙尺已使用（" + (ds.dowsingEffect === "damage" ? "造成伤害" : "减少伤害") + "）";
+    };
+    actionsArea.appendChild(dowsingBtn);
+  }
 }
 
 function playChemDuelCard(playerCard, enemyCards) {
@@ -1954,7 +2052,7 @@ function playChemDuelCard(playerCard, enemyCards) {
       log.push("佩戴护目镜，本回合减少1点伤害");
       break;
     case "water_wash":
-      ds.playerHP = Math.min(5, ds.playerHP + 1);
+      ds.playerHP = Math.min(6, ds.playerHP + 1);
       ds.playerSulfuric = false;
       log.push("回复1点生命，去除硫酸腐蚀效果");
       break;
@@ -1971,71 +2069,149 @@ function playChemDuelCard(playerCard, enemyCards) {
       playerDmg = 1;
       log.push("释放大量二氧化碳，双方各受1点伤害");
       break;
+    case "violate_rules":
+      ds.violateRules = true;
+      log.push("违反实验规章！双方卡牌效果无效，但电线鞭挞和寻龙尺不受影响！");
+      break;
+    case "hot_crucible":
+      enemyDmg = 2;
+      playerDmg = 1;
+      log.push("高温坩埚钳对敌方造成2点伤害，自己烫伤1点");
+      break;
+    case "cooling_tube":
+      ds.playerHP = Math.min(6, ds.playerHP + 2);
+      log.push("降温冷凝管回复2点生命！");
+      break;
+    case "tell_teacher":
+      ds.enemyStunned = true;
+      log.push("你告老师了！大脚鸡下回合无法行动！");
+      break;
+    case "stunned":
+      log.push("你被眩晕了，本回合无法行动！");
+      break;
+  }
+
+  // 违反实验规章：双方卡牌效果无效（电线鞭挞和寻龙尺不受影响）
+  if (ds.violateRules) {
+    log.push("违反实验规章生效！双方卡牌效果无效！");
+    playerDmg = 0;
+    enemyDmg = 0;
+    ds.playerSulfuric = false;
+    ds.enemySulfuric = false;
+    ds.playerShield = false;
+    ds.enemyShield = false;
   }
 
   // 玩家硫酸腐蚀加成
-  if (ds.enemySulfuric && enemyDmg > 0) {
+  if (!ds.violateRules && ds.enemySulfuric && enemyDmg > 0) {
     enemyDmg++;
     ds.enemySulfuric = false;
     log.push("敌方硫酸腐蚀触发，额外+1伤害！");
   }
 
-  // 电线鞭挞额外伤害
+  // === 第二步：大脚鸡出牌效果（噩梦模式多张牌） ===
+  if (ds.enemyStunned) {
+    ds.enemyStunned = false;
+    log.push("大脚鸡被老师训话了，本回合无法行动！");
+  } else if (ds.violateRules) {
+    log.push("违反实验规章！大脚鸡本回合卡牌效果无效！");
+  } else {
+    for (var i = 0; i < enemyCards.length; i++) {
+      var enemyCard = enemyCards[i];
+      log.push("大脚鸡使用了" + (enemyCards.length > 1 ? "第" + (i+1) + "张：" : "：") + enemyCard.name);
+
+      switch (enemyCard.id) {
+        case "water_to_acid":
+          playerDmg += 1;
+          ds.playerSulfuric = true;
+          log.push("大脚鸡对你造成1点伤害，附加硫酸腐蚀！");
+          break;
+        case "alcohol_bomb":
+          playerDmg += 3;
+          log.push("大脚鸡引发大爆炸！造成3点伤害！");
+          break;
+        case "heat_tube":
+          playerDmg += 1;
+          log.push("大脚鸡用热蒸汽造成1点伤害");
+          break;
+        case "goggles":
+          ds.enemyShield = true;
+          log.push("大脚鸡佩戴护目镜，减少1点伤害");
+          break;
+        case "water_wash":
+          ds.enemyHP = Math.min(gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6, ds.enemyHP + 1);
+          ds.enemySulfuric = false;
+          log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
+          break;
+        case "shield":
+          ds.enemyShield = "full";
+          log.push("大脚鸡展开防爆盾牌！抵挡全部伤害！");
+          break;
+        case "beaker":
+          playerDmg += 1;
+          log.push("大脚鸡投掷烧杯造成1点伤害");
+          break;
+        case "co2":
+          playerDmg += 1;
+          enemyDmg += 1;
+          log.push("大脚鸡释放二氧化碳，双方各受1点伤害");
+          break;
+        case "violate_rules":
+          ds.violateRules = true;
+          log.push("大脚鸡违反实验规章！双方卡牌效果无效！");
+          playerDmg = 0;
+          enemyDmg = 0;
+          ds.playerSulfuric = false;
+          ds.enemySulfuric = false;
+          ds.playerShield = false;
+          ds.enemyShield = false;
+          i = enemyCards.length; // 跳出循环，后续卡牌不再处理
+          break;
+        case "hot_crucible":
+          playerDmg += 2;
+          enemyDmg += 1;
+          log.push("大脚鸡用高温坩埚钳对你造成2点伤害，自己烫伤1点");
+          break;
+        case "cooling_tube":
+          var maxHP = gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6;
+          ds.enemyHP = Math.min(maxHP, ds.enemyHP + 2);
+          log.push("大脚鸡用降温冷凝管回复2点生命！");
+          break;
+        case "tell_teacher":
+          ds.playerStunned = true;
+          log.push("大脚鸡告老师了！你下回合无法行动！");
+          break;
+      }
+    }
+  }
+
+  // 大脚鸡硫酸腐蚀加成
+  if (!ds.violateRules && ds.playerSulfuric && playerDmg > 0) {
+    playerDmg++;
+    ds.playerSulfuric = false;
+    log.push("你的硫酸腐蚀触发，额外+1伤害！");
+  }
+
+  // 电线鞭挞额外伤害（不受违反规章影响，在所有卡牌结算后执行）
   if (ds.whipUsed) {
     enemyDmg++;
     ds.whipUsed = false;
     log.push("电线鞭挞额外造成1点伤害！");
   }
 
-  // === 第二步：大脚鸡出牌效果（噩梦模式多张牌） ===
-  for (var i = 0; i < enemyCards.length; i++) {
-    var enemyCard = enemyCards[i];
-    log.push("大脚鸡使用了" + (enemyCards.length > 1 ? "第" + (i+1) + "张：" : "：") + enemyCard.name);
-
-    switch (enemyCard.id) {
-      case "water_to_acid":
-        playerDmg += 1;
-        ds.playerSulfuric = true;
-        log.push("大脚鸡对你造成1点伤害，附加硫酸腐蚀！");
-        break;
-      case "alcohol_bomb":
-        playerDmg += 3;
-        log.push("大脚鸡引发大爆炸！造成3点伤害！");
-        break;
-      case "heat_tube":
-        playerDmg += 1;
-        log.push("大脚鸡用热蒸汽造成1点伤害");
-        break;
-      case "goggles":
-        ds.enemyShield = true;
-        log.push("大脚鸡佩戴护目镜，减少1点伤害");
-        break;
-      case "water_wash":
-        ds.enemyHP = Math.min(gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6, ds.enemyHP + 1);
-        ds.enemySulfuric = false;
-        log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
-        break;
-      case "shield":
-        ds.enemyShield = "full";
-        log.push("大脚鸡展开防爆盾牌！抵挡全部伤害！");
-        break;
-      case "beaker":
-        playerDmg += 1;
-        log.push("大脚鸡投掷烧杯造成1点伤害");
-        break;
-      case "co2":
-        playerDmg += 1;
-        enemyDmg += 1;
-        log.push("大脚鸡释放二氧化碳，双方各受1点伤害");
-        break;
+  // 寻龙尺效果（不受违反规章影响，在所有卡牌结算后执行）
+  if (ds.dowsingUsed) {
+    if (ds.dowsingEffect === "damage") {
+      enemyDmg++;
+      log.push("寻龙尺感应到力量，对敌方额外造成1点伤害！");
+    } else {
+      if (ds.playerShield !== "full") {
+        ds.playerShield = true;
+      }
+      log.push("寻龙尺形成保护罩，减少1点伤害！");
     }
-  }
-
-  // 大脚鸡硫酸腐蚀加成
-  if (ds.playerSulfuric && playerDmg > 0) {
-    playerDmg++;
-    ds.playerSulfuric = false;
-    log.push("你的硫酸腐蚀触发，额外+1伤害！");
+    ds.dowsingUsed = false;
+    ds.dowsingEffect = null;
   }
 
   // === 第三步：统一结算护盾/护目镜 ===
@@ -2074,6 +2250,8 @@ function playChemDuelCard(playerCard, enemyCards) {
   if (ds.enemyHP <= 0 && ds.playerHP <= 0) {
     resultHTML += "<div style=\"text-align:center;color:#ffc832;font-size:16px;font-weight:700;margin-top:8px;\">同归于尽！</div>";
     gameOver = true;
+    gameState.lastDuelEnemyHP = ds.enemyHP;
+    gameState.lastDuelNightmare = gameState.chemDifficulty === "nightmare";
     setTimeout(function() { chemDuelState = null; renderScene("chem_lab_lose"); }, 2000);
   } else if (ds.enemyHP <= 0) {
     resultHTML += "<div style=\"text-align:center;color:#5cb85c;font-size:16px;font-weight:700;margin-top:8px;\">你战胜了大脚鸡！</div>";
@@ -2082,6 +2260,8 @@ function playChemDuelCard(playerCard, enemyCards) {
   } else if (ds.playerHP <= 0) {
     resultHTML += "<div style=\"text-align:center;color:#ff4444;font-size:16px;font-weight:700;margin-top:8px;\">你被大脚鸡击败了！</div>";
     gameOver = true;
+    gameState.lastDuelEnemyHP = ds.enemyHP;
+    gameState.lastDuelNightmare = gameState.chemDifficulty === "nightmare";
     setTimeout(function() { chemDuelState = null; renderScene("chem_lab_lose"); }, 2000);
   }
 
@@ -2157,6 +2337,49 @@ function renderChemWinSequence() {
       }, 2000);
     }
   }, 200);
+}
+
+// 化学决斗失败序列：噩梦模式根据大脚鸡剩余血量显示不同对话
+function renderChemLoseSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+
+  var isNightmare = gameState.lastDuelNightmare;
+  var enemyHP = gameState.lastDuelEnemyHP;
+  var scene = SCENE_CONFIG["chem_lab_lose"];
+
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = isNightmare ? "a9759ba712a67c0d0af129fac5d69e0e.jpg" : scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 噩梦模式：根据大脚鸡剩余血量选择对话
+  var desc;
+  if (isNightmare) {
+    if (enemyHP > 10) {
+      desc = "大脚鸡：你这家伙，是在给我挠痒痒吗";
+    } else if (enemyHP > 5) {
+      desc = "大脚鸡：亚嘞亚嘞，这家伙，为什么要挑战我呢";
+    } else {
+      desc = "大脚鸡：真是可敬的对手呢....我永远也不会忘掉你吧";
+    }
+  } else {
+    desc = scene.desc;
+  }
+
+  // 解锁成就
+  unlockAchievement("lost_to_bigfoot");
+
+  // 打字机播放对话，然后自动跳转
+  startTypewriter(desc, null, "lab_1f", null);
 }
 
 // 开始打字机
