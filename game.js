@@ -34,6 +34,7 @@ var ITEM_CONFIG = {
 var ACHIEVEMENT_CONFIG = {
   flying_pig:   { id: "flying_pig",   name: "飞天之猪", desc: "见证了神秘猪猪拉屎之地", icon: "🐷" },
   hachi_king:   { id: "hachi_king",   name: "哈气之王", desc: "在御前决斗中击败了哈基高大师", icon: "👑" },
+  hachi_emperor:{ id: "hachi_emperor",name: "哈气之皇", desc: "击杀困难哈基高", icon: "👑" },
   not_strong:   { id: "not_strong",   name: "你还不够强！", desc: "在御前决斗中败给了哈基高大师", icon: "💔" },
   retry_courage:{ id: "retry_courage",name: "再来一次的勇气", desc: "在御前决斗中落败仍然不认输", icon: "💪" },
   drunk_dream:  { id: "drunk_dream",  name: "疑似杭二新生", desc: "这家伙在幻想些什么呢", icon: "🤔" },
@@ -304,8 +305,16 @@ var SCENE_CONFIG = {
   hermit_duel_6: {
     id: "hermit_duel_6", name: "一位隐士的地方", img: "walking2.png",
     desc: "哈基高：那就来较量一场吧，我会赌上哈气大师之名的",
-    autoNext: "hermit_duel_7",
+    autoNext: "hermit_difficulty",
     buttons: []
+  },
+  hermit_difficulty: {
+    id: "hermit_difficulty", name: "御前决斗", img: "walking2.png",
+    desc: "选择决斗难度",
+    buttons: [
+      { text: "普通（1点血量，一击制胜）", target: "hermit_duel_7", setDifficulty: "normal" },
+      { text: "困难（2点血量，每次攻击消耗1点）", target: "hermit_duel_7", setDifficulty: "hard" },
+    ]
   },
   hermit_duel_7: {
     id: "hermit_duel_7", name: "一位隐士的地方", img: "walking2.png",
@@ -933,8 +942,8 @@ var SCENE_CONFIG = {
     buttons: [
       { text: "简单（大脚鸡4点血）", action: "chem_lab_battle_intro", setDifficulty: "easy" },
       { text: "普通（大脚鸡6点血）", action: "chem_lab_battle_intro", setDifficulty: "normal" },
-      { text: "困难（大脚鸡10点血）", action: "chem_lab_battle_intro", setDifficulty: "hard" },
-      { text: "噩梦（大脚鸡15点血，每回合两张牌）", action: "chem_lab_battle_intro", setDifficulty: "nightmare" },
+      { text: "困难（大脚鸡15点血）", action: "chem_lab_battle_intro", setDifficulty: "hard" },
+      { text: "噩梦（大脚鸡25点血，每回合两张牌）", action: "chem_lab_battle_intro", setDifficulty: "nightmare" },
     ]
   },
   chem_lab_battle_intro: {
@@ -1005,6 +1014,7 @@ var gameState = {
   toiletStayCount: 0,        // 厕所蹲坑次数
   confuciusDifficulty: "normal", // 孔子像吃草难度：normal/hard
   chemDifficulty: "normal",  // 化学决斗难度：easy/normal/hard/nightmare
+  hachiDifficulty: "normal", // 哈基高决斗难度：normal/hard
   lastDuelEnemyHP: 0,        // 上一场决斗大脚鸡剩余血量
   lastDuelNightmare: false,  // 上一场决斗是否为噩梦模式
 };
@@ -1013,6 +1023,7 @@ var gameState = {
 var battleState = {
   playerKi: 0,      // 玩家气
   hachiKi: 0,       // 哈基高气
+  hachiHP: 0,       // 哈基高血量（困难模式2点）
   inBattle: false,  // 是否在战斗中
 };
 
@@ -1422,6 +1433,8 @@ function renderScene(sceneId) {
         cancelAnimationFrame(pendingImageRAF);
         pendingImageRAF = null;
       }
+      // 预加载图片到缓存，避免 rAF 回调时图片未就绪导致概率不显示
+      (new Image()).src = scene.img;
       // 单帧 rAF 后设置新图片，保证浏览器先完成清空渲染再加载新图
       pendingImageRAF = requestAnimationFrame(function() {
         pendingImageRAF = null;
@@ -1878,7 +1891,7 @@ function startChemDuel() {
 
   chemDuelState = {
     playerHP: 6,
-    enemyHP: gameState.chemDifficulty === "easy" ? 4 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "nightmare" ? 15 : 6,
+    enemyHP: gameState.chemDifficulty === "easy" ? 5 : gameState.chemDifficulty === "hard" ? 15 : gameState.chemDifficulty === "nightmare" ? 25 : 8,
     playerSulfuric: false,  // 硫酸腐蚀debuff
     playerShield: false,    // 护目镜减伤
     enemyShield: false,
@@ -1909,11 +1922,12 @@ function renderChemDuelRound() {
   ds.dowsingEffect = null;
   ds.violateRules = false;
 
-  // 大脚鸡随机选牌（噩梦模式2张）
+  // 大脚鸡随机选牌（噩梦模式2张，且不抽违反实验规章）
   var isNightmare = gameState.chemDifficulty === "nightmare";
-  var enemyCards = [CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)]];
+  var enemyDeck = isNightmare ? CHEM_CARDS.filter(function(c) { return c.id !== "violate_rules"; }) : CHEM_CARDS;
+  var enemyCards = [enemyDeck[Math.floor(Math.random() * enemyDeck.length)]];
   if (isNightmare) {
-    var card2 = CHEM_CARDS[Math.floor(Math.random() * CHEM_CARDS.length)];
+    var card2 = enemyDeck[Math.floor(Math.random() * enemyDeck.length)];
     enemyCards.push(card2);
   }
 
@@ -1921,8 +1935,8 @@ function renderChemDuelRound() {
   if (ds.playerStunned) {
     ds.playerStunned = false;
     var stunHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
-      + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + "</span>"
-      + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + "</span>"
+      + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + " " + ds.enemyHP + "</span>"
+      + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + " " + ds.playerHP + "</span>"
       + "</div>"
       + "<div style=\"text-align:center;color:#ff4444;font-size:15px;margin:8px 0;\">你被老师训话了，本回合无法行动！</div>"
       + "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 大脚鸡行动中...</div>";
@@ -1940,15 +1954,21 @@ function renderChemDuelRound() {
     return;
   }
 
-  // 抽3张牌
+  // 抽3张牌（降低防爆盾牌出现概率：50%概率被替换为其他牌）
   var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
   var playerHand = shuffled.slice(0, 3);
+  for (var j = 0; j < playerHand.length; j++) {
+    if (playerHand[j].id === "shield" && Math.random() < 0.5) {
+      var nonShieldCards = CHEM_CARDS.filter(function(c) { return c.id !== "shield"; });
+      playerHand[j] = nonShieldCards[Math.floor(Math.random() * nonShieldCards.length)];
+    }
+  }
 
   // 渲染HP
   var nightmareLabel = isNightmare ? " <span style=\"color:#ff4444;font-size:11px;\">噩梦</span>" : "";
   var hpHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
-    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + nightmareLabel + "</span>"
-    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + "</span>"
+    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + " " + ds.enemyHP + nightmareLabel + "</span>"
+    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + " " + ds.playerHP + "</span>"
     + "</div>";
   if (ds.playerSulfuric) {
     hpHTML += "<div style=\"text-align:center;color:#ff6600;font-size:12px;margin-bottom:4px;\">⚠ 硫酸腐蚀：下次受伤+1</div>";
@@ -2139,7 +2159,7 @@ function playChemDuelCard(playerCard, enemyCards) {
           log.push("大脚鸡佩戴护目镜，减少1点伤害");
           break;
         case "water_wash":
-          ds.enemyHP = Math.min(gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6, ds.enemyHP + 1);
+          ds.enemyHP = Math.min(gameState.chemDifficulty === "nightmare" ? 25 : gameState.chemDifficulty === "hard" ? 15 : gameState.chemDifficulty === "easy" ? 5 : 8, ds.enemyHP + 1);
           ds.enemySulfuric = false;
           log.push("大脚鸡回复1点生命，去除硫酸腐蚀");
           break;
@@ -2173,7 +2193,7 @@ function playChemDuelCard(playerCard, enemyCards) {
           log.push("大脚鸡用高温坩埚钳对你造成2点伤害，自己烫伤1点");
           break;
         case "cooling_tube":
-          var maxHP = gameState.chemDifficulty === "nightmare" ? 15 : gameState.chemDifficulty === "hard" ? 10 : gameState.chemDifficulty === "easy" ? 4 : 6;
+          var maxHP = gameState.chemDifficulty === "nightmare" ? 25 : gameState.chemDifficulty === "hard" ? 15 : gameState.chemDifficulty === "easy" ? 5 : 8;
           ds.enemyHP = Math.min(maxHP, ds.enemyHP + 2);
           log.push("大脚鸡用降温冷凝管回复2点生命！");
           break;
@@ -2238,8 +2258,8 @@ function playChemDuelCard(playerCard, enemyCards) {
 
   // 显示回合结果
   var resultHTML = "<div id=\"chem-duel-hp\" style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
-    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(Math.max(0, ds.enemyHP)) + "</span>"
-    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(Math.max(0, ds.playerHP)) + "</span>"
+    + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(Math.max(0, ds.enemyHP)) + " " + Math.max(0, ds.enemyHP) + "</span>"
+    + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(Math.max(0, ds.playerHP)) + " " + Math.max(0, ds.playerHP) + "</span>"
     + "</div>"
     + "<div style=\"font-size:12px;color:#c0c8d8;line-height:1.6;margin:8px 0;\">"
     + log.map(function(l) { return "<div>" + l + "</div>"; }).join("")
@@ -2513,6 +2533,9 @@ function handleAction(btn) {
 
   // 跳转场景（如果target与当前相同则刷新当前场景）
   if (btn.target) {
+    if (btn.setDifficulty) {
+      gameState.hachiDifficulty = btn.setDifficulty;
+    }
     renderScene(btn.target);
   }
   // action 跳转（同 target）
@@ -2732,6 +2755,7 @@ function renderBattle() {
   battleState.inBattle = true;
   battleState.playerKi = 0;
   battleState.hachiKi = 0;
+  battleState.hachiHP = gameState.hachiDifficulty === "hard" ? 2 : 1;
 
   var descArea = document.getElementById("description-area");
   var actionsArea = document.getElementById("actions-area");
@@ -2768,17 +2792,20 @@ function renderBattle() {
   ruleBtn.style.cssText = "background:linear-gradient(135deg,#555,#444);color:#aaa;";
   ruleBtn.textContent = "📖 查看规则";
   ruleBtn.addEventListener("click", function() {
-    showPopupModal("【御前决斗规则】<br><br>⚔️ 哈气：消耗1气攻击对手，对手未格挡则出局<br>🛡️ 格挡：免消耗，抵挡对手的哈气<br>💨 呼吸：积累1气<br><br>哈基高会随机选择行动，但没气时不会哈气。");
+    showPopupModal("【御前决斗规则】<br><br>⚔️ 哈气：消耗1气攻击对手，对手未格挡则造成伤害<br>🛡️ 格挡：免消耗，抵挡对手的哈气<br>💨 呼吸：积累1气<br><br>哈基高会随机选择行动，但没气时不会哈气。<br>" + (gameState.hachiDifficulty === "hard" ? "困难模式：哈基高拥有2点血量，每次攻击消耗1点。" : "普通模式：一击制胜！"));
   });
   actionsArea.appendChild(ruleBtn);
 }
 
 function updateBattleHUD() {
   var descArea = document.getElementById("description-area");
+  var isHard = gameState.hachiDifficulty === "hard";
+  var hpDisplay = isHard ? '<div class="battle-ki">哈基高血量：<span class="ki-num" style="color:#ff6b6b;">' + "♥".repeat(battleState.hachiHP) + '</span></div>' : '';
   descArea.innerHTML =
     '<div class="battle-hud">' +
     '<div class="battle-ki">你的气：<span class="ki-num">' + battleState.playerKi + '</span></div>' +
     '<div class="battle-ki">哈基高的气：<span class="ki-num">' + battleState.hachiKi + '</span></div>' +
+    hpDisplay +
     '<div class="battle-round">选择你的行动</div>' +
     '</div>';
   descArea.onclick = null;
@@ -2819,16 +2846,30 @@ function handleBattleAction(action) {
     if (hachiAction === "格挡") {
       resultMsg += "哈基高格挡了你的攻击！毫发无伤。";
     } else {
-      resultMsg += "哈基高被你的哈气击中！哈基高出局！";
-      battleState.inBattle = false;
-      showPopupModal(resultMsg);
-      setTimeout(function() {
-        unlockAchievement("hachi_king");
-        var achCfg = ACHIEVEMENT_CONFIG["hachi_king"];
-        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
-        setTimeout(function() { renderScene("duel_victory"); }, 400);
-      }, 400);
-      return;
+      battleState.hachiHP--;
+      if (battleState.hachiHP <= 0) {
+        resultMsg += "哈基高被你的哈气击中！哈基高出局！";
+        battleState.inBattle = false;
+        showPopupModal(resultMsg);
+        setTimeout(function() {
+          unlockAchievement("hachi_king");
+          var achCfg = ACHIEVEMENT_CONFIG["hachi_king"];
+          showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
+          if (gameState.hachiDifficulty === "hard") {
+            setTimeout(function() {
+              unlockAchievement("hachi_emperor");
+              var achCfg2 = ACHIEVEMENT_CONFIG["hachi_emperor"];
+              showPopupModal("成就解锁：" + achCfg2.icon + " " + achCfg2.name + "<br><small>" + achCfg2.desc + "</small>");
+              setTimeout(function() { renderScene("duel_victory"); }, 400);
+            }, 400);
+          } else {
+            setTimeout(function() { renderScene("duel_victory"); }, 400);
+          }
+        }, 400);
+        return;
+      } else {
+        resultMsg += "哈基高被你的哈气击中！剩余血量：" + "♥".repeat(battleState.hachiHP) + "（" + battleState.hachiHP + "/" + (gameState.hachiDifficulty === "hard" ? 2 : 1) + "）";
+      }
     }
   }
 
