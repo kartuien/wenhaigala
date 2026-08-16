@@ -2868,17 +2868,17 @@ function renderSandboxActions() {
   actionsArea.appendChild(defendBtn);
 
   // 神秘药剂
-  if (hasItem("mystery_potion") && ss.potionCooldown <= 0) {
-    var potionBtn = document.createElement("button");
-    potionBtn.className = "action-btn sandbox-action-btn";
-    potionBtn.style.background = "rgba(180, 100, 255, 0.15)";
-    potionBtn.style.borderColor = "rgba(180, 100, 255, 0.5)";
-    potionBtn.style.color = "#b464ff";
-    potionBtn.textContent = "药剂";
-    potionBtn.title = "使用神秘药剂（眩晕企鹅狗1回合，冷却3回合）";
-    potionBtn.onclick = function() { doSandboxAction("potion"); };
-    actionsArea.appendChild(potionBtn);
-  }
+  var hasPotion = hasItem("mystery_potion") && ss.potionCooldown <= 0;
+  var potionBtn = document.createElement("button");
+  potionBtn.className = "action-btn sandbox-action-btn";
+  potionBtn.style.background = "rgba(180, 100, 255, 0.15)";
+  potionBtn.style.borderColor = "rgba(180, 100, 255, 0.5)";
+  potionBtn.style.color = "#b464ff";
+  potionBtn.textContent = hasPotion ? "药剂" : (ss.potionCooldown > 0 ? "冷却" + ss.potionCooldown : "无药剂");
+  potionBtn.title = hasPotion ? "使用神秘药剂（眩晕企鹅狗1回合，冷却3回合）" : "需要神秘药剂";
+  if (!hasPotion) potionBtn.disabled = true;
+  potionBtn.onclick = function() { doSandboxAction("potion"); };
+  actionsArea.appendChild(potionBtn);
 }
 
 function showSandboxTargetSelect(cells, action) {
@@ -2983,17 +2983,24 @@ function doSandboxAction(action, r, c) {
     return;
   }
 
+  // 重置 enemyDefend（玩家已行动完毕，消耗上回合企鹅狗的防御）
+  ss.enemyDefend = false;
+
   // 企鹅狗行动
+  var enemyLogs = [];
   if (!ss.enemyStunned) {
-    sandboxEnemyAI();
+    enemyLogs.push(sandboxEnemyAI());
+    // 困难模式：企鹅狗每回合两次行动
+    if (ss.difficulty === "hard") {
+      enemyLogs.push(sandboxEnemyAI());
+    }
   } else {
     ss.enemyStunned = false;
   }
 
-  // 冷却减1
+  // 冷却减1，重置 playerDefend（企鹅狗已行动完毕，消耗上回合玩家的防御）
   if (ss.potionCooldown > 0) ss.potionCooldown--;
   ss.playerDefend = false;
-  ss.enemyDefend = false;
 
   // 检查企鹅狗胜利
   if (ss.enemyScore >= winScore) {
@@ -3006,12 +3013,28 @@ function doSandboxAction(action, r, c) {
 
   updateSandboxHUD();
   renderSandboxActions();
+  // 显示玩家行动弹窗
   if (log) {
     var toast = document.createElement("div");
     toast.className = "toast show";
     toast.textContent = log;
     document.body.appendChild(toast);
     setTimeout(function() { toast.remove(); }, 2000);
+  }
+  // 显示企鹅狗行动弹窗（延迟500ms）
+  for (var ei = 0; ei < enemyLogs.length; ei++) {
+    if (enemyLogs[ei]) {
+      (function(msg, delay) {
+        setTimeout(function() {
+          var eToast = document.createElement("div");
+          eToast.className = "toast show";
+          eToast.style.background = "rgba(255,107,107,0.9)";
+          eToast.textContent = msg;
+          document.body.appendChild(eToast);
+          setTimeout(function() { eToast.remove(); }, 2000);
+        }, delay);
+      })(enemyLogs[ei], 500 + ei * 600);
+    }
   }
 }
 
@@ -3023,7 +3046,7 @@ function sandboxEnemyAI() {
   // 优先防御如果玩家接近胜利
   if (ss.playerScore >= 7 && Math.random() < 0.4 && hasAdj) {
     ss.enemyDefend = true;
-    return;
+    return "企鹅狗摆出防御架势！";
   }
 
   // 随机选择行动
@@ -3049,9 +3072,11 @@ function sandboxEnemyAI() {
     }
     if (ss.board[pick[0]][pick[1]] === "player" && ss.playerDefend) {
       ss.enemyScore = Math.max(0, ss.enemyScore - 1);
+      return "企鹅狗试图夺取你的格子，但你防御了！企鹅狗-1分";
     } else {
       ss.board[pick[0]][pick[1]] = "enemy";
       ss.enemyScore++;
+      return "企鹅狗夺取了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
     }
   } else if (roll < 0.8) {
     // 精摆（概率提高：从30%提高到35%）
@@ -3065,10 +3090,13 @@ function sandboxEnemyAI() {
       var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
       ss.refined[pick[0] + "," + pick[1]] = true;
       ss.enemyScore++;
+      return "企鹅狗精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
     }
+    return "企鹅狗无所事事...";
   } else if (hasAdj) {
     // 防御（仅在接壤时使用）
     ss.enemyDefend = true;
+    return "企鹅狗摆出防御架势！";
   } else {
     // 无接壤且没抽到精摆，强制精摆
     var enemyCells = [];
@@ -3081,7 +3109,9 @@ function sandboxEnemyAI() {
       var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
       ss.refined[pick[0] + "," + pick[1]] = true;
       ss.enemyScore++;
+      return "企鹅狗精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
     }
+    return "企鹅狗无所事事...";
   }
 }
 

@@ -474,10 +474,10 @@ body {
 
 /* 沙盘行动按钮 - 3个并排 */
 .sandbox-action-btn {
-  flex: 0 0 calc(33.33% - 4px);
-  max-width: calc(33.33% - 4px);
-  padding: 10px 6px !important;
-  font-size: 13px !important;
+  flex: 0 0 calc(25% - 5px);
+  max-width: calc(25% - 5px);
+  padding: 10px 4px !important;
+  font-size: 12px !important;
   letter-spacing: 0.5px !important;
   white-space: nowrap;
   overflow: hidden;
@@ -529,8 +529,8 @@ body {
   display: flex; flex-wrap: wrap; gap: 4px;
 }
 .portal-game-btn {
-  display: flex; align-items: center; gap: 4px;
-  padding: 6px 10px; font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; gap: 3px;
+  padding: 4px 6px; font-size: 11px; font-weight: 500;
   color: rgba(232,213,183,0.85);
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(232,213,183,0.1);
@@ -542,7 +542,7 @@ body {
   border-color: rgba(232,213,183,0.25);
 }
 .portal-game-btn .game-icon {
-  font-size: 14px; flex-shrink: 0;
+  font-size: 12px; flex-shrink: 0;
 }
 
 /* ===== Toast 提示 ===== */
