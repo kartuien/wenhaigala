@@ -1035,6 +1035,10 @@ var battleState = {
   hachiKi: 0,       // 哈基高气
   hachiHP: 0,       // 哈基高血量（困难模式2点）
   inBattle: false,  // 是否在战斗中
+  round: 1,                    // 当前回合数
+  lastPlayerAction: null,      // 玩家上回合行动（趁虚而入判断用）
+  hachiPlannedAction: null,    // 哈基高本回合预定行动（HUD倾向提示用）
+  hachiMindRead: false,        // 困难模式：本回合是否触发读心
 };
 
 // 检查是否有某道具
@@ -1045,6 +1049,47 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.76.94", date: "2026-08-16", items: [
+    "哈基高也能解放誓约胜利之哈：蓄满3气后按局势概率发动，破盾——无视玩家格挡直接命中",
+    "新增双誓约对轰：双方同回合释放誓约胜利之哈会相互抵消，气尽数耗散——用你的誓约对冲它的誓约！",
+    "玩家0气且哈基高蓄满时解放概率更高（趁虚而入+15%，封顶75%）",
+    "HUD新增红色脉冲警告：哈基高气息蓄满时提示誓约随时降临；其发动当回合必显准确预警",
+    "困难模式读心强化：看穿玩家格挡/呼吸且气已蓄满时，直接解放誓约反制",
+    "规则说明更新：补充誓约胜利之哈与对轰反制手段",
+  ]},
+  { version: "v1.5.76.93", date: "2026-08-16", items: [
+    "御前决斗新增蓄力爆发：积满3气解锁'誓约胜利之哈'，造成2点伤害但消耗全部气",
+    "哈基高AI感知3气威胁：玩家蓄满气时格挡概率额外+15%（封顶80%）",
+    "御前决斗新增战斗特效：哈气命中闪白震动、玩家受击剧震、读心反制紫闪",
+    "哈基高台词气泡化：台词以气泡叠在图片区展示，结算弹窗延后弹出",
+    "化学决斗新增换牌机制：每回合可弃掉全部手牌重抽1次",
+    "化学决斗新增元素连击：硫酸+酒精连锁反应、热蒸汽+烧杯骤冷碎裂、CO2+热蒸汽窒息加深，均额外+1伤害",
+    "手牌中存在可触发combo的牌时显示连击提示，换牌后实时刷新",
+    "大脚鸡AI性格随机化：每局随机攻击型/防御型/捣乱型，按性格加权出牌并在HUD显示",
+  ]},
+  { version: "v1.5.76.92", date: "2026-08-16", items: [
+    "哈基高AI升级为策略型：危险预警——玩家有气时格挡概率55%起，玩家0气时绝不格挡趁机蓄力",
+    "趁虚而入：玩家刚耗光气且哈基高有气时，哈气概率大幅提高（最高75%）",
+    "困难模式读心：20%概率看穿玩家本回合行动并针对性反制，体现大师风范",
+    "台词情境化：格挡成功/扑空/进攻/蓄力/读心各有不同台词池，危险期格挡说'亚嘞亚嘞，被我看穿了呢'",
+    "战斗HUD新增回合数显示与哈基高行动倾向提示（读心时显示'深不可测'）",
+  ]},
+  { version: "v1.5.76.91", date: "2026-08-16", items: [
+    "沙盘对决规则重构：分数改为实时计算，地块1分/高价值2分/精摆翻倍",
+    "新增高价值地块：每局随机2个★地，本体2分，精摆后4分",
+    "新增独立'夺取'行动：抢夺接壤敌方格并摧毁其精摆，与铺设分离",
+    "防御惩罚改为'震碎'：夺取方失败时随机失去一块领地",
+    "棋盘尺寸调整：普通4×4（10分获胜），困难4×5（15分获胜）",
+    "企鹅狗AI性格随机化：每局随机激进夺地或保守精摆",
+    "困难AI改为策略型：优先抢离玩家近的格子阻止扩张，按收益选夺取目标",
+    "30回合上限，超时按分数判定，平局判企鹅狗胜",
+    "新增开局规则说明弹窗、战斗日志面板、分数进度条、回合数显示",
+    "精摆格金色发光边框，格子显示实时价值，夺取时闪烁动画",
+    "新增'退出'按钮，中途可放弃沙盘对决",
+    "精选小游戏移至梦境裂隙，背包新增控制台可输入道具名直接获取",
+    "修复沙盘底部按钮被挤出屏幕无法点击的问题，格子缩小为42px",
+    "企鹅狗行动弹窗提示（红色底），困难模式移除双倍行动机制",
+  ]},
   { version: "v1.5.76.78", date: "2026-08-16", items: [
     "实验楼二楼开放：进入心理教室往里看→遇见企鹅狗→沙盘对决",
     "新增沙盘对决游戏：3×4棋盘回合制对战，含铺设/精摆/防御/神秘药剂行动",
@@ -1934,6 +1979,46 @@ var CHEM_CARDS = [
 
 var chemDuelState = null;
 
+// ===== 大脚鸡性格AI配置 =====
+// 卡牌分类（供性格权重选牌用）
+var CHEM_CARD_CATEGORIES = {
+  attack:  ["water_to_acid", "alcohol_bomb", "heat_tube", "beaker", "co2", "hot_crucible"],
+  defense: ["goggles", "shield"],
+  heal:    ["water_wash", "cooling_tube"],
+  control: ["tell_teacher"],
+  chaos:   ["violate_rules"],
+};
+// 三种性格：aggressive攻击型 / defensive防御型 / chaos捣乱型
+var ENEMY_PERSONA_CONFIG = {
+  aggressive: { hint: "🐔 大脚鸡气势汹汹，攻势凌厉！",     weights: { attack: 65, defense: 15, heal: 10, control: 5, chaos: 5 } },
+  defensive:  { hint: "🐔 大脚鸡摆出防御架势，稳扎稳打！", weights: { attack: 25, defense: 35, heal: 25, control: 10, chaos: 5 } },
+  chaos:      { hint: "🐔 大脚鸡疯疯癫癫，不知想干什么……", weights: { attack: 30, defense: 10, heal: 10, control: 10, chaos: 40 } },
+};
+
+// 按当前性格加权选一张大脚鸡的牌（excludeChaos=true时排除违反实验规章）
+function pickEnemyCard(excludeChaos) {
+  var persona = ENEMY_PERSONA_CONFIG[chemDuelState.enemyPersona];
+  var w = persona.weights;
+  var pool = [
+    ["attack", w.attack], ["defense", w.defense], ["heal", w.heal],
+    ["control", w.control], ["chaos", excludeChaos ? 0 : w.chaos],
+  ];
+  var total = 0;
+  for (var i = 0; i < pool.length; i++) total += pool[i][1];
+  var r = Math.random() * total;
+  var chosenCat = "attack";
+  for (var j = 0; j < pool.length; j++) {
+    if (r < pool[j][1]) { chosenCat = pool[j][0]; break; }
+    r -= pool[j][1];
+  }
+  var ids = CHEM_CARD_CATEGORIES[chosenCat];
+  var cardId = ids[Math.floor(Math.random() * ids.length)];
+  for (var k = 0; k < CHEM_CARDS.length; k++) {
+    if (CHEM_CARDS[k].id === cardId) return CHEM_CARDS[k];
+  }
+  return CHEM_CARDS[0];
+}
+
 function startChemDuel() {
   var descArea = document.getElementById("description-area");
   var actionsArea = document.getElementById("actions-area");
@@ -1957,6 +2042,9 @@ function startChemDuel() {
     playerStunned: false,   // 玩家被眩晕（下回合无法行动）
     enemyStunned: false,    // 敌方被眩晕（下回合无法行动）
     turn: 0,
+    enemyPersona: ["aggressive", "defensive", "chaos"][Math.floor(Math.random() * 3)], // 大脚鸡性格（每局随机）
+    lastPlayerCardId: null,   // 玩家上回合使用的卡牌（元素连击判定用）
+    redrewThisTurn: false,    // 本回合是否已换牌
   };
 
   descArea.innerHTML = "";
@@ -1975,15 +2063,15 @@ function renderChemDuelRound() {
   ds.dowsingUsed = false;
   ds.dowsingEffect = null;
   ds.violateRules = false;
+  ds.redrewThisTurn = false;
 
-  // 大脚鸡随机选牌（噩梦模式2张，且不抽违反实验规章）
+  // 大脚鸡按性格加权选牌（噩梦模式2张，且不抽违反实验规章）
   var isNightmare = gameState.chemDifficulty === "nightmare";
-  var enemyDeck = isNightmare ? CHEM_CARDS.filter(function(c) { return c.id !== "violate_rules"; }) : CHEM_CARDS;
-  var enemyCards = [enemyDeck[Math.floor(Math.random() * enemyDeck.length)]];
+  var enemyCards = [pickEnemyCard(isNightmare)];
   if (isNightmare) {
-    var card2 = enemyDeck[Math.floor(Math.random() * enemyDeck.length)];
-    enemyCards.push(card2);
+    enemyCards.push(pickEnemyCard(true));
   }
+  var personaHint = ENEMY_PERSONA_CONFIG[ds.enemyPersona].hint;
 
   // 玩家被眩晕：跳过出牌，敌方直接行动
   if (ds.playerStunned) {
@@ -1992,6 +2080,7 @@ function renderChemDuelRound() {
       + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + " " + ds.enemyHP + "</span>"
       + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + " " + ds.playerHP + "</span>"
       + "</div>"
+      + "<div style=\"text-align:center;color:#ffa940;font-size:12px;margin-bottom:2px;\">" + personaHint + "</div>"
       + "<div style=\"text-align:center;color:#ff4444;font-size:15px;margin:8px 0;\">你被老师训话了，本回合无法行动！</div>"
       + "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 大脚鸡行动中...</div>";
     descArea.innerHTML = stunHTML;
@@ -2008,40 +2097,103 @@ function renderChemDuelRound() {
     return;
   }
 
-  // 抽3张牌
-  var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
-  var playerHand = shuffled.slice(0, 3);
+  // 抽3张牌（drawHand独立成函数，供换牌机制重抽）
+  function drawHand() {
+    var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
+    return shuffled.slice(0, 3);
+  }
+  var playerHand = drawHand();
+  var handHas = function(id) {
+    return playerHand.some(function(c) { return c.id === id; });
+  };
 
-  // 渲染HP
+  // 渲染HP + 性格提示 + 连击提示
   var nightmareLabel = isNightmare ? " <span style=\"color:#ff4444;font-size:11px;\">噩梦</span>" : "";
   var hpHTML = "<div style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
     + "<span style=\"color:#ff6b6b;\">大脚鸡 HP: " + "♥".repeat(ds.enemyHP) + " " + ds.enemyHP + nightmareLabel + "</span>"
     + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + " " + ds.playerHP + "</span>"
     + "</div>";
+  hpHTML += "<div style=\"text-align:center;color:#ffa940;font-size:12px;margin-bottom:2px;\">" + personaHint + "</div>";
   if (ds.playerSulfuric) {
     hpHTML += "<div style=\"text-align:center;color:#ff6600;font-size:12px;margin-bottom:4px;\">⚠ 硫酸腐蚀：每次受伤+1</div>";
   }
+  // 元素连击提示：手牌中存在可触发combo的牌时给出暗示（换牌后实时刷新）
+  var comboHint = "";
+  if (ds.enemySulfuric && handHas("alcohol_bomb")) {
+    comboHint = "💡 敌方带着硫酸腐蚀——酒精炸弹会引发连锁反应！";
+  } else if (ds.lastPlayerCardId === "heat_tube" && handHas("beaker")) {
+    comboHint = "💡 试管余温未散——投掷烧杯会骤冷碎裂！";
+  } else if (ds.lastPlayerCardId === "co2" && handHas("heat_tube")) {
+    comboHint = "💡 空气中CO2浓度很高——热蒸汽会令人窒息！";
+  }
+  hpHTML += "<div id=\"chem-combo-hint\" style=\"text-align:center;color:#9fd6ff;font-size:12px;margin-bottom:4px;\">" + comboHint + "</div>";
   hpHTML += "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 选择一张卡牌</div>";
   descArea.innerHTML = hpHTML;
 
-  // 渲染卡牌
+  // 渲染卡牌（手牌放在独立容器中，换牌时只替换容器内容）
   actionsArea.innerHTML = "";
   actionsArea.style.display = "flex";
   actionsArea.style.flexDirection = "column";
   actionsArea.style.gap = "6px";
 
-  playerHand.forEach(function(card) {
-    var btn = document.createElement("button");
-    btn.className = "action-btn";
-    btn.style.textAlign = "left";
-    btn.style.padding = "8px 12px";
-    btn.style.fontSize = "13px";
-    btn.innerHTML = "<span style=\"font-size:16px;\">" + card.icon + "</span> <b>" + card.name + "</b><br><span style=\"font-size:11px;color:#aaa;\">" + card.desc + "</span>";
-    btn.onclick = function() {
-      playChemDuelCard(card, enemyCards);
-    };
-    actionsArea.appendChild(btn);
-  });
+  var handDiv = document.createElement("div");
+  handDiv.id = "chem-hand";
+  handDiv.style.display = "flex";
+  handDiv.style.flexDirection = "column";
+  handDiv.style.gap = "6px";
+  actionsArea.appendChild(handDiv);
+
+  function renderChemHand(hand) {
+    handDiv.innerHTML = "";
+    hand.forEach(function(card) {
+      var btn = document.createElement("button");
+      btn.className = "action-btn";
+      btn.style.textAlign = "left";
+      btn.style.padding = "8px 12px";
+      btn.style.fontSize = "13px";
+      btn.innerHTML = "<span style=\"font-size:16px;\">" + card.icon + "</span> <b>" + card.name + "</b><br><span style=\"font-size:11px;color:#aaa;\">" + card.desc + "</span>";
+      btn.onclick = function() {
+        playChemDuelCard(card, enemyCards);
+      };
+      handDiv.appendChild(btn);
+    });
+  }
+  renderChemHand(playerHand);
+
+  // 换牌按钮：弃掉全部手牌重抽，每回合限1次
+  var redrawBtn = document.createElement("button");
+  redrawBtn.className = "action-btn";
+  redrawBtn.id = "chem-redraw-btn";
+  redrawBtn.style.textAlign = "center";
+  redrawBtn.style.padding = "6px 12px";
+  redrawBtn.style.fontSize = "12px";
+  redrawBtn.style.background = "rgba(159, 214, 255, 0.12)";
+  redrawBtn.style.borderColor = "rgba(159, 214, 255, 0.4)";
+  redrawBtn.style.color = "#9fd6ff";
+  redrawBtn.textContent = "🔄 换牌（弃掉全部手牌重抽，每回合限1次）";
+  redrawBtn.onclick = function() {
+    if (ds.redrewThisTurn) return;
+    ds.redrewThisTurn = true;
+    redrawBtn.disabled = true;
+    redrawBtn.style.opacity = "0.5";
+    redrawBtn.textContent = "🔄 已换牌";
+    playerHand = drawHand();
+    renderChemHand(playerHand);
+    // 刷新连击提示（基于新手牌）
+    var hintDiv = document.getElementById("chem-combo-hint");
+    if (hintDiv) {
+      var newHint = "";
+      if (ds.enemySulfuric && handHas("alcohol_bomb")) {
+        newHint = "💡 敌方带着硫酸腐蚀——酒精炸弹会引发连锁反应！";
+      } else if (ds.lastPlayerCardId === "heat_tube" && handHas("beaker")) {
+        newHint = "💡 试管余温未散——投掷烧杯会骤冷碎裂！";
+      } else if (ds.lastPlayerCardId === "co2" && handHas("heat_tube")) {
+        newHint = "💡 空气中CO2浓度很高——热蒸汽会令人窒息！";
+      }
+      hintDiv.textContent = newHint;
+    }
+  };
+  actionsArea.appendChild(redrawBtn);
 
   // 电线鞭挞按钮
   if (hasItem("wire") && !ds.whipUsed) {
@@ -2174,6 +2326,25 @@ function playChemDuelCard(playerCard, enemyCards) {
     log.push("敌方硫酸腐蚀触发，额外+1伤害！");
   }
 
+  // === 元素连击（combo）：牌与牌之间的配合触发额外效果 ===
+  if (!ds.violateRules) {
+    // 连锁反应：敌方处于硫酸腐蚀时引爆酒精
+    if (ds.enemySulfuric && playerCard.id === "alcohol_bomb") {
+      enemyDmg += 1;
+      log.push("🔥 连锁反应！硫酸遇上酒精剧烈燃烧，额外+1伤害！");
+    }
+    // 骤冷碎裂：上回合热蒸汽加热，本回合投掷烧杯
+    if (ds.lastPlayerCardId === "heat_tube" && playerCard.id === "beaker") {
+      enemyDmg += 1;
+      log.push("❄️ 骤冷碎裂！余温未散的烧杯应声炸裂，额外+1伤害！");
+    }
+    // 窒息加深：上回合CO2浓度升高，本回合热蒸汽无处可逃
+    if (ds.lastPlayerCardId === "co2" && playerCard.id === "heat_tube") {
+      enemyDmg += 1;
+      log.push("🌫️ 窒息加深！高浓度CO2中热蒸汽令人窒息，额外+1伤害！");
+    }
+  }
+
   // === 第二步：大脚鸡出牌效果（噩梦模式多张牌） ===
   if (ds.enemyStunned) {
     ds.enemyStunned = false;
@@ -2297,6 +2468,11 @@ function playChemDuelCard(playerCard, enemyCards) {
   // === 第四步：统一扣血 ===
   ds.enemyHP -= enemyDmg;
   ds.playerHP -= playerDmg;
+
+  // 记录玩家本回合卡牌（供下回合元素连击判定；眩晕回合不计入）
+  if (playerCard.id !== "stunned") {
+    ds.lastPlayerCardId = playerCard.id;
+  }
 
   // 显示回合结果
   var resultHTML = "<div id=\"chem-duel-hp\" style=\"display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:600;\">"
@@ -2908,8 +3084,8 @@ function updateSandboxHUD(selectMode, selectAction) {
   }
 
   // 渲染棋盘（格子固定小尺寸，棋盘宽度随列数自适应）
-  var gridWidth = ss.cols * 50 + (ss.cols - 1) * 4;
-  html += '<div class="sandbox-grid" id="sandbox-grid" style="grid-template-columns: repeat(' + ss.cols + ', 50px); width:' + gridWidth + 'px; max-width:100%;">';
+  var gridWidth = ss.cols * 42 + (ss.cols - 1) * 4;
+  html += '<div class="sandbox-grid" id="sandbox-grid" style="grid-template-columns: repeat(' + ss.cols + ', 42px); width:' + gridWidth + 'px; max-width:100%;">';
   for (var r = 0; r < ss.rows; r++) {
     for (var c = 0; c < ss.cols; c++) {
       var cell = ss.board[r][c];
@@ -3885,6 +4061,12 @@ function renderBattle() {
   battleState.playerKi = 0;
   battleState.hachiKi = 0;
   battleState.hachiHP = gameState.hachiDifficulty === "hard" ? 2 : 1;
+  battleState.round = 1;
+  battleState.lastPlayerAction = null;
+  battleState.hachiPlannedAction = null;
+  battleState.hachiMindRead = false;
+  // 开局先规划哈基高的行动（供HUD倾向提示）
+  planHachiAction();
 
   var descArea = document.getElementById("description-area");
   var actionsArea = document.getElementById("actions-area");
@@ -3915,13 +4097,21 @@ function renderBattle() {
   huBtn.addEventListener("click", function() { handleBattleAction("呼吸"); });
   actionsArea.appendChild(huBtn);
 
+  // 誓约胜利之哈按钮（蓄力爆发：积满3气解锁，造成2点伤害，消耗全部气）
+  var fullHaBtn = document.createElement("button");
+  fullHaBtn.className = "action-btn battle-btn battle-full-btn";
+  fullHaBtn.id = "full-ha-btn";
+  fullHaBtn.textContent = "💥 誓约胜利之哈（消耗全部气，造成2点伤害）";
+  fullHaBtn.addEventListener("click", function() { handleBattleAction("誓约胜利之哈"); });
+  actionsArea.appendChild(fullHaBtn);
+
   // 规则按钮
   var ruleBtn = document.createElement("button");
   ruleBtn.className = "action-btn";
   ruleBtn.style.cssText = "background:linear-gradient(135deg,#555,#444);color:#aaa;";
   ruleBtn.textContent = "📖 查看规则";
   ruleBtn.addEventListener("click", function() {
-    showPopupModal("【御前决斗规则】<br><br>⚔️ 哈气：消耗1气攻击对手，对手未格挡则造成伤害<br>🛡️ 格挡：免消耗，抵挡对手的哈气<br>💨 呼吸：积累1气<br><br>哈基高会随机选择行动，但没气时不会哈气。<br>" + (gameState.hachiDifficulty === "hard" ? "困难模式：哈基高拥有2点血量，每次攻击消耗1点。" : "普通模式：一击制胜！"));
+    showPopupModal("【御前决斗规则】<br><br>⚔️ 哈气：消耗1气攻击对手，对手未格挡则造成伤害<br>🛡️ 格挡：免消耗，抵挡对手的哈气<br>💨 呼吸：积累1气<br>💥 誓约胜利之哈：蓄满3气解放，造成2点伤害，消耗全部气<br><br>⚠️ 哈基高蓄满3气后也会解放誓约胜利之哈——它能<b>无视格挡</b>直接命中！<br>反制手段：抢先击杀它，或以你自己的誓约胜利之哈<b>对轰抵消</b>！<br><br>哈基高会观察你的气量随机应变：你蓄满气时它会重点防御，你气竭时它会趁机猛攻！留意HUD中它的架势提示。<br>" + (gameState.hachiDifficulty === "hard" ? "困难模式：哈基高拥有2点血量，每次攻击消耗1点，且有20%概率看穿你的行动！" : "普通模式：一击制胜！"));
   });
   actionsArea.appendChild(ruleBtn);
 }
@@ -3930,13 +4120,27 @@ function updateBattleHUD() {
   var descArea = document.getElementById("description-area");
   var isHard = gameState.hachiDifficulty === "hard";
   var hpDisplay = isHard ? '<div class="battle-ki">哈基高血量：<span class="ki-num" style="color:#ff6b6b;">' + "♥".repeat(battleState.hachiHP) + '</span></div>' : '';
+  // 蓄力爆发是否就绪（3气解锁誓约胜利之哈）
+  var fullReady = battleState.playerKi >= 3;
+  // 哈基高蓄满3气：誓约胜利之哈随时可能降临（破盾警告）
+  var hachiCharged = battleState.hachiKi >= 3;
   descArea.innerHTML =
     '<div class="battle-hud">' +
+    '<div class="battle-round">—— 第 ' + battleState.round + ' 回合 ——</div>' +
     '<div class="battle-ki">你的气：<span class="ki-num">' + battleState.playerKi + '</span></div>' +
     '<div class="battle-ki">哈基高的气：<span class="ki-num">' + battleState.hachiKi + '</span></div>' +
     hpDisplay +
+    (hachiCharged ? '<div class="battle-hachiwarn">⚠️ 哈基高气息已蓄满——誓约胜利之哈随时可能降临，格挡无效！</div>' : '') +
+    '<div class="battle-tip">' + getHachiTendencyHint() + '</div>' +
+    (fullReady ? '<div class="battle-fullready">💥 蓄力完成！誓约胜利之哈已解锁！</div>' : '') +
     '<div class="battle-round">选择你的行动</div>' +
     '</div>';
+  // 同步誓约胜利之哈按钮的可用状态
+  var fullBtn = document.getElementById("full-ha-btn");
+  if (fullBtn) {
+    fullBtn.disabled = !fullReady;
+    fullBtn.style.opacity = fullReady ? "1" : "0.45";
+  }
   descArea.onclick = null;
 }
 
@@ -3948,56 +4152,81 @@ function handleBattleAction(action) {
     showPopupModal("气不够！请先使用「呼吸」积累气。");
     return;
   }
+  // 誓约胜利之哈需要蓄满3气
+  if (action === "誓约胜利之哈" && battleState.playerKi < 3) {
+    showPopupModal("气不够！「誓约胜利之哈」需要蓄满3气（连续呼吸3次）。");
+    return;
+  }
 
-  // 哈基高选择行动
-  var hachiAction = hachiChoose();
+  // 哈基高行动：困难模式读心触发时看穿玩家本回合行动并针对性反制，否则使用预定行动
+  var mindReadUsed = false;
+  var hachiAction;
+  if (battleState.hachiMindRead) {
+    mindReadUsed = true;
+    triggerBattleFx("mind"); // 读心紫闪特效
+    if (action === "哈气" || action === "誓约胜利之哈") hachiAction = "格挡";
+    else if (battleState.hachiKi >= 3) hachiAction = "誓约胜利之哈"; // 看穿玩家格挡/呼吸且气已蓄满：直接解放誓约
+    else if (action === "格挡") hachiAction = "呼吸";
+    else hachiAction = battleState.hachiKi >= 1 ? "哈气" : "呼吸";
+  } else {
+    hachiAction = battleState.hachiPlannedAction || "呼吸";
+  }
 
-  // 执行玩家行动
+  // 执行玩家行动（誓约胜利之哈消耗全部气，风险与爆发并存）
   if (action === "哈气") battleState.playerKi--;
+  if (action === "誓约胜利之哈") battleState.playerKi = 0;
   if (action === "呼吸") battleState.playerKi++;
 
-  // 执行哈基高行动
+  // 执行哈基高行动（誓约胜利之哈同样消耗全部气）
   if (hachiAction === "哈气") battleState.hachiKi--;
+  if (hachiAction === "誓约胜利之哈") battleState.hachiKi = 0;
   if (hachiAction === "呼吸") battleState.hachiKi++;
 
-  // 判断结果
-  var hachiSay = "";
-  if (hachiAction === "格挡") hachiSay = "「防下了！！！」";
-  else if (hachiAction === "哈气") hachiSay = "「天翔哈闪！！！」";
-  else if (hachiAction === "呼吸") hachiSay = "「哈之呼吸法！！！」";
+  // 情境化台词 + 台词气泡（先在图片区展示，稍后再弹结算窗）
+  var hachiSay = getHachiLine(hachiAction, action, mindReadUsed);
+  showHachiBubble(hachiSay);
 
+  var isFullHa = action === "誓约胜利之哈";
   var resultMsg = "";
   resultMsg += "【你的行动】" + action + "<br>";
   resultMsg += "【哈基高的行动】" + hachiAction + " " + hachiSay + "<br><br>";
 
-  // 玩家哈气判定
-  if (action === "哈气") {
+  // ===== 双誓约对轰：两道光炮相互抵消 =====
+  var clashed = (action === "誓约胜利之哈" && hachiAction === "誓约胜利之哈");
+  if (clashed) {
+    triggerBattleFx("impact");
+    resultMsg += "双方同时解放了誓约胜利之哈！！<br>两道光炮在正中央轰然相撞，爆发出刺目的光辉——<br>相互抵消！双方的气被冲击波尽数吹散。";
+  }
+  // 玩家攻击判定（哈气1点伤害，誓约胜利之哈2点）
+  else if (action === "哈气" || isFullHa) {
     if (hachiAction === "格挡") {
-      resultMsg += "哈基高格挡了你的攻击！毫发无伤。";
+      resultMsg += "哈基高格挡了你的" + (isFullHa ? "誓约胜利之哈" : "攻击") + "！毫发无伤。";
     } else {
-      battleState.hachiHP--;
+      battleState.hachiHP -= isFullHa ? 2 : 1;
+      triggerBattleFx("impact"); // 命中闪白震动
       if (battleState.hachiHP <= 0) {
-        resultMsg += "哈基高被你的哈气击中！哈基高出局！";
+        resultMsg += "哈基高被你的" + (isFullHa ? "誓约胜利之哈" : "哈气") + "击中！哈基高出局！";
         battleState.inBattle = false;
-        showPopupModal(resultMsg);
-        setTimeout(function() {
+        delayedModal(resultMsg, function() {
           unlockAchievement("hachi_king");
           var achCfg = ACHIEVEMENT_CONFIG["hachi_king"];
-          showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
-          if (gameState.hachiDifficulty === "hard") {
-            setTimeout(function() {
-              unlockAchievement("hachi_emperor");
-              var achCfg2 = ACHIEVEMENT_CONFIG["hachi_emperor"];
-              showPopupModal("成就解锁：" + achCfg2.icon + " " + achCfg2.name + "<br><small>" + achCfg2.desc + "</small>");
-              setTimeout(function() { renderScene("duel_victory"); }, 400);
-            }, 400);
-          } else {
-            setTimeout(function() { renderScene("duel_victory"); }, 400);
-          }
-        }, 400);
+          showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>", function() {
+            if (gameState.hachiDifficulty === "hard") {
+              setTimeout(function() {
+                unlockAchievement("hachi_emperor");
+                var achCfg2 = ACHIEVEMENT_CONFIG["hachi_emperor"];
+                showPopupModal("成就解锁：" + achCfg2.icon + " " + achCfg2.name + "<br><small>" + achCfg2.desc + "</small>", function() {
+                  renderScene("duel_victory");
+                });
+              }, 400);
+            } else {
+              renderScene("duel_victory");
+            }
+          });
+        });
         return;
       } else {
-        resultMsg += "哈基高被你的哈气击中！剩余血量：" + "♥".repeat(battleState.hachiHP) + "（" + battleState.hachiHP + "/" + (gameState.hachiDifficulty === "hard" ? 2 : 1) + "）";
+        resultMsg += "哈基高被你的" + (isFullHa ? "誓约胜利之哈" : "哈气") + "击中！剩余血量：" + "♥".repeat(battleState.hachiHP) + "（" + battleState.hachiHP + "/" + (gameState.hachiDifficulty === "hard" ? 2 : 1) + "）";
       }
     }
   }
@@ -4008,16 +4237,36 @@ function handleBattleAction(action) {
       resultMsg += "你格挡了哈基高的攻击！毫发无伤。";
     } else {
       resultMsg += "你被哈基高的哈气击中！你出局了！";
+      triggerBattleFx("player-hit"); // 玩家受击剧烈震动
       battleState.inBattle = false;
-      showPopupModal(resultMsg);
-      setTimeout(function() {
+      delayedModal(resultMsg, function() {
         unlockAchievement("not_strong");
         var achCfg = ACHIEVEMENT_CONFIG["not_strong"];
-        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>");
-        setTimeout(function() { renderScene("duel_defeat"); }, 400);
-      }, 400);
+        showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>", function() {
+          renderScene("duel_defeat");
+        });
+      });
       return;
     }
+  }
+
+  // 哈基高誓约胜利之哈判定：破盾——无视格挡直接命中
+  if (!clashed && hachiAction === "誓约胜利之哈") {
+    if (action === "格挡") {
+      resultMsg += "哈基高解放了誓约胜利之哈！！<br>光炮贯穿了你的格挡——你被吞没了！你出局了！";
+    } else {
+      resultMsg += "你被哈基高的誓约胜利之哈吞噬了！你出局了！";
+    }
+    triggerBattleFx("player-hit");
+    battleState.inBattle = false;
+    delayedModal(resultMsg, function() {
+      unlockAchievement("not_strong");
+      var achCfg = ACHIEVEMENT_CONFIG["not_strong"];
+      showPopupModal("成就解锁：" + achCfg.icon + " " + achCfg.name + "<br><small>" + achCfg.desc + "</small>", function() {
+        renderScene("duel_defeat");
+      });
+    });
+    return;
   }
 
   // 双方都格挡或都呼吸
@@ -4034,20 +4283,164 @@ function handleBattleAction(action) {
     resultMsg += "哈基高深吸一口气，你摆出格挡架势。";
   }
 
-  showPopupModal(resultMsg);
+  // 记录本回合玩家行动，推进回合数并规划哈基高下一回合的策略
+  battleState.lastPlayerAction = action;
+  battleState.round++;
+  planHachiAction();
+
+  delayedModal(resultMsg);
   updateBattleHUD();
 }
 
-function hachiChoose() {
-  var options = [];
-  // 格挡和呼吸始终可选
-  options.push("格挡");
-  options.push("呼吸");
-  // 有气才能哈气
-  if (battleState.hachiKi >= 1) {
-    options.push("哈气");
+// 延迟弹出结算弹窗，给台词气泡和战斗特效留出展示时间
+function delayedModal(msg, onClose) {
+  setTimeout(function() { showPopupModal(msg, onClose); }, 950);
+}
+
+// 战斗特效：impact=命中闪白震动 player-hit=玩家受击剧震 mind=读心紫闪
+function triggerBattleFx(type) {
+  var c = document.getElementById("game-container");
+  if (!c) return;
+  var cls = type === "player-hit" ? "shake-hard" : type === "mind" ? "mind-flash" : "impact";
+  c.classList.remove(cls);
+  void c.offsetWidth; // 强制重绘，确保同名动画可重复触发
+  c.classList.add(cls);
+  setTimeout(function() { c.classList.remove(cls); }, 1000);
+}
+
+// 哈基高台词气泡：叠在图片区右下角，自动消失
+var hachiBubbleTimer = null;
+function showHachiBubble(text) {
+  var imgArea = document.getElementById("image-area");
+  if (!imgArea) return;
+  var old = imgArea.querySelector(".hachi-bubble");
+  if (old) old.remove();
+  if (hachiBubbleTimer) clearTimeout(hachiBubbleTimer);
+  var b = document.createElement("div");
+  b.className = "hachi-bubble";
+  b.textContent = text;
+  imgArea.appendChild(b);
+  hachiBubbleTimer = setTimeout(function() {
+    b.classList.add("out");
+    setTimeout(function() { if (b.parentNode) b.remove(); }, 320);
+  }, 2300);
+}
+
+// ===== 哈基高策略型AI =====
+// 按权重随机选择（pairs为[选项, 权重]数组，权重总和100）
+function weightedPick(pairs) {
+  var total = 0;
+  for (var i = 0; i < pairs.length; i++) total += pairs[i][1];
+  var r = Math.random() * total;
+  for (var j = 0; j < pairs.length; j++) {
+    if (r < pairs[j][1]) return pairs[j][0];
+    r -= pairs[j][1];
   }
-  return options[Math.floor(Math.random() * options.length)];
+  return pairs[pairs.length - 1][0];
+}
+
+// 哈基高每回合策略规划（在玩家行动前决定，供HUD倾向提示与结算使用）
+function planHachiAction() {
+  battleState.hachiMindRead = false;
+  battleState.hachiPlannedAction = null;
+
+  var isHard = gameState.hachiDifficulty === "hard";
+  var playerHasKi = battleState.playerKi >= 1;   // 玩家随时能哈气（危险状态）
+  var hachiHasKi = battleState.hachiKi >= 1;
+  // 趁虚而入判断：玩家刚用哈气耗光了气（本回合只能格挡或呼吸）
+  var playerJustExhausted = battleState.lastPlayerAction === "哈气" && battleState.playerKi === 0;
+
+  // 困难模式读心：20%概率看穿玩家本回合行动（结算时针对性反制，HUD不显示倾向）
+  if (isHard && Math.random() < 0.2) {
+    battleState.hachiMindRead = true;
+    battleState.hachiPlannedAction = "读心";
+    return;
+  }
+
+  var block = 0, breathe = 0, ha = 0, full = 0;
+  if (battleState.hachiKi >= 3) {
+    // 蓄满3气：随时可能解放誓约胜利之哈（破盾，无视格挡）
+    if (playerHasKi) {
+      full = isHard ? 35 : 25;   // 玩家有气：主要仍以防为主，偶发大招
+      block = 60;
+      breathe = 100 - full - block;
+    } else {
+      // 玩家0气：格挡无意义，大概率解放誓约（格挡也挡不住光炮）
+      full = isHard ? 55 : 45;
+      if (playerJustExhausted) full = Math.min(full + 15, 75); // 趁虚而入：气刚耗光直接处刑
+      ha = 15;
+      breathe = 100 - full - ha;
+    }
+  } else if (playerHasKi) {
+    // 危险预警：玩家有气时重点格挡（普通55%/困难60%）
+    block = isHard ? 60 : 55;
+    // 玩家蓄满3气（誓约胜利之哈威胁）：格挡欲望更强，封顶80%
+    if (battleState.playerKi >= 3) block = Math.min(block + 15, 80);
+    if (hachiHasKi) {
+      breathe = isHard ? 20 : 25;
+      ha = 20;
+    } else {
+      breathe = 100 - block;
+      ha = 0;
+    }
+  } else {
+    // 玩家0气：绝不格挡，趁机蓄力或进攻
+    block = 0;
+    if (hachiHasKi) {
+      ha = isHard ? 50 : 40;
+      if (playerJustExhausted) {
+        // 趁虚而入：玩家气刚耗光，大幅提高哈气概率
+        ha = isHard ? 75 : 70;
+      }
+      breathe = 100 - ha;
+    } else {
+      ha = 0;
+      breathe = 100;
+    }
+  }
+  battleState.hachiPlannedAction = weightedPick([["格挡", block], ["呼吸", breathe], ["哈气", ha], ["誓约胜利之哈", full]]);
+}
+
+// HUD倾向提示：根据哈基高本回合的架势给出暗示（读心时不可读，偶尔神色难测）
+function getHachiTendencyHint() {
+  if (battleState.hachiMindRead) return "哈基高的眼神深不可测，似乎看穿了什么……";
+  // 誓约胜利之哈的预警必须绝对准确——这是玩家唯一的反制窗口（对轰/抢先击杀）
+  if (battleState.hachiPlannedAction === "誓约胜利之哈") return "⚠️ 哈基高正在凝聚全部气力——誓约胜利之哈即将降临！！";
+  // 提示并非100%准确：困难模式更容易摸不透
+  var vagueChance = gameState.hachiDifficulty === "hard" ? 0.3 : 0.15;
+  if (Math.random() < vagueChance) return "哈基高神色平静，难以捉摸……";
+  if (battleState.hachiPlannedAction === "格挡") return "哈基高正凝神戒备……";
+  if (battleState.hachiPlannedAction === "哈气") return "哈基高杀气毕露，气息骤然凶猛！";
+  if (battleState.hachiPlannedAction === "呼吸") return "哈基高缓缓沉腰，似乎在酝酿气息……";
+  return "";
+}
+
+// 情境化台词：根据双方行动与读心状态选择台词
+function getHachiLine(hachiAction, playerAction, mindReadUsed) {
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  if (mindReadUsed) return "「你的行动，早已在我预料之中」";
+  if (hachiAction === "誓约胜利之哈") {
+    if (playerAction === "誓约胜利之哈") return "「什么！？竟敢以誓约对轰——！！！」";
+    if (playerAction === "格挡") return "「那面盾，可挡不住此等光芒」";
+    return pick(["「EX——誓约·胜利之哈！！！」", "「于此见证吧，吾毕生修行之极致——」", "「哈啊啊啊啊啊啊——！！！！」"]);
+  }
+  if (hachiAction === "格挡") {
+    if (playerAction === "誓约胜利之哈") {
+      // 挡下玩家的孤注一掷
+      return pick(["「孤注一掷吗……防下了！！！」", "「把气全部押上，太过天真了呢」", "「哈啊啊——什么都没发生」"]);
+    }
+    if (playerAction === "哈气") {
+      // 危险期格挡成功
+      return pick(["「亚嘞亚嘞，被我看穿了呢」", "「防下了！！！」", "「这种程度的哈气，可伤不到我」"]);
+    }
+    // 扑空格挡
+    return pick(["「……防了个寂寞」", "「切，居然不出手吗」", "「谨慎些总归没错」"]);
+  }
+  if (hachiAction === "哈气") {
+    return pick(["「天翔哈闪！！！」", "「哈之呼吸·贰之型·飞沫！」", "「接招吧！这就是哈气大师的实力！」"]);
+  }
+  // 呼吸蓄力
+  return pick(["「哈之呼吸法·壹之型」", "「调整气息……」", "「为下一击，做好准备……」"]);
 }
 
 // ===== 游玩提示 =====

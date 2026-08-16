@@ -95,7 +95,7 @@ body {
 
 /* ===== 中部图片区 ===== */
 #image-area {
-  flex: 1; min-height: 200px; margin: 0 16px;
+  flex: 1; min-height: 150px; margin: 0 16px;
   border-radius: 12px; overflow: hidden;
   border: 2px solid rgba(232,213,183,0.2);
   background: rgba(255,255,255,0.03);
@@ -114,10 +114,11 @@ body {
 
 /* ===== 描述区 ===== */
 #description-area {
-  padding: 14px 20px; flex-shrink: 0;
+  padding: 14px 20px; flex-shrink: 1;
   font-size: 15px; line-height: 1.7; color: #c0c8d8;
   text-align: center; min-height: 60px;
   cursor: pointer; position: relative;
+  overflow-y: auto;
 }
 #description-area .cursor::after {
   content: "|"; animation: blink 0.8s infinite;
@@ -425,6 +426,70 @@ body {
   font-size: 13px; color: rgba(232,213,183,0.5);
   margin-top: 8px; letter-spacing: 2px;
 }
+.battle-tip {
+  font-size: 13px; font-weight: 600; color: #ffd166;
+  margin: 8px 0 2px; letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(255,209,102,0.35);
+}
+.battle-fullready {
+  font-size: 13px; font-weight: 700; color: #ff9e3d;
+  margin: 4px 0 2px; letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255,158,61,0.5);
+}
+.battle-hachiwarn {
+  font-size: 13px; font-weight: 700; color: #ff4d4d;
+  margin: 4px 0 2px; letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255,77,77,0.6);
+  animation: hachiwarn-pulse 1.1s ease-in-out infinite;
+}
+@keyframes hachiwarn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.battle-full-btn {
+  background: linear-gradient(135deg, #b8860b, #8b6914) !important;
+  color: #fff !important;
+  border: 2px solid rgba(255,209,102,0.5) !important;
+}
+.battle-full-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* ===== 哈基高台词气泡 ===== */
+.hachi-bubble {
+  position: absolute; bottom: 12px; right: 10px; max-width: 72%;
+  background: rgba(20, 25, 45, 0.92);
+  border: 2px solid rgba(232, 213, 183, 0.55);
+  border-radius: 14px 14px 3px 14px;
+  padding: 8px 12px;
+  color: #e8d5b7; font-size: 14px; font-weight: 600;
+  z-index: 5; pointer-events: none;
+  animation: bubble-in 0.25s ease-out;
+}
+.hachi-bubble.out {
+  animation: bubble-out 0.32s ease-in forwards;
+}
+@keyframes bubble-in {
+  from { transform: translateY(8px) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes bubble-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ===== 读心反制特效（紫闪） ===== */
+#game-container.mind-flash::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(147,112,219,0.15) 30%, rgba(147,112,219,0.6) 100%);
+  z-index: 200; pointer-events: none;
+  animation: mind-fade 0.95s ease-out;
+}
+@keyframes mind-fade {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
 .battle-btn {
   background: linear-gradient(135deg, #e94560, #c23152) !important;
   color: #fff !important;
@@ -446,9 +511,9 @@ body {
   gap: 4px; padding: 6px 0 2px; margin: 0 auto;
 }
 .sandbox-cell {
-  width: 50px; height: 50px; border-radius: 6px;
+  width: 42px; height: 42px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(232,213,183,0.12);
   color: rgba(232,213,183,0.3);
@@ -507,14 +572,14 @@ body {
 
 /* 沙盘战斗日志 */
 .sandbox-log {
-  margin-top: 8px; padding: 6px 8px;
+  margin-top: 6px; padding: 4px 8px;
   border-radius: 6px;
   background: rgba(0,0,0,0.2);
   border: 1px solid rgba(232,213,183,0.08);
-  max-height: 96px; overflow-y: auto;
+  max-height: 58px; overflow-y: auto;
 }
 .sandbox-log-entry {
-  font-size: 11px; line-height: 1.7; white-space: nowrap;
+  font-size: 11px; line-height: 1.6; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
 
