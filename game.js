@@ -69,6 +69,10 @@ var ACHIEVEMENT_CONFIG = {
   easy_bigfoot:       { id: "easy_bigfoot",       name: "简单大脚鸡击败", desc: "你不会是打不过才选的这个吧", icon: "🐣" },
   chem_king:          { id: "chem_king",          name: "化学之王", desc: "击败了将成为神明的超级大脚鸡", icon: "👑" },
   nightmare_bigfoot:  { id: "nightmare_bigfoot",  name: "噩梦大脚鸡", desc: "击败了不可战胜的噩梦大脚鸡", icon: "👹" },
+  penguin_dog:        { id: "penguin_dog",        name: "偶遇企鹅狗", desc: "在实验楼二楼遇到了企鹅狗", icon: "🐧" },
+  sandbox_win:        { id: "sandbox_win",        name: "沙盘胜利", desc: "在沙盘对决中战胜了企鹅狗", icon: "🏆" },
+  sandbox_lose:       { id: "sandbox_lose",       name: "沙盘失败", desc: "在沙盘对决中败给了企鹅狗", icon: "😔" },
+  sandbox_hard_win:   { id: "sandbox_hard_win",   name: "击败困难企鹅狗", desc: "在困难模式下击败了企鹅狗", icon: "🎖️" },
   lost_to_bigfoot:    { id: "lost_to_bigfoot",    name: "丢人现眼", desc: "在化学决斗中输给了大脚鸡", icon: "💀" },
 };
 
@@ -152,6 +156,7 @@ var SCENE_CONFIG = {
       { text: "去拜访孔子像", target: "confucius_1" },
       { text: "我要去实验楼耍耍！！！", target: "lab_floor" },
       { text: "去文海少年科技院（行政楼）看看吧", target: "tech_academy_1" },
+      { text: "我要去看看地下室", target: "sandbag" },
     ]
   },
   gate_look: {
@@ -886,7 +891,7 @@ var SCENE_CONFIG = {
     desc: "去哪楼呢",
     buttons: [
       { text: "1F", target: "lab_1f" },
-      { text: "2F", popup: "前面的区域以后再去探索吧！" },
+      { text: "2F", target: "lab_2f" },
       { text: "3F", popup: "前面的区域以后再去探索吧！" },
       { text: "4F", popup: "前面的区域以后再去探索吧！" },
       { text: "5F", popup: "前面的区域以后再去探索吧！" },
@@ -902,6 +907,11 @@ var SCENE_CONFIG = {
       { text: "化学实验室", target: "chem_lab_1" },
       { text: "图书馆", target: "lab_library_door" },
     ]
+  },
+  lab_2f: {
+    id: "lab_2f", name: "实验楼二楼", img: "6ab37b0a449e58316f2d983dc8bf696d.jpg",
+    desc: "",
+    buttons: []
   },
   // 化学实验室
   chem_lab_1: {
@@ -1035,6 +1045,24 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.76.78", date: "2026-08-16", items: [
+    "实验楼二楼开放：进入心理教室往里看→遇见企鹅狗→沙盘对决",
+    "新增沙盘对决游戏：3×4棋盘回合制对战，含铺设/精摆/防御/神秘药剂行动",
+    "沙盘对决新增困难模式：4×4棋盘，企鹅狗开局2格，17分获胜",
+    "困难模式击败企鹅狗可获得成就'击败困难企鹅狗'",
+    "企鹅狗AI优化：随机选择行动，接壤时优先夺取玩家地块，无接壤不防御",
+    "修复企鹅狗空过回合bug，精摆概率提升",
+    "铺设目标格子改为点击沙盘上的格子选择",
+    "沙盘行动按钮改为3个并排显示",
+    "地下室摔倒、红室、后室饥渴而死新增闪回剧情及图片切换",
+    "噩梦大脚鸡血量调整为25，困难大脚鸡为15，HP显示改为心形+数字格式",
+    "噩梦模式玩家血量改为7，清水冲洗/降温冷凝管回复上限为7",
+    "硫酸易伤debuff持续整局，文案改为'每次受伤+1'",
+    "修复化学决斗战斗时概率跳到实验室一楼的bug",
+    "传送门新增搜索功能，改名为'梦境裂隙'",
+    "校门口新增'我要去看看地下室'选项直达沙包场景",
+    "哈基高对战前新增难度选择及成就'哈气之皇'",
+  ]},
   { version: "v1.5.76.58", date: "2026-08-15", items: [
     "玩家血量从5点提升至6点",
     "违反实验规章改为仅取消对方卡牌效果（己方卡牌不受影响）",
@@ -1157,10 +1185,10 @@ var CHANGELOG = [
   ]},
   { version: "v1.3.78.05", date: "2026-08-13", items: [
     "新增成就：哈气大师传说",
-    "删除传送门中未使用的场景（教学楼/图书馆/操场/食堂/实验室/花园/礼堂/行政楼/体育馆）",
+    "删除梦境裂隙中未使用的场景（教学楼/图书馆/操场/食堂/实验室/花园/礼堂/行政楼/体育馆）",
   ]},
   { version: "v1.3.78", date: "2026-08-13", items: [
-    "新增传送门功能（左上角按钮，按标题分组跳转任意场景）",
+    "新增梦境裂隙功能（左上角按钮，按标题分组跳转任意场景）",
     "新增游玩提示（开始页面「游玩提示」按钮）",
     "新增成就：疑似杭二新生",
     "新增胜利结局完整剧情线（哈基高崩溃 → 获得斗笠 → 回校门口）",
@@ -1335,6 +1363,8 @@ function renderScene(sceneId) {
 
   // 化学决斗介绍
   if (sceneId === "chem_lab_battle_intro") {
+    stopTypewriter();
+    if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
     var scene = SCENE_CONFIG["chem_lab_battle_intro"];
     // 渲染场景画面
     var img = document.getElementById("scene-img");
@@ -1345,6 +1375,8 @@ function renderScene(sceneId) {
     var gc = document.getElementById("game-container");
     gc.classList.add("shake");
     setTimeout(function() { gc.classList.remove("shake"); }, 500);
+    // 推荐道具提示弹窗
+    showPopupModal("💡 <b>提示</b><br><br>推荐玩家先去<b>地下室</b>收集<b>电线</b>，并在<b>靠小学一侧跑道</b>收集<b>寻龙尺</b>后再进行挑战，会大大降低游戏难度！<br><br><small>（电线可在决斗中鞭挞大脚鸡，寻龙尺有几率造成额外伤害或免伤）</small>");
     setTimeout(function() {
       startTypewriter(scene.desc, scene.autoNext, scene.autoJump, scene.getItem);
     }, 500);
@@ -1353,6 +1385,8 @@ function renderScene(sceneId) {
   }
   // 化学决斗
   if (sceneId === "chem_lab_battle") {
+    stopTypewriter();
+    if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
     startChemDuel();
     return;
   }
@@ -1364,6 +1398,26 @@ function renderScene(sceneId) {
   // 化学决斗失败 → 噩梦模式根据大脚鸡剩余血量显示不同对话
   if (sceneId === "chem_lab_lose") {
     renderChemLoseSequence();
+    return;
+  }
+  // 地下室摔倒 → 闪回插入
+  if (sceneId === "basement_fall") {
+    renderBasementFallSequence();
+    return;
+  }
+  // 红室 → 闪回插入
+  if (sceneId === "backrooms_red") {
+    renderRedRoomSequence();
+    return;
+  }
+  // 后室饥渴而死 → 闪回插入
+  if (sceneId === "backrooms_death") {
+    renderBackroomsDeathSequence();
+    return;
+  }
+  // 实验楼二楼 → 企鹅狗沙盘剧情
+  if (sceneId === "lab_2f") {
+    renderLab2FSequence();
     return;
   }
 
@@ -1890,7 +1944,7 @@ function startChemDuel() {
   document.getElementById("location-name").textContent = "化学实验决斗";
 
   chemDuelState = {
-    playerHP: 6,
+    playerHP: gameState.chemDifficulty === "nightmare" ? 7 : 6,
     enemyHP: gameState.chemDifficulty === "easy" ? 5 : gameState.chemDifficulty === "hard" ? 15 : gameState.chemDifficulty === "nightmare" ? 25 : 8,
     playerSulfuric: false,  // 硫酸腐蚀debuff
     playerShield: false,    // 护目镜减伤
@@ -1954,15 +2008,9 @@ function renderChemDuelRound() {
     return;
   }
 
-  // 抽3张牌（降低防爆盾牌出现概率：50%概率被替换为其他牌）
+  // 抽3张牌
   var shuffled = CHEM_CARDS.slice().sort(function() { return Math.random() - 0.5; });
   var playerHand = shuffled.slice(0, 3);
-  for (var j = 0; j < playerHand.length; j++) {
-    if (playerHand[j].id === "shield" && Math.random() < 0.5) {
-      var nonShieldCards = CHEM_CARDS.filter(function(c) { return c.id !== "shield"; });
-      playerHand[j] = nonShieldCards[Math.floor(Math.random() * nonShieldCards.length)];
-    }
-  }
 
   // 渲染HP
   var nightmareLabel = isNightmare ? " <span style=\"color:#ff4444;font-size:11px;\">噩梦</span>" : "";
@@ -1971,7 +2019,7 @@ function renderChemDuelRound() {
     + "<span style=\"color:#5cb85c;\">玩家 HP: " + "♥".repeat(ds.playerHP) + " " + ds.playerHP + "</span>"
     + "</div>";
   if (ds.playerSulfuric) {
-    hpHTML += "<div style=\"text-align:center;color:#ff6600;font-size:12px;margin-bottom:4px;\">⚠ 硫酸腐蚀：下次受伤+1</div>";
+    hpHTML += "<div style=\"text-align:center;color:#ff6600;font-size:12px;margin-bottom:4px;\">⚠ 硫酸腐蚀：每次受伤+1</div>";
   }
   hpHTML += "<div style=\"text-align:center;font-size:15px;color:#e8d5b7;margin:6px 0;\">第 " + ds.turn + " 回合 — 选择一张卡牌</div>";
   descArea.innerHTML = hpHTML;
@@ -2072,7 +2120,7 @@ function playChemDuelCard(playerCard, enemyCards) {
       log.push("佩戴护目镜，本回合减少1点伤害");
       break;
     case "water_wash":
-      ds.playerHP = Math.min(6, ds.playerHP + 1);
+      ds.playerHP = Math.min(gameState.chemDifficulty === "nightmare" ? 7 : 6, ds.playerHP + 1);
       ds.playerSulfuric = false;
       log.push("回复1点生命，去除硫酸腐蚀效果");
       break;
@@ -2099,7 +2147,7 @@ function playChemDuelCard(playerCard, enemyCards) {
       log.push("高温坩埚钳对敌方造成2点伤害，自己烫伤1点");
       break;
     case "cooling_tube":
-      ds.playerHP = Math.min(6, ds.playerHP + 2);
+      ds.playerHP = Math.min(gameState.chemDifficulty === "nightmare" ? 7 : 6, ds.playerHP + 2);
       log.push("降温冷凝管回复2点生命！");
       break;
     case "tell_teacher":
@@ -2116,16 +2164,13 @@ function playChemDuelCard(playerCard, enemyCards) {
     log.push("违反实验规章生效！双方卡牌效果无效！");
     playerDmg = 0;
     enemyDmg = 0;
-    ds.playerSulfuric = false;
-    ds.enemySulfuric = false;
     ds.playerShield = false;
     ds.enemyShield = false;
   }
 
-  // 玩家硫酸腐蚀加成
+  // 玩家硫酸腐蚀加成（持续一整局，不会被消耗）
   if (!ds.violateRules && ds.enemySulfuric && enemyDmg > 0) {
     enemyDmg++;
-    ds.enemySulfuric = false;
     log.push("敌方硫酸腐蚀触发，额外+1伤害！");
   }
 
@@ -2181,8 +2226,6 @@ function playChemDuelCard(playerCard, enemyCards) {
           log.push("大脚鸡违反实验规章！双方卡牌效果无效！");
           playerDmg = 0;
           enemyDmg = 0;
-          ds.playerSulfuric = false;
-          ds.enemySulfuric = false;
           ds.playerShield = false;
           ds.enemyShield = false;
           i = enemyCards.length; // 跳出循环，后续卡牌不再处理
@@ -2205,10 +2248,9 @@ function playChemDuelCard(playerCard, enemyCards) {
     }
   }
 
-  // 大脚鸡硫酸腐蚀加成
+  // 大脚鸡硫酸腐蚀加成（持续一整局，不会被消耗）
   if (!ds.violateRules && ds.playerSulfuric && playerDmg > 0) {
     playerDmg++;
-    ds.playerSulfuric = false;
     log.push("你的硫酸腐蚀触发，额外+1伤害！");
   }
 
@@ -2400,6 +2442,689 @@ function renderChemLoseSequence() {
 
   // 打字机播放对话，然后自动跳转
   startTypewriter(desc, null, "lab_1f", null);
+}
+
+// 地下室摔倒序列：摔倒 → 闪回 → 回到现实
+function renderBasementFallSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+
+  var scene = SCENE_CONFIG["basement_fall"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 撞击特效
+  var gc = document.getElementById("game-container");
+  gc.classList.add("impact");
+  playImpactSound();
+  setTimeout(function() { gc.classList.remove("impact"); }, 600);
+
+  // 解锁成就
+  unlockAchievement("flat_fall");
+
+  // 第一阶段：打"啊！！！！！"
+  startTypewriter("啊！！！！！", null, null, null);
+
+  // 监听第一阶段打字完成
+  var check1 = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(check1);
+      // 切换为闪回图片
+      img.src = "";
+      if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+      pendingImageRAF = requestAnimationFrame(function() {
+        pendingImageRAF = null;
+        img.src = "7df52960ad37327cf4a1dccdb0c03f2e.jpg";
+        img.style.display = "block";
+        placeholder.style.display = "none";
+      });
+      // 第二阶段：闪回文案
+      startTypewriter(".....这里是哪......|我在做梦吗....|这不是现实..|这.....不是现实....", null, null, null);
+      // 监听第二阶段打字完成
+      var check2 = setInterval(function() {
+        if (typewriterDone) {
+          clearInterval(check2);
+          // 切回原图
+          img.src = "";
+          if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+          pendingImageRAF = requestAnimationFrame(function() {
+            pendingImageRAF = null;
+            img.src = scene.img;
+            img.style.display = "block";
+            placeholder.style.display = "none";
+          });
+          // 第三阶段：剩余文案，自动跳转
+          startTypewriter("这里怎么有个水坑啊....|呜.........|好疼......", null, "basement", null);
+        }
+      }, 100);
+    }
+  }, 100);
+}
+
+// 红室序列：文案结束 → 闪回 → 回到校门口
+function renderRedRoomSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+
+  var scene = SCENE_CONFIG["backrooms_red"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 解锁成就
+  unlockAchievement("red_room");
+
+  // 第一阶段：原文案
+  startTypewriter(scene.desc, null, null, null);
+
+  var check1 = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(check1);
+      // 切换为闪回图片
+      img.src = "";
+      if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+      pendingImageRAF = requestAnimationFrame(function() {
+        pendingImageRAF = null;
+        img.src = "88512876c3fbb56613b3ea90c95b6644.jpg";
+        img.style.display = "block";
+        placeholder.style.display = "none";
+      });
+      // 第二阶段：闪回文案，然后跳转到校门口
+      startTypewriter("唔.....|怎么了......|(醒醒！！）|呜.......", null, "gate", null);
+    }
+  }, 100);
+}
+
+// 后室饥渴而死序列：文案结束 → 闪回 → 回到校门口
+function renderBackroomsDeathSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+
+  var scene = SCENE_CONFIG["backrooms_death"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 解锁成就
+  unlockAchievement("starved_to_death");
+
+  // 第一阶段：原文案
+  startTypewriter(scene.desc, null, null, null);
+
+  var check1 = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(check1);
+      // 切换为闪回图片
+      img.src = "";
+      if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+      pendingImageRAF = requestAnimationFrame(function() {
+        pendingImageRAF = null;
+        img.src = "5ff634cca651352fb437e343b33ff07b.jpg";
+        img.style.display = "block";
+        placeholder.style.display = "none";
+      });
+      // 第二阶段：闪回文案，然后跳转到校门口
+      startTypewriter("我这是....怎么了|我要醒过来......", null, "gate", null);
+    }
+  }, 100);
+}
+
+// 实验楼二楼序列：上楼 → 心理教室 → 企鹅狗 → 沙盘游戏
+function renderLab2FSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+
+  var scene = SCENE_CONFIG["lab_2f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  document.getElementById("actions-area").style.display = "none";
+
+  // 阶段1：上楼
+  startTypewriter("（上楼ing)", null, null, null);
+  var step = 1;
+  function lab2fCheck() {
+    if (typewriterDone) {
+      clearInterval(check);
+      if (step === 1) {
+        // 阶段2：心理教室
+        img.src = "";
+        cancelRAF();
+        pendingImageRAF = requestAnimationFrame(function() {
+          pendingImageRAF = null;
+          img.src = "540bb3af605088778a2ad0b50077841f.jpg";
+          img.style.display = "block";
+          placeholder.style.display = "none";
+        });
+        startTypewriter("到了啊，心理教室....|之前没来过几次这里呢|心理课早就没有了.........", null, null, null);
+        step = 2;
+        check = setInterval(lab2fCheck, 100);
+      } else if (step === 2) {
+        // 阶段3：往里看 + 震动
+        img.src = "";
+        cancelRAF();
+        pendingImageRAF = requestAnimationFrame(function() {
+          pendingImageRAF = null;
+          img.src = "dd5c8e3dbd6e38f52bd71f445e2d5064.jpg";
+          img.style.display = "block";
+          placeholder.style.display = "none";
+        });
+        var gc = document.getElementById("game-container");
+        gc.classList.add("shake");
+        setTimeout(function() { gc.classList.remove("shake"); }, 1000);
+        startTypewriter("往这看看吧.....", null, null, null);
+        step = 3;
+        check = setInterval(lab2fCheck, 100);
+      } else if (step === 3) {
+        // 阶段4：企鹅狗出现
+        img.src = "";
+        cancelRAF();
+        pendingImageRAF = requestAnimationFrame(function() {
+          pendingImageRAF = null;
+          img.src = "c2de7982035c6c7ba3c1ab236a8ab93d.jpg";
+          img.style.display = "block";
+          placeholder.style.display = "none";
+        });
+        unlockAchievement("penguin_dog");
+        startTypewriter("企鹅狗：你到这里干什么|亚嘞亚嘞，还是被发现了吗|企鹅狗：我不会让你在这里久待的，跟我来...", null, null, null);
+        step = 4;
+        check = setInterval(lab2fCheck, 100);
+      } else if (step === 4) {
+        // 阶段5：摆阵 → 进入沙盘
+        img.src = "";
+        cancelRAF();
+        pendingImageRAF = requestAnimationFrame(function() {
+          pendingImageRAF = null;
+          img.src = "62d9adb6d7848472877a00da89957ae2.jpg";
+          img.style.display = "block";
+          placeholder.style.display = "none";
+        });
+        startTypewriter("企鹅狗：跟我一起来摆一下吧|是战斗吗.....我不会低头的|企鹅狗：你这家伙...真是满脑子都只想着战斗呢|塔塔开！！！！！", null, null, null);
+        step = 5;
+        check = setInterval(lab2fCheck, 100);
+      } else if (step === 5) {
+        // 进入沙盘游戏 - 先选难度
+        clearInterval(check);
+        stopTypewriter();
+        var descArea = document.getElementById("description-area");
+        descArea.innerHTML = '<div style="text-align:center;padding:20px;">' +
+          '<div style="font-size:18px;color:#e8d5b7;margin-bottom:16px;">选择沙盘难度</div>' +
+          '<button class="action-btn" style="margin-bottom:10px;width:100%;" id="sandbox-normal-btn">普通（3×4棋盘，企鹅狗开局1格）</button>' +
+          '<button class="action-btn" style="width:100%;" id="sandbox-hard-btn">困难（4×4棋盘，企鹅狗开局2格）</button>' +
+          '</div>';
+        document.getElementById("actions-area").innerHTML = "";
+        document.getElementById("sandbox-normal-btn").onclick = function() {
+          startSandboxGame("normal");
+        };
+        document.getElementById("sandbox-hard-btn").onclick = function() {
+          startSandboxGame("hard");
+        };
+      }
+    }
+  }
+  var check = setInterval(lab2fCheck, 100);
+}
+
+// ===== 沙盘游戏 =====
+var sandboxState = null;
+
+function startSandboxGame(difficulty) {
+  difficulty = difficulty || "normal";
+  var isHard = difficulty === "hard";
+  var rows = isHard ? 4 : 3;
+  var cols = 4;
+
+  // 创建棋盘
+  var board = [];
+  for (var r = 0; r < rows; r++) {
+    board[r] = [];
+    for (var c = 0; c < cols; c++) {
+      board[r][c] = null;
+    }
+  }
+
+  if (isHard) {
+    // 困难模式：企鹅狗开局2格（右上角），玩家左下角1格
+    board[0][3] = "enemy";
+    board[0][2] = "enemy";
+    board[rows - 1][0] = "player";
+  } else {
+    // 普通模式：3行4列，企鹅狗右上角1格，玩家左下角1格
+    board[0][3] = "enemy";
+    board[rows - 1][0] = "player";
+  }
+
+  sandboxState = {
+    difficulty: difficulty,
+    board: board,
+    rows: rows,
+    cols: cols,
+    refined: {},
+    playerScore: 1,
+    enemyScore: isHard ? 2 : 1,
+    playerDefend: false,
+    enemyDefend: false,
+    potionCooldown: 0,
+    enemyStunned: false,
+    gameOver: false,
+  };
+
+  document.getElementById("location-name").textContent = isHard ? "沙盘对决（困难）" : "沙盘对决";
+  updateSandboxHUD();
+  renderSandboxActions();
+}
+
+function updateSandboxHUD(selectMode, selectAction) {
+  var descArea = document.getElementById("description-area");
+  var ss = sandboxState;
+  var html = '<div class="battle-hud">';
+  html += '<div style="display:flex;justify-content:space-between;padding:8px 0;">';
+  html += '<span style="color:#5cb85c;">你：' + ss.playerScore + '分</span>';
+  html += '<span style="color:#ff6b6b;">企鹅狗：' + ss.enemyScore + '分</span>';
+  html += '</div>';
+
+  if (selectMode && selectAction) {
+    html += '<div style="text-align:center;color:#ffc832;font-size:13px;margin:4px 0;">点击棋盘选择目标格子</div>';
+  }
+
+  // 计算可选格子
+  var validCells = {};
+  if (selectMode && selectAction === "settle") {
+    var adj = getAdjacentCells("player");
+    for (var i = 0; i < adj.length; i++) {
+      validCells[adj[i][0] + "," + adj[i][1]] = true;
+    }
+  }
+
+  // 渲染棋盘
+  html += '<div class="sandbox-grid" id="sandbox-grid" style="grid-template-columns: repeat(' + ss.cols + ', 1fr);">';
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      var cell = ss.board[r][c];
+      var key = r + "," + c;
+      var cls = "sandbox-cell";
+      var content = "";
+      if (cell === "player") {
+        cls += " sandbox-player";
+        content = ss.refined[key] ? "2" : "1";
+      } else if (cell === "enemy") {
+        cls += " sandbox-enemy";
+        content = ss.refined[key] ? "2" : "1";
+      }
+      if (selectMode && selectAction && validCells[key]) {
+        cls += " sandbox-selectable";
+      }
+      html += '<div class="' + cls + '" data-r="' + r + '" data-c="' + c + '">' + (content || "") + '</div>';
+    }
+  }
+  html += '</div>';
+
+  if (ss.enemyStunned) {
+    html += '<div style="text-align:center;color:#ff6600;margin-top:6px;">企鹅狗被神秘药剂眩晕，本回合无法行动！</div>';
+  }
+  html += '</div>';
+  descArea.innerHTML = html;
+  descArea.onclick = null;
+
+  // 绑定棋盘点击（选择模式）
+  if (selectMode && selectAction) {
+    var cells = descArea.querySelectorAll(".sandbox-selectable");
+    cells.forEach(function(el) {
+      el.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var r = parseInt(el.dataset.r);
+        var c = parseInt(el.dataset.c);
+        doSandboxAction(selectAction, r, c);
+      });
+    });
+  }
+}
+
+function renderSandboxActions() {
+  var ss = sandboxState;
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  actionsArea.style.flexDirection = "row";
+  actionsArea.style.flexWrap = "wrap";
+  actionsArea.style.gap = "6px";
+  actionsArea.style.justifyContent = "center";
+
+  // 铺设：点击棋盘选择目标格子
+  var adjCells = getAdjacentCells("player");
+  var hasAdj = adjCells.length > 0;
+  var settleBtn = document.createElement("button");
+  settleBtn.className = "action-btn sandbox-action-btn";
+  settleBtn.textContent = "铺设";
+  settleBtn.title = "点击棋盘选择目标格子";
+  if (!hasAdj) settleBtn.disabled = true;
+  settleBtn.onclick = function() {
+    // 进入棋盘选择模式
+    updateSandboxHUD(true, "settle");
+    // 显示取消按钮
+    actionsArea.innerHTML = "";
+    var cancelBtn = document.createElement("button");
+    cancelBtn.className = "action-btn";
+    cancelBtn.textContent = "取消选择";
+    cancelBtn.style.width = "100%";
+    cancelBtn.onclick = function() {
+      updateSandboxHUD();
+      renderSandboxActions();
+    };
+    actionsArea.appendChild(cancelBtn);
+  };
+  actionsArea.appendChild(settleBtn);
+
+  // 精摆
+  var refineBtn = document.createElement("button");
+  refineBtn.className = "action-btn sandbox-action-btn";
+  refineBtn.textContent = "精摆";
+  refineBtn.title = "让一个格子价值翻倍";
+  refineBtn.onclick = function() { doSandboxAction("refine"); };
+  actionsArea.appendChild(refineBtn);
+
+  // 防御
+  var defendBtn = document.createElement("button");
+  defendBtn.className = "action-btn sandbox-action-btn";
+  defendBtn.textContent = "防御";
+  defendBtn.title = "本回合对方无法夺取你的格子";
+  defendBtn.onclick = function() { doSandboxAction("defend"); };
+  actionsArea.appendChild(defendBtn);
+
+  // 神秘药剂
+  if (hasItem("mystery_potion") && ss.potionCooldown <= 0) {
+    var potionBtn = document.createElement("button");
+    potionBtn.className = "action-btn sandbox-action-btn";
+    potionBtn.style.background = "rgba(180, 100, 255, 0.15)";
+    potionBtn.style.borderColor = "rgba(180, 100, 255, 0.5)";
+    potionBtn.style.color = "#b464ff";
+    potionBtn.textContent = "药剂";
+    potionBtn.title = "使用神秘药剂（眩晕企鹅狗1回合，冷却3回合）";
+    potionBtn.onclick = function() { doSandboxAction("potion"); };
+    actionsArea.appendChild(potionBtn);
+  }
+}
+
+function showSandboxTargetSelect(cells, action) {
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  actionsArea.style.flexDirection = "column";
+  actionsArea.style.gap = "4px";
+
+  var label = document.createElement("div");
+  label.style.cssText = "text-align:center;color:#e8d5b7;font-size:13px;padding:4px;";
+  label.textContent = "选择目标格子：";
+  actionsArea.appendChild(label);
+
+  cells.forEach(function(cell) {
+    var btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = "第" + (cell[0] + 1) + "行 第" + (cell[1] + 1) + "列";
+    btn.style.width = "100%";
+    btn.onclick = function() { doSandboxAction(action, cell[0], cell[1]); };
+    actionsArea.appendChild(btn);
+  });
+}
+
+function getAdjacentCells(owner) {
+  var ss = sandboxState;
+  var cells = [];
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      if (ss.board[r][c] === owner) {
+        var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+        for (var d = 0; d < dirs.length; d++) {
+          var nr = r + dirs[d][0], nc = c + dirs[d][1];
+          if (nr >= 0 && nr < ss.rows && nc >= 0 && nc < ss.cols && ss.board[nr][nc] !== owner) {
+            // 去重
+            var dup = false;
+            for (var k = 0; k < cells.length; k++) {
+              if (cells[k][0] === nr && cells[k][1] === nc) { dup = true; break; }
+            }
+            if (!dup) cells.push([nr, nc]);
+          }
+        }
+      }
+    }
+  }
+  return cells;
+}
+
+function doSandboxAction(action, r, c) {
+  var ss = sandboxState;
+  if (ss.gameOver) return;
+
+  var descArea = document.getElementById("description-area");
+  var log = "";
+
+  // 玩家行动
+  if (action === "settle") {
+    // 验证目标格子是否相邻
+    var adjCells = getAdjacentCells("player");
+    var valid = false;
+    for (var i = 0; i < adjCells.length; i++) {
+      if (adjCells[i][0] === r && adjCells[i][1] === c) { valid = true; break; }
+    }
+    if (!valid) return;
+    if (ss.board[r][c] === "enemy" && ss.enemyDefend) {
+      // 对方防御，玩家失去1分，格子归对方
+      ss.playerScore = Math.max(0, ss.playerScore - 1);
+      log = "企鹅狗防御了！你失去1分！";
+    } else {
+      ss.board[r][c] = "player";
+      ss.playerScore++;
+      log = "你夺取了第" + (r+1) + "行第" + (c+1) + "列！+1分";
+    }
+  } else if (action === "refine") {
+    // 精摆一个自己的格子
+    var playerCells = [];
+    for (var rr = 0; rr < ss.rows; rr++) {
+      for (var cc = 0; cc < ss.cols; cc++) {
+        if (ss.board[rr][cc] === "player") playerCells.push([rr, cc]);
+      }
+    }
+    var pick = playerCells[Math.floor(Math.random() * playerCells.length)];
+    ss.refined[pick[0] + "," + pick[1]] = true;
+    ss.playerScore++;
+    log = "你精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！该格子价值+1";
+  } else if (action === "defend") {
+    ss.playerDefend = true;
+    log = "你摆出防御架势，本回合对方无法夺取你的格子";
+  } else if (action === "potion") {
+    ss.enemyStunned = true;
+    ss.potionCooldown = 3;
+    log = "哈哈哈看我神秘药剂！企鹅狗：啊！！！（企鹅狗本回合无法行动）";
+  }
+
+  // 检查胜利
+  var winScore = ss.difficulty === "hard" ? 17 : 10;
+  if (ss.playerScore >= winScore) {
+    ss.gameOver = true;
+    descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#5cb85c;font-size:18px;font-weight:700;">你赢了！' + winScore + '分达成！</div></div>';
+    document.getElementById("actions-area").innerHTML = "";
+    setTimeout(function() { sandboxVictory(); }, 1500);
+    return;
+  }
+
+  // 企鹅狗行动
+  if (!ss.enemyStunned) {
+    sandboxEnemyAI();
+  } else {
+    ss.enemyStunned = false;
+  }
+
+  // 冷却减1
+  if (ss.potionCooldown > 0) ss.potionCooldown--;
+  ss.playerDefend = false;
+  ss.enemyDefend = false;
+
+  // 检查企鹅狗胜利
+  if (ss.enemyScore >= winScore) {
+    ss.gameOver = true;
+    descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#ff4444;font-size:18px;font-weight:700;">企鹅狗率先达到' + winScore + '分！</div></div>';
+    document.getElementById("actions-area").innerHTML = "";
+    setTimeout(function() { sandboxDefeat(); }, 1500);
+    return;
+  }
+
+  updateSandboxHUD();
+  renderSandboxActions();
+  if (log) {
+    var toast = document.createElement("div");
+    toast.className = "toast show";
+    toast.textContent = log;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 2000);
+  }
+}
+
+function sandboxEnemyAI() {
+  var ss = sandboxState;
+  var adj = getAdjacentCells("enemy");
+  var hasAdj = adj.length > 0;
+
+  // 优先防御如果玩家接近胜利
+  if (ss.playerScore >= 7 && Math.random() < 0.4 && hasAdj) {
+    ss.enemyDefend = true;
+    return;
+  }
+
+  // 随机选择行动
+  var roll = Math.random();
+  if (roll < 0.45 && hasAdj) {
+    // 铺设：优先夺取玩家格子（仅在接壤时）
+    var playerTargets = [];
+    var emptyTargets = [];
+    for (var i = 0; i < adj.length; i++) {
+      if (ss.board[adj[i][0]][adj[i][1]] === "player") {
+        playerTargets.push(adj[i]);
+      } else {
+        emptyTargets.push(adj[i]);
+      }
+    }
+    var pick;
+    if (playerTargets.length > 0 && Math.random() < 0.8) {
+      pick = playerTargets[Math.floor(Math.random() * playerTargets.length)];
+    } else if (emptyTargets.length > 0) {
+      pick = emptyTargets[Math.floor(Math.random() * emptyTargets.length)];
+    } else {
+      pick = playerTargets[Math.floor(Math.random() * playerTargets.length)];
+    }
+    if (ss.board[pick[0]][pick[1]] === "player" && ss.playerDefend) {
+      ss.enemyScore = Math.max(0, ss.enemyScore - 1);
+    } else {
+      ss.board[pick[0]][pick[1]] = "enemy";
+      ss.enemyScore++;
+    }
+  } else if (roll < 0.8) {
+    // 精摆（概率提高：从30%提高到35%）
+    var enemyCells = [];
+    for (var r = 0; r < ss.rows; r++) {
+      for (var c = 0; c < ss.cols; c++) {
+        if (ss.board[r][c] === "enemy") enemyCells.push([r, c]);
+      }
+    }
+    if (enemyCells.length > 0) {
+      var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
+      ss.refined[pick[0] + "," + pick[1]] = true;
+      ss.enemyScore++;
+    }
+  } else if (hasAdj) {
+    // 防御（仅在接壤时使用）
+    ss.enemyDefend = true;
+  } else {
+    // 无接壤且没抽到精摆，强制精摆
+    var enemyCells = [];
+    for (var r = 0; r < ss.rows; r++) {
+      for (var c = 0; c < ss.cols; c++) {
+        if (ss.board[r][c] === "enemy") enemyCells.push([r, c]);
+      }
+    }
+    if (enemyCells.length > 0) {
+      var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
+      ss.refined[pick[0] + "," + pick[1]] = true;
+      ss.enemyScore++;
+    }
+  }
+}
+
+function sandboxVictory() {
+  unlockAchievement("sandbox_win");
+  if (sandboxState.difficulty === "hard") unlockAchievement("sandbox_hard_win");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "62d9adb6d7848472877a00da89957ae2.jpg";
+    img.style.display = "block";
+  });
+  document.getElementById("actions-area").style.display = "none";
+  startTypewriter("企鹅狗：是我输了|哈哈哈哈！胜利者！是我", null, null, null);
+  var check = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(check);
+      var gc = document.getElementById("game-container");
+      gc.classList.add("shake");
+      setTimeout(function() { gc.classList.remove("shake"); }, 500);
+      startTypewriter("企鹅狗：唉...我失败了，没能把你拉出来|你这家伙在说什么呢|不管了，这企鹅狗一直在神神叨叨的...我要赶紧离开这里", null, "lab_floor", null);
+    }
+  }, 100);
+}
+
+function sandboxDefeat() {
+  unlockAchievement("sandbox_lose");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "62d9adb6d7848472877a00da89957ae2.jpg";
+    img.style.display = "block";
+  });
+  document.getElementById("actions-area").style.display = "none";
+  startTypewriter("可恶.....还是输了吗|企鹅狗：可怜的孩子啊.....|企鹅狗：你先出去吧.....", null, "lab_floor", null);
+}
+
+function cancelRAF() {
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
 }
 
 // 开始打字机
@@ -2654,11 +3379,28 @@ function openBackpack() {
     '<div class="modal">' +
     '<div class="modal-header">🎒 背包</div>' +
     '<div class="modal-body">' + itemsHtml + '</div>' +
+    // 控制台
+    '<div class="backpack-console">' +
+    '<div class="console-title">🖥️ 控制台</div>' +
+    '<div style="display:flex;gap:6px;">' +
+    '<input type="text" id="console-input" class="console-input" placeholder="输入道具名称获取...">' +
+    '<button id="console-btn" class="console-btn">获取</button>' +
+    '</div>' +
+    '<div id="console-msg" style="font-size:12px;color:#5cb85c;margin-top:4px;min-height:16px;"></div>' +
+    '</div>' +
     '<div class="modal-footer">' +
     '<button class="modal-close-btn" id="backpack-close-btn">关 闭</button>' +
     '</div>' +
     '</div>';
   document.body.appendChild(overlay);
+
+  // 控制台逻辑
+  overlay.querySelector("#console-btn").addEventListener("click", function() {
+    handleConsoleInput(overlay);
+  });
+  overlay.querySelector("#console-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") handleConsoleInput(overlay);
+  });
 
   // 绑定使用按钮
   overlay.querySelectorAll(".item-use-btn").forEach(function(btn) {
@@ -2675,6 +3417,77 @@ function openBackpack() {
 
   overlay.querySelector("#backpack-close-btn").addEventListener("click", function() { overlay.remove(); });
   overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.remove(); });
+}
+
+// 控制台输入处理
+function handleConsoleInput(overlay) {
+  var input = overlay.querySelector("#console-input");
+  var msg = overlay.querySelector("#console-msg");
+  var name = input.value.trim();
+  if (!name) { msg.style.color = "#ff6b6b"; msg.textContent = "请输入道具名称"; return; }
+
+  // 按名称匹配道具
+  var found = null;
+  for (var key in ITEM_CONFIG) {
+    if (ITEM_CONFIG[key].name === name) { found = key; break; }
+  }
+  if (!found) {
+    // 也尝试按id匹配
+    if (ITEM_CONFIG[name]) { found = name; }
+  }
+  if (!found) {
+    msg.style.color = "#ff6b6b";
+    msg.textContent = "未找到道具：" + name;
+    return;
+  }
+
+  if (hasItem(found)) {
+    msg.style.color = "#ffc832";
+    msg.textContent = "已拥有：" + ITEM_CONFIG[found].name;
+  } else {
+    addItem(found);
+    msg.style.color = "#5cb85c";
+    msg.textContent = "已获取：" + ITEM_CONFIG[found].name;
+    // 刷新背包内容
+    refreshBackpackContent(overlay);
+  }
+  input.value = "";
+}
+
+// 刷新背包道具列表
+function refreshBackpackContent(overlay) {
+  var body = overlay.querySelector(".modal-body");
+  var itemsHtml = "";
+  if (gameState.inventory.length === 0) {
+    itemsHtml = '<div class="empty-text">背包空空如也<br>去探索校园收集道具吧！</div>';
+  } else {
+    gameState.inventory.forEach(function(itemId) {
+      var item = ITEM_CONFIG[itemId];
+      if (!item) return;
+      itemsHtml +=
+        '<div class="item-card">' +
+        '<div class="item-icon">📦</div>' +
+        '<div class="item-info">' +
+        '<div class="item-name">' + item.name + '</div>' +
+        '<div class="item-desc">' + item.desc + '</div>' +
+        '</div>' +
+        (item.usable ? '<button class="item-use-btn" data-item="' + itemId + '">使用</button>' : '') +
+        '</div>';
+    });
+  }
+  body.innerHTML = itemsHtml;
+  // 重新绑定使用按钮
+  body.querySelectorAll(".item-use-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var itemId = btn.dataset.item;
+      var item = ITEM_CONFIG[itemId];
+      if (item && item.useEvent) {
+        overlay.remove();
+        showEventModal(item.useEvent);
+      }
+    });
+  });
 }
 
 // 打开成就列表
@@ -2926,7 +3739,7 @@ function showTips() {
   showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
 }
 
-// ===== 传送门 =====
+// ===== 梦境裂隙 =====
 function openPortal() {
   var overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -2942,17 +3755,42 @@ function openPortal() {
     groups[name].push({ id: sid, name: name });
   }
 
-  var html = '<div class="modal"><div class="modal-header">🌀 传送门</div>';
-  html += '<div class="modal-body"><div class="portal-list">';
+  var html = '<div class="modal"><div class="modal-header">🌀 梦境裂隙</div>';
+  html += '<div class="modal-body">';
+
+  // 精选小游戏
+  html += '<div class="portal-games">';
+  html += '<div class="portal-games-title">🎮 精选小游戏</div>';
+  html += '<div class="portal-games-list">';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderScene(\'alien_game\');">';
+  html += '<span class="game-icon">👽</span>外星人石头剪刀布</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderScene(\'hermit_difficulty\');">';
+  html += '<span class="game-icon">⚔️</span>哈基高御前决斗</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderScene(\'chem_lab_difficulty\');">';
+  html += '<span class="game-icon">🧪</span>大脚鸡化学决斗</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderScene(\'confucius_difficulty\');">';
+  html += '<span class="game-icon">🌿</span>孔子像吃草</button>';
+
+  html += '<button class="portal-game-btn" id="portal-sandbox-btn">';
+  html += '<span class="game-icon">🏆</span>沙盘决斗</button>';
+
+  html += '</div></div>';
+
+  html += '<input class="portal-search" id="portal-search-input" type="text" placeholder="搜索场景名称或ID..." autocomplete="off">';
+  html += '<div class="portal-list" id="portal-list">';
 
   var groupNames = Object.keys(groups);
   for (var g = 0; g < groupNames.length; g++) {
     var gname = groupNames[g];
     var scenes = groups[gname];
-    html += '<div class="portal-group"><div class="portal-group-name">' + gname + '</div>';
+    html += '<div class="portal-group" data-group="' + gname + '"><div class="portal-group-name">' + gname + '</div>';
     for (var s = 0; s < scenes.length; s++) {
       var sc = scenes[s];
-      html += '<button class="portal-scene-btn" data-scene="' + sc.id + '">' + gname + '<span class="portal-scene-id">' + sc.id + '</span></button>';
+      html += '<button class="portal-scene-btn" data-scene="' + sc.id + '" data-name="' + gname + '">' + gname + '<span class="portal-scene-id">' + sc.id + '</span></button>';
     }
     html += '</div>';
   }
@@ -2961,6 +3799,28 @@ function openPortal() {
   html += '<div class="modal-footer"><button class="modal-close-btn" id="portal-close-btn">关 闭</button></div></div>';
   overlay.innerHTML = html;
   document.body.appendChild(overlay);
+
+  // 搜索功能
+  var searchInput = overlay.querySelector("#portal-search-input");
+  searchInput.addEventListener("input", function() {
+    var query = searchInput.value.toLowerCase().trim();
+    var groups = overlay.querySelectorAll(".portal-group");
+    groups.forEach(function(group) {
+      var btns = group.querySelectorAll(".portal-scene-btn");
+      var visible = false;
+      btns.forEach(function(btn) {
+        var name = (btn.dataset.name || "").toLowerCase();
+        var sceneId = (btn.dataset.scene || "").toLowerCase();
+        if (!query || name.indexOf(query) !== -1 || sceneId.indexOf(query) !== -1) {
+          btn.style.display = "";
+          visible = true;
+        } else {
+          btn.style.display = "none";
+        }
+      });
+      group.style.display = visible ? "" : "none";
+    });
+  });
 
   // 绑定场景按钮点击
   overlay.querySelectorAll(".portal-scene-btn").forEach(function(btn) {
@@ -2971,6 +3831,16 @@ function openPortal() {
       stopTypewriter();
       renderScene(sceneId);
     });
+  });
+
+  // 沙盘决斗按钮：弹出难度选择
+  overlay.querySelector("#portal-sandbox-btn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    var gamesList = overlay.querySelector(".portal-games-list");
+    gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择沙盘难度</div>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();startSandboxGame(\'normal\');">普通（3×4棋盘，10分获胜）</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();startSandboxGame(\'hard\');">困难（4×4棋盘，17分获胜）</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
   });
 
   overlay.querySelector("#portal-close-btn").addEventListener("click", function() { overlay.remove(); });
