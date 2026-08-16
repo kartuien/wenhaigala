@@ -442,17 +442,17 @@ body {
 
 /* ===== 沙盘游戏样式 ===== */
 .sandbox-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 4px; padding: 8px 0; max-width: 320px; margin: 0 auto;
+  display: grid;
+  gap: 4px; padding: 6px 0 2px; margin: 0 auto;
 }
 .sandbox-cell {
-  aspect-ratio: 1; border-radius: 6px;
+  width: 50px; height: 50px; border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700;
+  font-size: 14px; font-weight: 700;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(232,213,183,0.12);
   color: rgba(232,213,183,0.3);
-  transition: all 0.2s;
+  transition: background 0.2s, border-color 0.2s;
 }
 .sandbox-player {
   background: rgba(92,184,92,0.2) !important;
@@ -464,6 +464,28 @@ body {
   border-color: rgba(255,107,107,0.5) !important;
   color: #ff6b6b !important;
 }
+/* 精摆格：金色发光边框 */
+.sandbox-refined-cell {
+  border-color: #ffc832 !important;
+  box-shadow: 0 0 6px rgba(255,200,50,0.35), inset 0 0 4px rgba(255,200,50,0.15);
+}
+/* 最近变化的格子：闪烁动画 */
+.sandbox-flash { animation: sandbox-flash 0.6s ease-out; }
+@keyframes sandbox-flash {
+  0% { transform: scale(0.7); filter: brightness(2.5); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+/* 高价值地块：紫色标记 */
+.sandbox-hv {
+  border-color: rgba(180,100,255,0.6) !important;
+  color: #b464ff !important;
+  background: rgba(180,100,255,0.08) !important;
+  font-size: 16px;
+}
+.sandbox-hv-owned {
+  box-shadow: 0 0 6px rgba(180,100,255,0.45), inset 0 0 3px rgba(180,100,255,0.2);
+}
 .sandbox-selectable {
   cursor: pointer; border: 2px dashed rgba(255,200,50,0.5) !important;
 }
@@ -472,10 +494,34 @@ body {
   border-color: rgba(255,200,50,0.8) !important;
 }
 
-/* 沙盘行动按钮 - 3个并排 */
+/* 沙盘分数进度条 */
+.sandbox-progress {
+  height: 5px; border-radius: 3px; margin: 2px 0;
+  background: rgba(255,255,255,0.06); overflow: hidden;
+}
+.sandbox-progress-fill {
+  height: 100%; border-radius: 3px; transition: width 0.4s ease;
+}
+.sandbox-progress-player { background: linear-gradient(90deg, #3d8b3d, #5cb85c); }
+.sandbox-progress-enemy { background: linear-gradient(270deg, #a83232, #ff6b6b); }
+
+/* 沙盘战斗日志 */
+.sandbox-log {
+  margin-top: 8px; padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(232,213,183,0.08);
+  max-height: 96px; overflow-y: auto;
+}
+.sandbox-log-entry {
+  font-size: 11px; line-height: 1.7; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 沙盘行动按钮 - 6个，三列两行 */
 .sandbox-action-btn {
-  flex: 0 0 calc(25% - 5px);
-  max-width: calc(25% - 5px);
+  flex: 0 0 calc(33.33% - 4px);
+  max-width: calc(33.33% - 4px);
   padding: 10px 4px !important;
   font-size: 12px !important;
   letter-spacing: 0.5px !important;

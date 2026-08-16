@@ -2707,8 +2707,8 @@ var sandboxState = null;
 function startSandboxGame(difficulty) {
   difficulty = difficulty || "normal";
   var isHard = difficulty === "hard";
-  var rows = isHard ? 4 : 3;
-  var cols = 4;
+  var rows = 4;
+  var cols = isHard ? 5 : 4;
 
   // 创建棋盘
   var board = [];
@@ -2721,13 +2721,28 @@ function startSandboxGame(difficulty) {
 
   if (isHard) {
     // 困难模式：企鹅狗开局2格（右上角），玩家左下角1格
-    board[0][3] = "enemy";
-    board[0][2] = "enemy";
+    board[0][cols - 1] = "enemy";
+    board[0][cols - 2] = "enemy";
     board[rows - 1][0] = "player";
   } else {
-    // 普通模式：3行4列，企鹅狗右上角1格，玩家左下角1格
-    board[0][3] = "enemy";
+    // 普通模式：企鹅狗右上角1格，玩家左下角1格
+    board[0][cols - 1] = "enemy";
     board[rows - 1][0] = "player";
+  }
+
+  // 随机选择2个高价值地块（不能是双方初始领地）
+  var highValue = {};
+  var placed = 0;
+  var guard = 0;
+  while (placed < 2 && guard < 200) {
+    guard++;
+    var hr = Math.floor(Math.random() * rows);
+    var hc = Math.floor(Math.random() * cols);
+    var hk = hr + "," + hc;
+    if (board[hr][hc] === null && !highValue[hk]) {
+      highValue[hk] = true;
+      placed++;
+    }
   }
 
   sandboxState = {
@@ -2736,6 +2751,7 @@ function startSandboxGame(difficulty) {
     rows: rows,
     cols: cols,
     refined: {},
+    highValue: highValue,
     playerScore: 1,
     enemyScore: isHard ? 2 : 1,
     playerDefend: false,
@@ -2743,50 +2759,177 @@ function startSandboxGame(difficulty) {
     potionCooldown: 0,
     enemyStunned: false,
     gameOver: false,
+    turn: 0,
+    maxTurns: 30,
+    logs: [],
+    lastChange: null,
+    // AI性格随机化：aggressive=激进夺地 / conservative=保守精摆
+    aiPersonality: Math.random() < 0.5 ? "aggressive" : "conservative",
   };
 
   document.getElementById("location-name").textContent = isHard ? "沙盘对决（困难）" : "沙盘对决";
-  updateSandboxHUD();
-  renderSandboxActions();
+
+  // 显示沙盘对决图片（从传送门进入时覆盖上一场景的图）
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "62d9adb6d7848472877a00da89957ae2.jpg";
+    img.style.display = "block";
+  });
+
+  // 先显示规则说明，确认后开始
+  showSandboxRules(difficulty);
+}
+
+// 实时计算某方分数：普通地1分、高价值地2分、精摆价值翻倍
+function calcSandboxScore(owner) {
+  var ss = sandboxState;
+  var score = 0;
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      if (ss.board[r][c] === owner) {
+        var base = ss.highValue[r + "," + c] ? 2 : 1;
+        score += ss.refined[r + "," + c] ? base * 2 : base;
+      }
+    }
+  }
+  return score;
+}
+
+// 同步双方分数（棋盘变化后调用）
+function refreshSandboxScores() {
+  sandboxState.playerScore = calcSandboxScore("player");
+  sandboxState.enemyScore = calcSandboxScore("enemy");
+}
+
+// 防御成功时，夺取方随机失去一块领地（优先未精摆的），返回坐标或null
+function sandboxLoseCell(owner) {
+  var ss = sandboxState;
+  var unrefined = [], refinedCells = [];
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      if (ss.board[r][c] === owner) {
+        var key = r + "," + c;
+        if (ss.refined[key]) refinedCells.push([r, c]);
+        else unrefined.push([r, c]);
+      }
+    }
+  }
+  var pool = unrefined.length > 0 ? unrefined : refinedCells;
+  if (pool.length === 0) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// 沙盘规则说明弹窗
+function showSandboxRules(difficulty) {
+  var isHard = difficulty === "hard";
+  var winScore = isHard ? 15 : 10;
+  var overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  var html = '<div class="modal"><div class="modal-header">🎲 沙盘对决规则</div>';
+  html += '<div class="modal-body">';
+  html += '<div style="color:#ffc832;font-size:13px;margin-bottom:6px;font-weight:700;">' + (isHard ? "困难模式：4×5棋盘 · " : "普通模式：4×4棋盘 · ") + winScore + '分获胜</div>';
+  html += '<div style="font-size:12px;color:#b464ff;margin-bottom:6px;">★ 分数实时计算：每块地1分，高价值地2分，精摆使地块价值翻倍</div>';
+  html += '<ul style="font-size:12px;line-height:1.9;color:rgba(232,213,183,0.85);padding-left:18px;">';
+  html += '<li><b style="color:#5cb85c;">铺设</b>：占领与己方接壤的<b>空格</b>（高价值★地值2分）</li>';
+  html += '<li><b style="color:#5cb85c;">夺取</b>：抢夺接壤的敌方格子，摧毁其精摆（对方掉分，你得分）</li>';
+  html += '<li><b style="color:#5cb85c;">精摆</b>：点击自己的未精摆格子，价值翻倍（高价值地1→2分，普通地1→2分、高价值2→4分）</li>';
+  html += '<li><b style="color:#5cb85c;">防御</b>：敌方夺取失败时，会随机震碎它一块领地</li>';
+  html += '<li><b style="color:#b464ff;">药剂</b>：眩晕企鹅狗1回合（需神秘药剂，冷却3回合）</li>';
+  html += '<li style="color:rgba(232,213,183,0.6);">回合上限30，超时按分数判定胜负</li>';
+  if (isHard) html += '<li style="color:#ff6b6b;">困难企鹅狗开局2格，会优先抢占高价值地、夺取你的精摆格！</li>';
+  html += '</ul></div>';
+  html += '<div class="modal-footer"><button class="modal-close-btn" id="sandbox-rules-start">开始对战</button></div></div>';
+  overlay.innerHTML = html;
+  document.body.appendChild(overlay);
+  overlay.querySelector("#sandbox-rules-start").addEventListener("click", function() {
+    overlay.remove();
+    updateSandboxHUD();
+    renderSandboxActions();
+  });
+}
+
+// 记录沙盘战斗日志（最新的在前面）
+function pushSandboxLog(msg, type) {
+  var ss = sandboxState;
+  if (!ss) return;
+  ss.logs.unshift({ msg: msg, type: type || "player" });
+  if (ss.logs.length > 10) ss.logs.pop();
 }
 
 function updateSandboxHUD(selectMode, selectAction) {
   var descArea = document.getElementById("description-area");
   var ss = sandboxState;
+  var winScore = ss.difficulty === "hard" ? 15 : 10;
   var html = '<div class="battle-hud">';
-  html += '<div style="display:flex;justify-content:space-between;padding:8px 0;">';
-  html += '<span style="color:#5cb85c;">你：' + ss.playerScore + '分</span>';
-  html += '<span style="color:#ff6b6b;">企鹅狗：' + ss.enemyScore + '分</span>';
+
+  // 顶部分数 + 回合数
+  html += '<div style="display:flex;justify-content:space-between;padding:6px 0 4px;font-size:13px;">';
+  html += '<span style="color:#5cb85c;">你：<b>' + ss.playerScore + '</b>/' + winScore + '</span>';
+  html += '<span style="color:rgba(232,213,183,0.5);font-size:12px;">回合 ' + ss.turn + '/' + ss.maxTurns + '</span>';
+  html += '<span style="color:#ff6b6b;">企鹅狗：<b>' + ss.enemyScore + '</b>/' + winScore + '</span>';
   html += '</div>';
 
+  // 分数进度条
+  var pPct = Math.min(100, Math.round(ss.playerScore / winScore * 100));
+  var ePct = Math.min(100, Math.round(ss.enemyScore / winScore * 100));
+  html += '<div class="sandbox-progress"><div class="sandbox-progress-fill sandbox-progress-player" style="width:' + pPct + '%;"></div></div>';
+  html += '<div class="sandbox-progress"><div class="sandbox-progress-fill sandbox-progress-enemy" style="width:' + ePct + '%;float:right;"></div></div>';
+
   if (selectMode && selectAction) {
-    html += '<div style="text-align:center;color:#ffc832;font-size:13px;margin:4px 0;">点击棋盘选择目标格子</div>';
+    var modeText = selectAction === "refine" ? "点击自己未精摆的格子"
+      : selectAction === "seize" ? "点击要夺取的敌方格子（虚线框）"
+      : "点击要铺设的空格子（虚线框）";
+    html += '<div style="text-align:center;color:#ffc832;font-size:13px;margin:4px 0;">' + modeText + '</div>';
   }
 
   // 计算可选格子
   var validCells = {};
-  if (selectMode && selectAction === "settle") {
+  if (selectMode && (selectAction === "settle" || selectAction === "seize")) {
     var adj = getAdjacentCells("player");
     for (var i = 0; i < adj.length; i++) {
-      validCells[adj[i][0] + "," + adj[i][1]] = true;
+      var ar = adj[i][0], ac = adj[i][1];
+      // 铺设只能选空格，夺取只能选敌方格
+      if ((selectAction === "settle" && ss.board[ar][ac] === null) ||
+          (selectAction === "seize" && ss.board[ar][ac] === "enemy")) {
+        validCells[ar + "," + ac] = true;
+      }
+    }
+  } else if (selectMode && selectAction === "refine") {
+    for (var rr = 0; rr < ss.rows; rr++) {
+      for (var cc = 0; cc < ss.cols; cc++) {
+        if (ss.board[rr][cc] === "player" && !ss.refined[rr + "," + cc]) {
+          validCells[rr + "," + cc] = true;
+        }
+      }
     }
   }
 
-  // 渲染棋盘
-  html += '<div class="sandbox-grid" id="sandbox-grid" style="grid-template-columns: repeat(' + ss.cols + ', 1fr);">';
+  // 渲染棋盘（格子固定小尺寸，棋盘宽度随列数自适应）
+  var gridWidth = ss.cols * 50 + (ss.cols - 1) * 4;
+  html += '<div class="sandbox-grid" id="sandbox-grid" style="grid-template-columns: repeat(' + ss.cols + ', 50px); width:' + gridWidth + 'px; max-width:100%;">';
   for (var r = 0; r < ss.rows; r++) {
     for (var c = 0; c < ss.cols; c++) {
       var cell = ss.board[r][c];
       var key = r + "," + c;
+      var isHV = ss.highValue[key] ? true : false;
       var cls = "sandbox-cell";
       var content = "";
-      if (cell === "player") {
-        cls += " sandbox-player";
-        content = ss.refined[key] ? "2" : "1";
-      } else if (cell === "enemy") {
-        cls += " sandbox-enemy";
-        content = ss.refined[key] ? "2" : "1";
+      if (cell === "player" || cell === "enemy") {
+        // 显示该格实时价值：普通1/2（精摆翻倍），高价值2/4
+        var base = isHV ? 2 : 1;
+        content = ss.refined[key] ? base * 2 : base;
+        cls += cell === "player" ? " sandbox-player" : " sandbox-enemy";
+        if (isHV) cls += " sandbox-hv-owned";
+      } else if (isHV) {
+        content = "★";
+        cls += " sandbox-hv";
       }
+      if (ss.refined[key]) cls += " sandbox-refined-cell";
+      // 最近变化的格子播放闪烁动画
+      if (ss.lastChange && ss.lastChange[0] === r && ss.lastChange[1] === c) cls += " sandbox-flash";
       if (selectMode && selectAction && validCells[key]) {
         cls += " sandbox-selectable";
       }
@@ -2795,8 +2938,20 @@ function updateSandboxHUD(selectMode, selectAction) {
   }
   html += '</div>';
 
+  // 战斗日志面板
+  html += '<div class="sandbox-log">';
+  for (var li = 0; li < ss.logs.length && li < 6; li++) {
+    var entry = ss.logs[li];
+    var color = entry.type === "enemy" ? "#ff6b6b" : (entry.type === "sys" ? "#ffc832" : "#5cb85c");
+    html += '<div class="sandbox-log-entry" style="color:' + color + ';">' + entry.msg + '</div>';
+  }
+  if (ss.logs.length === 0) {
+    html += '<div class="sandbox-log-entry" style="color:rgba(232,213,183,0.35);">（战斗开始...）</div>';
+  }
+  html += '</div>';
+
   if (ss.enemyStunned) {
-    html += '<div style="text-align:center;color:#ff6600;margin-top:6px;">企鹅狗被神秘药剂眩晕，本回合无法行动！</div>';
+    html += '<div style="text-align:center;color:#ff6600;margin-top:6px;font-size:12px;">🐧 企鹅狗被眩晕，本回合无法行动！</div>';
   }
   html += '</div>';
   descArea.innerHTML = html;
@@ -2826,18 +2981,9 @@ function renderSandboxActions() {
   actionsArea.style.gap = "6px";
   actionsArea.style.justifyContent = "center";
 
-  // 铺设：点击棋盘选择目标格子
-  var adjCells = getAdjacentCells("player");
-  var hasAdj = adjCells.length > 0;
-  var settleBtn = document.createElement("button");
-  settleBtn.className = "action-btn sandbox-action-btn";
-  settleBtn.textContent = "铺设";
-  settleBtn.title = "点击棋盘选择目标格子";
-  if (!hasAdj) settleBtn.disabled = true;
-  settleBtn.onclick = function() {
-    // 进入棋盘选择模式
-    updateSandboxHUD(true, "settle");
-    // 显示取消按钮
+  // 进入棋盘选择模式的公共流程（铺设/夺取/精摆共用取消逻辑）
+  function enterSelectMode(action) {
+    updateSandboxHUD(true, action);
     actionsArea.innerHTML = "";
     var cancelBtn = document.createElement("button");
     cancelBtn.className = "action-btn";
@@ -2848,22 +2994,57 @@ function renderSandboxActions() {
       renderSandboxActions();
     };
     actionsArea.appendChild(cancelBtn);
-  };
+  }
+
+  // 统计相邻空格（铺设目标）
+  var adjCells = getAdjacentCells("player");
+  var emptyAdj = 0, enemyAdj = 0;
+  for (var ai = 0; ai < adjCells.length; ai++) {
+    if (ss.board[adjCells[ai][0]][adjCells[ai][1]] === null) emptyAdj++;
+    else enemyAdj++;
+  }
+
+  // 铺设：只能占领相邻空格
+  var settleBtn = document.createElement("button");
+  settleBtn.className = "action-btn sandbox-action-btn";
+  settleBtn.textContent = "铺设";
+  settleBtn.title = "占领与己方接壤的空格（高价值★地值2分）";
+  if (emptyAdj === 0) settleBtn.disabled = true;
+  settleBtn.onclick = function() { enterSelectMode("settle"); };
   actionsArea.appendChild(settleBtn);
 
-  // 精摆
+  // 夺取：抢夺相邻敌方格子
+  var seizeBtn = document.createElement("button");
+  seizeBtn.className = "action-btn sandbox-action-btn";
+  seizeBtn.style.background = "rgba(255,107,107,0.12)";
+  seizeBtn.style.borderColor = "rgba(255,107,107,0.45)";
+  seizeBtn.style.color = "#ff6b6b";
+  seizeBtn.textContent = "夺取";
+  seizeBtn.title = "抢夺接壤的敌方格子，摧毁其精摆";
+  if (enemyAdj === 0) seizeBtn.disabled = true;
+  seizeBtn.onclick = function() { enterSelectMode("seize"); };
+  actionsArea.appendChild(seizeBtn);
+
+  // 精摆：点击自己的未精摆格子
+  var refinable = 0;
+  for (var rr = 0; rr < ss.rows; rr++) {
+    for (var cc = 0; cc < ss.cols; cc++) {
+      if (ss.board[rr][cc] === "player" && !ss.refined[rr + "," + cc]) refinable++;
+    }
+  }
   var refineBtn = document.createElement("button");
   refineBtn.className = "action-btn sandbox-action-btn";
   refineBtn.textContent = "精摆";
-  refineBtn.title = "让一个格子价值翻倍";
-  refineBtn.onclick = function() { doSandboxAction("refine"); };
+  refineBtn.title = "点击自己的未精摆格子，价值翻倍";
+  if (refinable === 0) refineBtn.disabled = true;
+  refineBtn.onclick = function() { enterSelectMode("refine"); };
   actionsArea.appendChild(refineBtn);
 
   // 防御
   var defendBtn = document.createElement("button");
   defendBtn.className = "action-btn sandbox-action-btn";
   defendBtn.textContent = "防御";
-  defendBtn.title = "本回合对方无法夺取你的格子";
+  defendBtn.title = "敌方夺取失败时，会随机震碎它一块领地";
   defendBtn.onclick = function() { doSandboxAction("defend"); };
   actionsArea.appendChild(defendBtn);
 
@@ -2879,28 +3060,17 @@ function renderSandboxActions() {
   if (!hasPotion) potionBtn.disabled = true;
   potionBtn.onclick = function() { doSandboxAction("potion"); };
   actionsArea.appendChild(potionBtn);
-}
 
-function showSandboxTargetSelect(cells, action) {
-  var actionsArea = document.getElementById("actions-area");
-  actionsArea.innerHTML = "";
-  actionsArea.style.display = "flex";
-  actionsArea.style.flexDirection = "column";
-  actionsArea.style.gap = "4px";
-
-  var label = document.createElement("div");
-  label.style.cssText = "text-align:center;color:#e8d5b7;font-size:13px;padding:4px;";
-  label.textContent = "选择目标格子：";
-  actionsArea.appendChild(label);
-
-  cells.forEach(function(cell) {
-    var btn = document.createElement("button");
-    btn.className = "action-btn";
-    btn.textContent = "第" + (cell[0] + 1) + "行 第" + (cell[1] + 1) + "列";
-    btn.style.width = "100%";
-    btn.onclick = function() { doSandboxAction(action, cell[0], cell[1]); };
-    actionsArea.appendChild(btn);
-  });
+  // 退出按钮
+  var quitBtn = document.createElement("button");
+  quitBtn.className = "action-btn sandbox-action-btn";
+  quitBtn.style.background = "rgba(255,255,255,0.04)";
+  quitBtn.style.borderColor = "rgba(232,213,183,0.15)";
+  quitBtn.style.color = "rgba(232,213,183,0.45)";
+  quitBtn.textContent = "退出";
+  quitBtn.title = "放弃本局，离开沙盘";
+  quitBtn.onclick = function() { renderScene("lab_floor"); };
+  actionsArea.appendChild(quitBtn);
 }
 
 function getAdjacentCells(owner) {
@@ -2933,50 +3103,81 @@ function doSandboxAction(action, r, c) {
 
   var descArea = document.getElementById("description-area");
   var log = "";
+  ss.lastChange = null;
 
   // 玩家行动
   if (action === "settle") {
-    // 验证目标格子是否相邻
+    // 铺设：只能铺相邻空格
+    if (ss.board[r][c] !== null) return;
     var adjCells = getAdjacentCells("player");
     var valid = false;
     for (var i = 0; i < adjCells.length; i++) {
       if (adjCells[i][0] === r && adjCells[i][1] === c) { valid = true; break; }
     }
     if (!valid) return;
-    if (ss.board[r][c] === "enemy" && ss.enemyDefend) {
-      // 对方防御，玩家失去1分，格子归对方
-      ss.playerScore = Math.max(0, ss.playerScore - 1);
-      log = "企鹅狗防御了！你失去1分！";
+    var isHV = ss.highValue[r + "," + c] ? true : false;
+    ss.board[r][c] = "player";
+    ss.lastChange = [r, c];
+    log = "你铺设了第" + (r+1) + "行第" + (c+1) + "列！" + (isHV ? "★高价值地+2分" : "+1分");
+  } else if (action === "seize") {
+    // 夺取：只能夺取相邻敌方格
+    if (ss.board[r][c] !== "enemy") return;
+    var adjCells2 = getAdjacentCells("player");
+    var valid2 = false;
+    for (var j = 0; j < adjCells2.length; j++) {
+      if (adjCells2[j][0] === r && adjCells2[j][1] === c) { valid2 = true; break; }
+    }
+    if (!valid2) return;
+    if (ss.enemyDefend) {
+      // 企鹅狗防御成功：你随机失去一块领地
+      var lost = sandboxLoseCell("player");
+      if (lost) {
+        delete ss.refined[lost[0] + "," + lost[1]];
+        ss.board[lost[0]][lost[1]] = null;
+        ss.lastChange = [lost[0], lost[1]];
+        log = "🐧 企鹅狗防御了！你的第" + (lost[0]+1) + "行第" + (lost[1]+1) + "列被震碎！";
+      } else {
+        log = "🐧 企鹅狗防御了！夺取失败";
+      }
     } else {
+      var key = r + "," + c;
+      var wasRefined = ss.refined[key] ? true : false;
+      var isHV2 = ss.highValue[key] ? true : false;
+      delete ss.refined[key];
       ss.board[r][c] = "player";
-      ss.playerScore++;
-      log = "你夺取了第" + (r+1) + "行第" + (c+1) + "列！+1分";
+      ss.lastChange = [r, c];
+      log = "你夺取了第" + (r+1) + "行第" + (c+1) + "列！" + (isHV2 ? "★高价值地" : "") + (wasRefined ? "（摧毁了企鹅狗的精摆！）" : "");
     }
   } else if (action === "refine") {
-    // 精摆一个自己的格子
-    var playerCells = [];
-    for (var rr = 0; rr < ss.rows; rr++) {
-      for (var cc = 0; cc < ss.cols; cc++) {
-        if (ss.board[rr][cc] === "player") playerCells.push([rr, cc]);
-      }
-    }
-    var pick = playerCells[Math.floor(Math.random() * playerCells.length)];
-    ss.refined[pick[0] + "," + pick[1]] = true;
-    ss.playerScore++;
-    log = "你精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！该格子价值+1";
+    // 验证是自己未精摆的格子
+    if (ss.board[r][c] !== "player" || ss.refined[r + "," + c]) return;
+    ss.refined[r + "," + c] = true;
+    ss.lastChange = [r, c];
+    var isHV3 = ss.highValue[r + "," + c] ? true : false;
+    log = "你精摆了第" + (r+1) + "行第" + (c+1) + "列！" + (isHV3 ? "★高价值价值翻倍至4分" : "价值翻倍至2分");
   } else if (action === "defend") {
     ss.playerDefend = true;
-    log = "你摆出防御架势，本回合对方无法夺取你的格子";
+    log = "你摆出防御架势，企鹅狗夺取会失败并被震碎领地";
   } else if (action === "potion") {
     ss.enemyStunned = true;
     ss.potionCooldown = 3;
-    log = "哈哈哈看我神秘药剂！企鹅狗：啊！！！（企鹅狗本回合无法行动）";
+    log = "你使用了神秘药剂！企鹅狗眩晕1回合";
   }
 
+  // 记录玩家日志
+  pushSandboxLog(log, "player");
+
+  // 实时重算双方分数
+  refreshSandboxScores();
+
+  // 回合数+1
+  ss.turn++;
+
   // 检查胜利
-  var winScore = ss.difficulty === "hard" ? 17 : 10;
+  var winScore = ss.difficulty === "hard" ? 15 : 10;
   if (ss.playerScore >= winScore) {
     ss.gameOver = true;
+    pushSandboxLog("🏆 你率先达到" + winScore + "分！", "sys");
     descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#5cb85c;font-size:18px;font-weight:700;">你赢了！' + winScore + '分达成！</div></div>';
     document.getElementById("actions-area").innerHTML = "";
     setTimeout(function() { sandboxVictory(); }, 1500);
@@ -2986,17 +3187,18 @@ function doSandboxAction(action, r, c) {
   // 重置 enemyDefend（玩家已行动完毕，消耗上回合企鹅狗的防御）
   ss.enemyDefend = false;
 
-  // 企鹅狗行动
-  var enemyLogs = [];
+  // 企鹅狗行动（单次行动，困难模式依靠策略而非次数）
+  var enemyLog = "";
   if (!ss.enemyStunned) {
-    enemyLogs.push(sandboxEnemyAI());
-    // 困难模式：企鹅狗每回合两次行动
-    if (ss.difficulty === "hard") {
-      enemyLogs.push(sandboxEnemyAI());
-    }
+    enemyLog = sandboxEnemyAI();
+    pushSandboxLog(enemyLog, "enemy");
   } else {
     ss.enemyStunned = false;
+    pushSandboxLog("🐧 企鹅狗眩晕中，跳过行动", "sys");
   }
+
+  // 实时重算双方分数（企鹅狗行动后）
+  refreshSandboxScores();
 
   // 冷却减1，重置 playerDefend（企鹅狗已行动完毕，消耗上回合玩家的防御）
   if (ss.potionCooldown > 0) ss.potionCooldown--;
@@ -3005,9 +3207,32 @@ function doSandboxAction(action, r, c) {
   // 检查企鹅狗胜利
   if (ss.enemyScore >= winScore) {
     ss.gameOver = true;
+    pushSandboxLog("💀 企鹅狗率先达到" + winScore + "分！", "sys");
     descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#ff4444;font-size:18px;font-weight:700;">企鹅狗率先达到' + winScore + '分！</div></div>';
     document.getElementById("actions-area").innerHTML = "";
     setTimeout(function() { sandboxDefeat(); }, 1500);
+    return;
+  }
+
+  // 回合上限结算：分数高者胜
+  if (ss.turn >= ss.maxTurns) {
+    ss.gameOver = true;
+    if (ss.playerScore > ss.enemyScore) {
+      pushSandboxLog("⏰ 30回合结束！" + ss.playerScore + " vs " + ss.enemyScore + "，你赢了！", "sys");
+      descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#5cb85c;font-size:16px;font-weight:700;">回合结束！<br>' + ss.playerScore + ' vs ' + ss.enemyScore + '<br>你以分数优势获胜！</div></div>';
+      document.getElementById("actions-area").innerHTML = "";
+      setTimeout(function() { sandboxVictory(); }, 1800);
+    } else if (ss.enemyScore > ss.playerScore) {
+      pushSandboxLog("⏰ 30回合结束！" + ss.playerScore + " vs " + ss.enemyScore + "，企鹅狗赢了", "sys");
+      descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#ff4444;font-size:16px;font-weight:700;">回合结束！<br>' + ss.playerScore + ' vs ' + ss.enemyScore + '<br>企鹅狗以分数优势获胜！</div></div>';
+      document.getElementById("actions-area").innerHTML = "";
+      setTimeout(function() { sandboxDefeat(); }, 1800);
+    } else {
+      pushSandboxLog("⏰ 30回合结束！" + ss.playerScore + " vs " + ss.enemyScore + "，平局判企鹅狗胜", "sys");
+      descArea.innerHTML = '<div class="battle-hud"><div style="text-align:center;color:#ff4444;font-size:16px;font-weight:700;">回合结束！<br>' + ss.playerScore + ' vs ' + ss.enemyScore + '<br>平局！企鹅狗获胜！</div></div>';
+      document.getElementById("actions-area").innerHTML = "";
+      setTimeout(function() { sandboxDefeat(); }, 1800);
+    }
     return;
   }
 
@@ -3022,97 +3247,158 @@ function doSandboxAction(action, r, c) {
     setTimeout(function() { toast.remove(); }, 2000);
   }
   // 显示企鹅狗行动弹窗（延迟500ms）
-  for (var ei = 0; ei < enemyLogs.length; ei++) {
-    if (enemyLogs[ei]) {
-      (function(msg, delay) {
-        setTimeout(function() {
-          var eToast = document.createElement("div");
-          eToast.className = "toast show";
-          eToast.style.background = "rgba(255,107,107,0.9)";
-          eToast.textContent = msg;
-          document.body.appendChild(eToast);
-          setTimeout(function() { eToast.remove(); }, 2000);
-        }, delay);
-      })(enemyLogs[ei], 500 + ei * 600);
+  if (enemyLog) {
+    setTimeout(function() {
+      var eToast = document.createElement("div");
+      eToast.className = "toast show";
+      eToast.style.background = "rgba(255,107,107,0.9)";
+      eToast.textContent = enemyLog;
+      document.body.appendChild(eToast);
+      setTimeout(function() { eToast.remove(); }, 2000);
+    }, 500);
+  }
+}
+
+// 计算格子集合中离玩家最近的格子（困难AI用于阻止玩家扩张/优先精摆前线）
+function sandboxNearestToPlayer(cells) {
+  var ss = sandboxState;
+  var playerCells = [];
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      if (ss.board[r][c] === "player") playerCells.push([r, c]);
     }
   }
+  if (playerCells.length === 0 || cells.length === 0) {
+    return cells[Math.floor(Math.random() * cells.length)];
+  }
+  var best = cells[0], bestDist = Infinity;
+  for (var i = 0; i < cells.length; i++) {
+    var minD = Infinity;
+    for (var j = 0; j < playerCells.length; j++) {
+      var d = Math.abs(cells[i][0] - playerCells[j][0]) + Math.abs(cells[i][1] - playerCells[j][1]);
+      if (d < minD) minD = d;
+    }
+    if (minD < bestDist) { bestDist = minD; best = cells[i]; }
+  }
+  return best;
+}
+
+// 评估夺取某格的收益（摧毁对方的价值 + 自己获得的价值）
+function sandboxSeizeGain(r, c) {
+  var ss = sandboxState;
+  var base = ss.highValue[r + "," + c] ? 2 : 1;
+  var value = ss.refined[r + "," + c] ? base * 2 : base;
+  return value * 2; // 对方损失value + 自己获得value
 }
 
 function sandboxEnemyAI() {
   var ss = sandboxState;
+  var isHard = ss.difficulty === "hard";
+  var isAggro = ss.aiPersonality === "aggressive";
+  var winScore = isHard ? 15 : 10;
   var adj = getAdjacentCells("enemy");
-  var hasAdj = adj.length > 0;
 
-  // 优先防御如果玩家接近胜利
-  if (ss.playerScore >= 7 && Math.random() < 0.4 && hasAdj) {
-    ss.enemyDefend = true;
-    return "企鹅狗摆出防御架势！";
+  // 性格影响策略参数：激进=高夺取低防御少精摆 / 保守=高防御高精摆
+  var seizeChance = isHard ? (isAggro ? 0.92 : 0.72) : (isAggro ? 0.78 : 0.6);
+  var defendChance = isAggro ? (isHard ? 0.35 : 0.2) : (isHard ? 0.75 : 0.55);
+  var refineBias = isAggro ? 0.85 : 0.97; // 保守派更倾向精摆（压制抢占/铺设的优先级）
+
+  // 相邻格子分类
+  var playerAdj = [], emptyAdj = [], hvEmpty = [];
+  for (var i = 0; i < adj.length; i++) {
+    var ar = adj[i][0], ac = adj[i][1];
+    if (ss.board[ar][ac] === "player") {
+      playerAdj.push(adj[i]);
+    } else {
+      emptyAdj.push(adj[i]);
+      if (ss.highValue[ar + "," + ac]) hvEmpty.push(adj[i]);
+    }
   }
 
-  // 随机选择行动
-  var roll = Math.random();
-  if (roll < 0.45 && hasAdj) {
-    // 铺设：优先夺取玩家格子（仅在接壤时）
-    var playerTargets = [];
-    var emptyTargets = [];
-    for (var i = 0; i < adj.length; i++) {
-      if (ss.board[adj[i][0]][adj[i][1]] === "player") {
-        playerTargets.push(adj[i]);
-      } else {
-        emptyTargets.push(adj[i]);
+  // 可精摆的自己格子（优先高价值：精摆高价值=+2分）
+  var refinable = [], refinableHV = [];
+  for (var r = 0; r < ss.rows; r++) {
+    for (var c = 0; c < ss.cols; c++) {
+      if (ss.board[r][c] === "enemy" && !ss.refined[r + "," + c]) {
+        if (ss.highValue[r + "," + c]) refinableHV.push([r, c]);
+        else refinable.push([r, c]);
       }
     }
+  }
+
+  // 1. 防御：玩家接近胜利时概率防御（保守派更警觉）
+  var defendThreshold = winScore - 3;
+  if (ss.playerScore >= defendThreshold && Math.random() < defendChance && playerAdj.length > 0) {
+    ss.enemyDefend = true;
+    return "🐧 企鹅狗摆出防御架势！";
+  }
+
+  // 2. 夺取玩家格子（困难AI按收益选最优，优先摧毁玩家精摆/高价值格）
+  if (playerAdj.length > 0 && Math.random() < seizeChance) {
     var pick;
-    if (playerTargets.length > 0 && Math.random() < 0.8) {
-      pick = playerTargets[Math.floor(Math.random() * playerTargets.length)];
-    } else if (emptyTargets.length > 0) {
-      pick = emptyTargets[Math.floor(Math.random() * emptyTargets.length)];
-    } else {
-      pick = playerTargets[Math.floor(Math.random() * playerTargets.length)];
-    }
-    if (ss.board[pick[0]][pick[1]] === "player" && ss.playerDefend) {
-      ss.enemyScore = Math.max(0, ss.enemyScore - 1);
-      return "企鹅狗试图夺取你的格子，但你防御了！企鹅狗-1分";
-    } else {
-      ss.board[pick[0]][pick[1]] = "enemy";
-      ss.enemyScore++;
-      return "企鹅狗夺取了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
-    }
-  } else if (roll < 0.8) {
-    // 精摆（概率提高：从30%提高到35%）
-    var enemyCells = [];
-    for (var r = 0; r < ss.rows; r++) {
-      for (var c = 0; c < ss.cols; c++) {
-        if (ss.board[r][c] === "enemy") enemyCells.push([r, c]);
+    if (isHard) {
+      pick = playerAdj[0];
+      var bestGain = -1;
+      for (var g = 0; g < playerAdj.length; g++) {
+        var gain = sandboxSeizeGain(playerAdj[g][0], playerAdj[g][1]);
+        if (gain > bestGain) { bestGain = gain; pick = playerAdj[g]; }
       }
+    } else {
+      pick = playerAdj[Math.floor(Math.random() * playerAdj.length)];
     }
-    if (enemyCells.length > 0) {
-      var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
-      ss.refined[pick[0] + "," + pick[1]] = true;
-      ss.enemyScore++;
-      return "企鹅狗精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
-    }
-    return "企鹅狗无所事事...";
-  } else if (hasAdj) {
-    // 防御（仅在接壤时使用）
-    ss.enemyDefend = true;
-    return "企鹅狗摆出防御架势！";
-  } else {
-    // 无接壤且没抽到精摆，强制精摆
-    var enemyCells = [];
-    for (var r = 0; r < ss.rows; r++) {
-      for (var c = 0; c < ss.cols; c++) {
-        if (ss.board[r][c] === "enemy") enemyCells.push([r, c]);
+    if (ss.playerDefend) {
+      // 玩家防御成功：企鹅狗随机失去一块领地
+      var lost = sandboxLoseCell("enemy");
+      if (lost) {
+        delete ss.refined[lost[0] + "," + lost[1]];
+        ss.board[lost[0]][lost[1]] = null;
+        ss.lastChange = [lost[0], lost[1]];
+        return "🐧 企鹅狗夺取失败被反震！它的第" + (lost[0]+1) + "行第" + (lost[1]+1) + "列被震碎！";
       }
+      return "🐧 企鹅狗夺取失败！";
     }
-    if (enemyCells.length > 0) {
-      var pick = enemyCells[Math.floor(Math.random() * enemyCells.length)];
-      ss.refined[pick[0] + "," + pick[1]] = true;
-      ss.enemyScore++;
-      return "企鹅狗精摆了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！+1分";
-    }
-    return "企鹅狗无所事事...";
+    var key = pick[0] + "," + pick[1];
+    var wasRefined = ss.refined[key] ? true : false;
+    var isHV = ss.highValue[key] ? true : false;
+    delete ss.refined[key];
+    ss.board[pick[0]][pick[1]] = "enemy";
+    ss.lastChange = [pick[0], pick[1]];
+    return "🐧 企鹅狗夺取了第" + (pick[0]+1) + "行第" + (pick[1]+1) + "列！" + (isHV ? "★" : "") + (wasRefined ? "（摧毁了你的精摆！）" : "");
   }
+
+  // 3. 精摆（保守派优先级更高；优先高价值格，困难AI其次选前线阻止玩家扩张）
+  var allRefinable = refinableHV.concat(refinable);
+  if (allRefinable.length > 0 && Math.random() < refineBias) {
+    var pool = refinableHV.length > 0 ? refinableHV : allRefinable;
+    var pick3 = isHard ? sandboxNearestToPlayer(pool) : pool[Math.floor(Math.random() * pool.length)];
+    ss.refined[pick3[0] + "," + pick3[1]] = true;
+    ss.lastChange = [pick3[0], pick3[1]];
+    var hvR = ss.highValue[pick3[0] + "," + pick3[1]] ? "★高价值" : "";
+    return "🐧 企鹅狗精摆了" + hvR + "第" + (pick3[0]+1) + "行第" + (pick3[1]+1) + "列！";
+  }
+
+  // 4. 抢占高价值空格
+  if (hvEmpty.length > 0 && Math.random() < 0.9) {
+    var pick2 = hvEmpty[Math.floor(Math.random() * hvEmpty.length)];
+    ss.board[pick2[0]][pick2[1]] = "enemy";
+    ss.lastChange = [pick2[0], pick2[1]];
+    return "🐧 企鹅狗抢占了★高价值地第" + (pick2[0]+1) + "行第" + (pick2[1]+1) + "列！";
+  }
+
+  // 5. 普通铺设（困难AI选离玩家近的格子，阻止玩家扩张方向）
+  if (emptyAdj.length > 0) {
+    var pick4 = isHard ? sandboxNearestToPlayer(emptyAdj) : emptyAdj[Math.floor(Math.random() * emptyAdj.length)];
+    ss.board[pick4[0]][pick4[1]] = "enemy";
+    ss.lastChange = [pick4[0], pick4[1]];
+    return "🐧 企鹅狗铺设了第" + (pick4[0]+1) + "行第" + (pick4[1]+1) + "列！";
+  }
+
+  // 6. 无事可做：接壤则防御，否则空过
+  if (playerAdj.length > 0) {
+    ss.enemyDefend = true;
+    return "🐧 企鹅狗摆出防御架势！";
+  }
+  return "🐧 企鹅狗无所事事...";
 }
 
 function sandboxVictory() {
