@@ -159,7 +159,6 @@ var SCENE_CONFIG = {
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
       { text: "去拜访孔子像", target: "confucius_1" },
       { text: "我要去实验楼耍耍！！！", target: "lab_floor" },
-      { text: "去文海少年科技院（行政楼）看看吧", target: "tech_academy_1" },
       { text: "我要去看看地下室", target: "sandbag" },
     ]
   },
@@ -195,7 +194,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   pig_3: {
-    id: "pig_3", name: "神秘猪猪拉屎之地", img: "pig3.jpg",
+    id: "pig_3", name: "神秘猪猪拉屎之地", img: "pig2.jpg",
     desc: "越来越多了……快跑啊！！！！",
     shakeHard: true,
     autoJump: "toilet",
@@ -217,7 +216,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   drunk: {
-    id: "drunk", name: "喝大了", img: "drunk.jpg",
+    id: "drunk", name: "喝大了", img: "window.jpg",
     desc: "欸……瓦达西……怎么到这了……|难道……我成为了一名杭二的学生？！|头……还是好晕",
     unlockAch: "drunk_dream",
     shakeHard: true,
@@ -231,7 +230,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   hermit_2: {
-    id: "hermit_2", name: "一位隐士的地方", img: "walking1.jpg",
+    id: "hermit_2", name: "一位隐士的地方", img: "hermit.jpg",
     desc: "（走路……）|（走路……）",
     autoJump: "hermit_3",
     buttons: []
@@ -294,7 +293,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   hermit_duel_3: {
-    id: "hermit_duel_3", name: "一位隐士的地方", img: "duel1.jpg",
+    id: "hermit_duel_3", name: "一位隐士的地方", img: "walking2.png",
     desc: "我避你锋芒？",
     autoNext: "hermit_duel_4",
     buttons: []
@@ -423,14 +422,14 @@ var SCENE_CONFIG = {
     buttons: []
   },
   alien_taunt: {
-    id: "alien_taunt", name: "外星人", img: "alien_2.jpg",
+    id: "alien_taunt", name: "外星人", img: "alien_1.jpg",
     desc: "外星人：我要在你的头上拉屎！！！！！|（没绷住）|外星人：笑什么!!!我可是很严肃的！！！！！|呜.....哈哈哈哈哈哈......啊哈哈哈哈哈哈哈哈哈哈|外星人：气死我了！！！你真的惹怒我了，我要和你决斗！！！|决斗啥啊|外星人：石头剪刀布|。。。sb|外星人：我很认真的啊喂！！！！|好好好我陪你玩我陪你玩",
     shakeHard: true,
     autoNext: "alien_game",
     buttons: []
   },
   alien_win: {
-    id: "alien_win", name: "外星人", img: "alien_2.jpg",
+    id: "alien_win", name: "外星人", img: "alien_1.jpg",
     desc: "你菜狗吧|外星人：呃啊啊啊啊啊！这次是失误！！！|菜别找借口|外星人：等着！！等我回去修炼再战！！！",
     unlockAch: "beat_alien",
     autoNext: "alien_win_space",
@@ -496,7 +495,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   backrooms_right: {
-    id: "backrooms_right", name: "后室level0", img: "backrooms_right.jpg",
+    id: "backrooms_right", name: "后室level0", img: "backrooms_walk.jpg",
     desc: "好累啊.....|不知道为什么胸没这么闷了|难道我刚才避开了什么东西？",
     shake: true,
     impactEffect: true,
@@ -586,7 +585,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   grove_arrive: {
-    id: "grove_arrive", name: "去小树林的路上", img: "grove_arrive.jpg",
+    id: "grove_arrive", name: "去小树林的路上", img: "path_to_grove.jpg",
     desc: "就是这里..........",
     autoNext: "grove_encounter",
     buttons: []
@@ -662,7 +661,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   basement: {
-    id: "basement", name: "地下室", img: "basement.jpg",
+    id: "basement", name: "地下室", img: "basement_door.jpg",
     desc: "要不要下去呢",
     buttons: [
       { text: "下去", target: "basement_inside" },
@@ -742,7 +741,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   strange_place_2: {
-    id: "strange_place_2", name: "奇怪的地方", img: "strange_place_2.jpg",
+    id: "strange_place_2", name: "奇怪的地方", img: "strange_place_1.jpg",
     desc: "门....怎么消失了....",
     autoNext: "strange_place_3",
     buttons: []
@@ -754,7 +753,7 @@ var SCENE_CONFIG = {
     buttons: []
   },
   strange_place_4: {
-    id: "strange_place_4", name: "奇怪的地方", img: "strange_place_4.jpg",
+    id: "strange_place_4", name: "奇怪的地方", img: "strange_place_1.jpg",
     desc: "好像之前来过这里......|这里真好，不用像上面那样孤单.....|(走路ing)",
     autoNext: "strange_place_5",
     buttons: []
@@ -843,13 +842,13 @@ var SCENE_CONFIG = {
     buttons: []
   },
   confucius_2: {
-    id: "confucius_2", name: "孔子像", img: "confucius_2.jpg",
+    id: "confucius_2", name: "孔子像", img: "confucius_1.jpg",
     desc: "我正在向你靠近呢，孔子|居然一点都不后退吗，真是胆大呢",
     autoNext: "confucius_3",
     buttons: []
   },
   confucius_3: {
-    id: "confucius_3", name: "孔子像", img: "confucius_3.jpg",
+    id: "confucius_3", name: "孔子像", img: "confucius_1.jpg",
     desc: "听说孔子像下面有很多祭品.......|有点想吃......",
     autoNext: "confucius_4",
     buttons: []
@@ -919,7 +918,7 @@ var SCENE_CONFIG = {
   },
   // 化学实验室
   chem_lab_1: {
-    id: "chem_lab_1", name: "化学实验室", img: "chem_lab_1.jpg",
+    id: "chem_lab_1", name: "化学实验室", img: "chem_lab_end.jpg",
     desc: "进来了...化学实验室|（门锁住了进不去,只能找网图了）|ayaaya....没有老师呢...|看来我可以做一些奇怪的化学实验了（坏笑）",
     unlockAch: "chem_lab_enter",
     autoNext: "chem_lab_2",
@@ -1003,20 +1002,6 @@ var SCENE_CONFIG = {
     desc: "",
     buttons: []
   },
-  // 文海少年科技院
-  tech_academy_1: {
-    id: "tech_academy_1", name: "文海少年科技院", img: "tech_academy_1.jpg",
-    desc: "欸......装修怎么这么豪华.....|进去看看吧",
-    autoNext: "tech_academy_2",
-    buttons: []
-  },
-  tech_academy_2: {
-    id: "tech_academy_2", name: "文海少年科技院", img: "tech_academy_2.jpg",
-    desc: "好大好宽敞|不过这里是干什么用的....",
-    buttons: [
-      { text: "返回校门口", popup: "这里什么都没有哦", popupThen: "gate" },
-    ]
-  },
 };
 
 // ============================================================
@@ -1065,6 +1050,27 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.77.3", date: "2026-08-17", items: [
+    "图片精简第四批：删除6张，项目图片降至97张（含3个代码文件总计恰好100个文件，满足GitHub单次上传限制）",
+    "猪猪线：pig_3'越来越多了'沿用pig2（画面递进自然）",
+    "奇怪的地方线：strange_place_2'门消失了'/strange_place_4'好像之前来过'沿用strange_place_1——复用同图反而强化既视感与无限循环氛围",
+    "化学实验室：chem_lab_1入口沿用chem_lab_end（入口与主场景画面有变化，文案本就吐槽是网图）",
+    "喝大了：drunk'杭二学生'沿用window厕所窗外图（头晕状态延续）",
+    "地下室：basement'要不要下去呢'沿用basement_door门口图（语义更贴合）",
+  ]},
+  { version: "v1.5.77.2", date: "2026-08-17", items: [
+    "图片精简第三批：删除6张，项目图片降至103张",
+    "文海少年科技院场景整体移除（入口按钮+2场景+2图片，无成就绑定无副作用）",
+    "孔子像线：confucius_2/3沿用confucius_1，保留confucius_4（祭品没了名场面）",
+    "沙漠溜达猪线：grove_arrive走路过渡沿用path_to_grove",
+    "后室线：backrooms_right沿用backrooms_walk（同为level0走廊）",
+  ]},
+  { version: "v1.5.77.1", date: "2026-08-17", items: [
+    "图片精简第二批：删除walking1.jpg/duel1.jpg/alien_2.jpg共3张",
+    "哈气大师线：走路过渡沿用隐士入口图，'我避你锋芒'复用walking2",
+    "外星人线：统一使用alien_1.jpg（嘲讽/胜利/石头剪刀布小游戏）",
+    "项目图片降至109张，剧情文案与演出效果不变",
+  ]},
   { version: "v1.5.77", date: "2026-08-17", items: [
     "教学楼一楼'初遇'剧情线完整开放：闲逛→揉眼模糊渐清晰→她登场→一起逛学校",
     "续篇'跟上去'：二楼糖人二选一（吃蜜糖/甜话被揍）→旧教室变回原样→坐回当年座位",
@@ -1080,6 +1086,7 @@ var CHANGELOG = [
     "成就页分组：🌙梦之旅途/⚔️决斗与小游戏/😈整活与隐藏，各组显示解锁进度",
     "食堂抢饭、执念鱿鱼决战加入梦境裂隙精选小游戏",
     "修复：教学楼/天台/鱿鱼对话残留选项按钮、'完成最后一击'需点两次、BOSS战0血黑屏遮字等bug",
+    "图片精简：删除7张单句过渡图（揉眼/我要拿了/走路×2/带逛提议/她催促/空走廊/旧教室），改为复用相邻图或纯文字，剧情节奏不变",
   ]},
   { version: "v1.5.76.98", date: "2026-08-17", items: [
     "BOSS战锁血叙事引导：鱿鱼锁血后HUD显示???台词'斩不断的……执念，与你同在'+伤害无效提示",
@@ -2022,7 +2029,7 @@ function renderRPSGame() {
   if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
   pendingImageRAF = requestAnimationFrame(function() {
     pendingImageRAF = null;
-    img.src = "alien_2.jpg";
+    img.src = "alien_1.jpg";
     img.style.display = "block";
     placeholder.style.display = "none";
   });
@@ -3027,13 +3034,13 @@ function renderTeaching1FSequence() {
   // 剧情序列：img为null表示沿用当前图片；meet=true时触发揉眼后模糊渐清晰+登场震动+成就
   var seq = [
     { img: null, text: "好无聊啊.....教学楼有什么好来的呢....|或者说....我来这个学校....都是在做什么呢.....|眼睛好痒....." },
-    { img: "0e92574bb5859c94e9658e7a15e54117.jpg", text: "揉一揉吧" },
+    { img: null, text: "揉一揉吧" },
     { img: "e44953fe91bea8bd111de733bc3fca1e.jpg", meet: true, text: "她：喂！！！！！！|欸....欸？！|她：我等了你好久啦！|她：你终于舍得回来看我了......|（这.....我不是在做梦吧....）" },
     { img: "9091bd44e6712c44730b1c56ddb2d6b5.jpg", text: "她：怎么呆住了？" },
     { img: "5470a144d4233a4467c8e6a4d193688e.jpg", text: "她：是不是被本大人的美貌吓到啦？！|只是太久没见到你了而已|再见有点不适应..." },
     { img: "9091bd44e6712c44730b1c56ddb2d6b5.jpg", text: "她：什么嘛...这时候不该夸我好看吗|好好好,大小姐最好看了~" },
     { img: "5470a144d4233a4467c8e6a4d193688e.jpg", text: "她：嘿嘿....原谅你啦！|她：你一直过的不太好呢...|她：我得想想要去哪玩让你开心起来" },
-    { img: "846c893916a8a51b2ca4510df2cb93e6.jpg", text: "她：居然你好久没回来了...|她：我就带你到学校各处逛逛如何!|这算哪门子好主意....." },
+    { img: "5470a144d4233a4467c8e6a4d193688e.jpg", text: "她：居然你好久没回来了...|她：我就带你到学校各处逛逛如何!|这算哪门子好主意....." },
     { img: "90c31247c5481f8b40b86751ba451ed2.jpg", text: "她：诶诶？我想了好久的....|明明是刚想到的吧......|她：由不得你愿不愿意,现在就陪我去！！！|好....." },
   ];
   var idx = 0;
@@ -3180,16 +3187,13 @@ function renderTeachingTourSequence() {
     }, 100);
   }
 
-  // 汇合：一起回教室看看 → 旧教室变回来 → 坐回当年座位
+  // 汇合：一起回教室看看 → 旧教室对话+坐回当年座位（同一张座位图）
   function goClassroom() {
     typeAndWait("我们一起回教室看看吧", function() {
-      switchImg("e56e887305c3fe11a571739b991317d3.jpg");
-      typeAndWait("以前的教室呢......我记得已经改成会议室了来着|她：我给你变回来啦~厉害吧~|要变也是我想成这样的....|她：你可以假装是我变的|好好好...宝宝好厉害|她：哼哼~谢谢啦", function() {
-        switchImg("4362fc91070218685e8efbe7c7edd4e1.jpg");
-        typeAndWait("你又坐到当时你的座位了呢...", function() {
-          // 接续：一起上课剧情
-          renderTeachingClassSequence();
-        });
+      switchImg("4362fc91070218685e8efbe7c7edd4e1.jpg");
+      typeAndWait("以前的教室呢......我记得已经改成会议室了来着|她：我给你变回来啦~厉害吧~|要变也是我想成这样的....|她：你可以假装是我变的|好好好...宝宝好厉害|她：哼哼~谢谢啦|你又坐到当时你的座位了呢...", function() {
+        // 接续：一起上课剧情
+        renderTeachingClassSequence();
       });
     });
   }
@@ -3263,16 +3267,15 @@ function renderTeachingClassSequence() {
       { label: "为什么突然说这个", text: "她：这不是怕你又走了|你，....会想念我吗|她：....这是什么话，当然啦！|......|（对话在一个奇怪的氛围里结束了)" },
     ]},
     { img: "0f8838731ecb4c15bf52fe7723d0bad3.jpg", text: "那里有一个管理手册！|她：怎么，你想看看吗|这里不会有人吧|她：应该只有你一个人吧|那我就放心了" },
-    { img: "a03aa84e49080e21372f461c85e318da.jpg", text: "我要拿了" },
+    { img: null, text: "我要拿了" },
     { text: "好痛！！！", shake: true },
     { img: "b662ffd6f7692078b8c0f61d485bced4.jpg", text: "这里怎么有个摄像头！！！|头好疼.....|她：你没事吧（把你扶到了一边坐着）" },
     { blackoutImg: "f614a90846a85770b84ae375b5d46ed0.jpg", text: "欸...为什么要把我放在饮水机旁边" },
     { img: "4a225150156297390d532ae642a653cf.jpg", text: "水！为什么水自动流出来了！", shake: true },
     { text: "（水停了）|她：怎么了|刚才饮水机自动启动了|她：是我开的哦|欸....骗人....明明你刚才还在厕所|她：我都说了是我开的哦（微笑）|好....好吧|她：拿你没办法...下楼吧" },
-    { img: "fd2ff25e9326c42bb230387802fa811c.jpg", text: "一个人都没有呢....." },
-    { img: "4aa5c3e229fcf6a4277707e43b5c42d3.jpg", text: "（走路ing）" },
+    { img: null, text: "一个人都没有呢.....|（走路ing）" },
     { img: "9553eed9844709499308fc823afc8ff7.jpg", text: "欸....这是同学们吗...." },
-    { img: "76a0d9eb879ee6b1b463c6e7cdc3a5fe.jpg", text: "她：喂！你发什么呆呢！|额...我刚才好像看到其他人了|她：你看错啦！！|她：赶紧跟我来！！！|好...的" },
+    { img: "90c31247c5481f8b40b86751ba451ed2.jpg", text: "她：喂！你发什么呆呢！|额...我刚才好像看到其他人了|她：你看错啦！！|她：赶紧跟我来！！！|好...的" },
     { img: "ff98d35198eea6891cd6a788cd5ef331.jpg", title: "亭子", text: "她：就到这里吧~|她：在这里坐一会把" },
     { img: "d17d538b5aa3b53f11665b1afe9ca276.jpg", text: "（坐下）|她：嘿嘿，这里有股文雅的感觉~|毕竟孔子像就在旁边|她：你要去吃草吗|不了谢谢....|她：说到这里....我有点饿了..|要不要一起去食堂吃饭|她：好啊~走吧！" },
     { img: "c31bc5670e3d7e6f2542e47960c39856.jpg", title: "食堂", text: "她：到啦~|她：我就不进去啦~你能帮我带两份饭出来吗|两份....有点难拿啊...." },
