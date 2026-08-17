@@ -1053,11 +1053,11 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 // ===== 更新日志配置 =====
 var CHANGELOG = [
   { version: "v1.5.78", date: "2026-08-17", items: [
-    "新增小游戏'乐队大赛'（传送门精选直达🎸）：与AI经纪人13回合经营对抗，比拼总知名度",
+    "新增小游戏'乐队大赛'（传送门精选直达🎸）：与AI经纪人10回合经营对抗，比拼总知名度",
     "双方各150金币开局，每回合市场随机刷新5名乐手（特殊艺人每回合最多2个，全游戏唯一，签完不补）",
-    "5位特殊艺人(数值×2)：山田凉60金(偷10金)/伊地知虹夏140金(全队稳定+14)/广井菊里60金(喝醉能力-120)/喜多郁代150金(知名度+30%)/后藤独100金(160能力80稳定)",
-    "普通艺人随机生成（日式名池50个+唐人整活名3个，位置：吉他手×2/鼓手/贝斯手），价格≈(能力+稳定)/2，能力随回合成长(r1:30-60→r13:138-160)，15%概率附带特殊能力",
-    "成长系统：队员每次演出后35%概率能力+2~4（封顶160），练得越久越强",
+    "5位特殊艺人(数值=初始设计×2，无视160上限)：山田凉60金180能力150稳定(偷10金)/伊地知虹夏140金172/166(全队稳定+14)/广井菊里60金170/168(喝醉能力-120)/喜多郁代150金166/156(知名度+30%)/后藤独100金190能力80稳定",
+    "普通艺人随机生成（日式名池50个+唐人整活名3个，位置：吉他手×2/鼓手/贝斯手/主唱），价格≈(能力+稳定)/2，能力随回合成长(r1:30-60→r10:111-141封顶160)，15%概率附带特殊能力",
+    "成长系统：队员每次演出后35%概率能力+2~4，练得越久越强（特殊艺人可突破160上限，普通艺人封顶160）",
     "标准编制加成：凑齐吉他×2+鼓+贝斯全员收益+30%；基础收益已下调(金币0.55/知名度0.4系数)",
     "Live House专场：演出前花20金币安排，本轮金币收益×1.5（AI也有30%概率办）",
     "随机事件：每回合15%概率触发街头星探(+知名度)/器材损坏(-金币)/粉丝应援(+金币)",
@@ -1066,6 +1066,7 @@ var CHANGELOG = [
     "新增唱腔属性：特殊艺人山田凉25/虹夏65/广井40/喜多85/后藤独1；普通乐手唱腔10-90，市场可刷出专职主唱（唱腔50-90，价格计入唱腔）",
     "上场限制：每场最多5名乐手（主唱优先入选，其余按能力+稳定自动选最强，替补不演出不成长；AI同规则）",
     "新成就：🏆乐队之王(击败AI经纪人)、🎸结成乐队吧！(签下后藤独)",
+    "修复游戏中跳回对话框的bug：打字机'点击继续/快进'onclick与800ms自动跳转定时器残留，从传送门进小游戏后点HUD/倒计时到点会把玩家拉回旧剧情——stopTypewriter现同时清除onclick，renderScene把清理移到函数最顶部覆盖全部小游戏早退分支",
   ]},
   { version: "v1.5.77.3", date: "2026-08-17", items: [
     "图片精简第四批：删除6张，项目图片降至97张（含3个代码文件总计恰好100个文件，满足GitHub单次上传限制）",
@@ -1442,6 +1443,13 @@ function renderScene(sceneId) {
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
+  // 【必须最先执行】停止打字机+清自动跳转定时器+清"点击继续"onclick
+  // （覆盖下方所有小游戏早退分支，防止从传送门进小游戏后残留定时器/点击把玩家拉回旧剧情对话框）
+  stopTypewriter();
+  if (pendingAutoJumpTimer) {
+    clearTimeout(pendingAutoJumpTimer);
+    pendingAutoJumpTimer = null;
+  }
   // 厕所蹲坑计数：第二次点击进入后室剧情
   if (sceneId === "toilet_stay_check") {
     gameState.toiletStayCount++;
@@ -1621,13 +1629,6 @@ function renderScene(sceneId) {
   var scene = SCENE_CONFIG[sceneId];
   if (!scene) return;
 
-  // 停止之前的打字机和自动跳转定时器（防止旧场景覆盖新场景）
-  stopTypewriter();
-  if (pendingAutoJumpTimer) {
-    clearTimeout(pendingAutoJumpTimer);
-    pendingAutoJumpTimer = null;
-  }
-
   gameState.currentScene = sceneId;
   visitScene(sceneId);
 
@@ -1755,6 +1756,10 @@ function stopTypewriter() {
   }
   typewriterDone = false;
   typewriterSession = null;
+  // 清除残留的"点击继续/快进"onclick：防止从传送门进入小游戏后，
+  // 点击HUD（描述区）触发旧对话的跳转，跳回剧情对话框
+  var descArea = document.getElementById("description-area");
+  if (descArea) descArea.onclick = null;
   hideSkipBtn();
 }
 
@@ -5973,20 +5978,20 @@ function getHachiLine(hachiAction, playerAction, mindReadUsed) {
 }
 
 // ===== 乐队大赛小游戏 =====
-// 与AI经纪人经营乐队对抗：13回合内比拼总知名度
-// 特殊艺人配置（全游戏唯一，每回合市场最多刷出2个；数值已×2，能力封顶160）
+// 与AI经纪人经营乐队对抗：10回合内比拼总知名度
+// 特殊艺人配置（全游戏唯一，每回合市场最多刷出2个；数值=初始设计×2，能力无视160上限，演出成长可继续突破）
 var BAND_SPECIAL_ARTISTS = [
-  { specialId: "yamada",  name: "山田凉",     role: "贝斯手", price: 60, ability: 160, stability: 150, vocal: 25, emoji: "🦎", desc: "每次演出后可能偷走 10 金币演出收益" },
-  { specialId: "nijika",  name: "伊地知虹夏", role: "鼓手",   price: 140, ability: 160, stability: 166, vocal: 65, emoji: "🥁", desc: "提升本队其他队员每人 14 点稳定度" },
-  { specialId: "hirokita",name: "广井菊里",   role: "贝斯手", price: 60, ability: 160, stability: 168, vocal: 40, emoji: "🍺", desc: "演出前有概率喝醉，能力值下降 120 点" },
-  { specialId: "kita",    name: "喜多郁代",   role: "吉他手", price: 150, ability: 160, stability: 156, vocal: 85, emoji: "✨", desc: "吉他英雄变身：个人知名度收益 +30%" },
-  { specialId: "bocchi",  name: "后藤独",     role: "吉他手", price: 100, ability: 160, stability: 80, vocal: 1, emoji: "📮", desc: "社恐吉他英雄：能力登峰造极但情绪极不稳定，唱腔稀烂" },
+  { specialId: "yamada",  name: "山田凉",     role: "贝斯手", price: 60, ability: 180, stability: 150, vocal: 25, emoji: "🦎", desc: "每次演出后可能偷走 10 金币演出收益" },
+  { specialId: "nijika",  name: "伊地知虹夏", role: "鼓手",   price: 140, ability: 172, stability: 166, vocal: 65, emoji: "🥁", desc: "提升本队其他队员每人 14 点稳定度" },
+  { specialId: "hirokita",name: "广井菊里",   role: "贝斯手", price: 60, ability: 170, stability: 168, vocal: 40, emoji: "🍺", desc: "演出前有概率喝醉，能力值下降 120 点" },
+  { specialId: "kita",    name: "喜多郁代",   role: "吉他手", price: 150, ability: 166, stability: 156, vocal: 85, emoji: "✨", desc: "吉他英雄变身：个人知名度收益 +30%" },
+  { specialId: "bocchi",  name: "后藤独",     role: "吉他手", price: 100, ability: 190, stability: 80, vocal: 1, emoji: "📮", desc: "社恐吉他英雄：能力登峰造极但情绪极不稳定，唱腔稀烂" },
 ];
 // 普通艺人随机名池（大部分日式风格，保留几个唐人整活名）
 var BAND_NORMAL_NAMES = ["田中太郎","铃木花子","佐藤悠希","渡边葵","山本樱","中村陆","小林芽衣","春日纯","林田空","斋藤莲","伊藤奈奈","阿部由美","上田真","森太阳","池田枫","石川纯菜","白石澪","高桥凉","松本雪菜","藤原翼","加藤浩二","水野枫","星野辉","栗原遥","雨宫莲","桥本奈奈未","矢野绫音","远藤樱","绫濑遥","菊池幸代","堀越丽奈","相泽慧","守屋瞳","冈崎绘里","村上葵","本多光太郎","长谷川堇","三浦春马","宫本岚","大冢爱美","西田结衣","东云玲","楠木灯里","一之濑翼","神谷诗织","月冈恋钟","日向翔阳","樱井优斗","望月聪","有马加奈","阿强","狗蛋","铁柱"];
 // 乐队位置：吉他手×2、鼓手、贝斯手、主唱（吉他双权重）
 var BAND_ROLES = ["吉他手","吉他手","贝斯手","鼓手","主唱"];
-var BAND_ROLE_EMOJI = { "吉他手": "🎸", "贝斯手": "🎸", "鼓手": "🥁", "主唱": "🎤" };
+var BAND_ROLE_EMOJI = { "吉他手": "🎸", "贝斯手": "🎻", "鼓手": "🥁", "主唱": "🎤" };
 // 普通艺人特殊能力（生成时15%概率附带一个）
 var BAND_NORMAL_PERKS = [
   { perk: "practice", name: "练习狂",   desc: "每次演出后能力永久+3" },
@@ -6024,7 +6029,7 @@ function renderBandGame() {
 
   // 初始化对局状态
   bandState = {
-    round: 1, maxRound: 13, phase: "sign",
+    round: 1, maxRound: 10, phase: "sign",
     gold: 150, fame: 0,
     aiGold: 150, aiFame: 0,
     band: [], aiBand: [],
@@ -6034,7 +6039,7 @@ function renderBandGame() {
     logs: [],
   };
   bandState.market = bandGenMarket(1);
-  bandState.logs.push("📢 乐队大赛开幕！你与AI经纪人各持 150 金币，13 回合后比拼总知名度！");
+  bandState.logs.push("📢 乐队大赛开幕！你与AI经纪人各持 150 金币，10 回合后比拼总知名度！");
   bandRender();
 }
 
@@ -6044,10 +6049,10 @@ function stopBandGame() {
   if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
 }
 
-// 生成普通艺人（能力随回合成长，13回合制，能力上限160；唱腔：专职主唱50-90、其他10-90）
+// 生成普通艺人（能力随回合成长，10回合制，能力上限160；唱腔：专职主唱50-90、其他10-90）
 function bandGenNormal(round) {
   var growth = (round - 1) * 9;
-  var ability = Math.min(160, 30 + growth + Math.floor(Math.random() * 31)); // r1:30-60 → r13:138-160
+  var ability = Math.min(160, 30 + growth + Math.floor(Math.random() * 31)); // r1:30-60 → r10:111-141
   var stability = 35 + Math.floor(Math.random() * 46);          // 35-80
   var name = BAND_NORMAL_NAMES[Math.floor(Math.random() * BAND_NORMAL_NAMES.length)];
   var role = BAND_ROLES[Math.floor(Math.random() * BAND_ROLES.length)];
@@ -6217,13 +6222,20 @@ function bandPerform(band, vocalUid) {
       stolen += 10;
       events.push("🦎 " + m.name + " 偷走了 10 金币演出收益！");
     }
-    // 练习狂：演出后能力+6
-    if (m.perk === "practice") { m.ability = Math.min(160, m.ability + 6); events.push("🎵 " + m.name + " 越练越强，能力+6！"); }
-    // 成长系统：演出积累经验，35%概率能力+2~4（练习狂已有必触发成长，不再叠加；封顶160）
-    else if (m.ability < 160 && Math.random() < 0.35) {
+    // 练习狂：演出后能力+6（特殊艺人可突破160上限，普通艺人封顶160）
+    if (m.perk === "practice") {
+      var oldAb = m.ability;
+      m.ability += 6;
+      if (!m.specialId && m.ability > 160) m.ability = 160;
+      events.push("🎵 " + m.name + " 越练越强，能力+6" + (oldAb <= 160 && m.ability > 160 ? "，突破极限！" : "") + "！");
+    }
+    // 成长系统：演出积累经验，35%概率能力+2~4（练习狂已有必触发成长，不再叠加；特殊艺人无上限，普通艺人封顶160）
+    else if ((m.specialId || m.ability < 160) && Math.random() < 0.35) {
       var grow = 2 + Math.floor(Math.random() * 3);
-      m.ability = Math.min(160, m.ability + grow);
-      events.push("🌟 " + m.name + " 在演出中积累了经验，能力+" + grow + "！");
+      var oldAb2 = m.ability;
+      m.ability += grow;
+      if (!m.specialId && m.ability > 160) m.ability = 160;
+      events.push("🌟 " + m.name + " 在演出中积累了经验，能力+" + grow + (oldAb2 <= 160 && m.ability > 160 ? "，突破极限！" : "") + "！");
     }
   }
   gold = Math.max(0, Math.round(gold - stolen));
@@ -6345,7 +6357,7 @@ function bandNextRound() {
 function bandFinish() {
   var st = bandState;
   var win = st.fame > st.aiFame;
-  var html = "13 回合巡回演出马拉松落幕！<br><br>"
+  var html = "10 回合巡回演出马拉松落幕！<br><br>"
     + "🎤 你的乐队：知名度 <b style='color:#ffc832'>" + st.fame + "</b>（" + st.band.length + " 人）<br>"
     + "🤖 AI乐队：知名度 <b style='color:#ff8a65'>" + st.aiFame + "</b>（" + st.aiBand.length + " 人）<br><br>"
     + (win ? "🏆 你的乐队轰动了全城，AI经纪人流下了不甘的泪水！" : (st.fame === st.aiFame ? "🤝 平局……AI经纪人侥幸保住了面子。" : "💥 AI乐队的海报贴满了大街小巷，下次再战！"));
