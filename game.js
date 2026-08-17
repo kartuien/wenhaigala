@@ -1064,7 +1064,7 @@ var CHANGELOG = [
     "随机事件：每回合15%概率触发街头星探(+知名度)/器材损坏(-金币)/粉丝应援(+金币)",
     "转会系统：签约阶段可按20%签约价卖出队员腾编制换血",
     "主唱位：签约阶段点🎙指派主唱——唱腔仅在担任主唱时生效：知名度按能力×50%+唱腔计算；专职主唱无惩罚，兼任稳定-12",
-    "上场限制：每场最多5名乐手（主唱优先入选，其余按能力+稳定自动选最强，替补不演出不成长；AI同规则）",
+    "上场限制：每场最多5名乐手（替补不演出不成长；AI同规则）。超5人时可手动排兵布阵：点成员🔄换下替补席，点⬆提回首发（已满员时自动换下最弱的非主唱首发），不手动设置则默认自动选最强5人",
     "AI经纪人智商优化：①卖弱买强(能力<90自动换血回收资金) ②攒钱策略(无特殊艺人时55%概率存钱等大牌) ③特殊艺人优先级(灯>爱音>后藤>虹夏>喜多>广井>祥子>山田凉——AI懂风险) ④编制意识(优先补缺失位置再按性价比)，每回合最多签2名普通艺人且预留30金运营",
     "新成就：🏆乐队之王(击败AI经纪人)、🎸结成乐队吧！(签下后藤独)",
     "修复游戏中跳回对话框的bug：打字机'点击继续/快进'onclick与800ms自动跳转定时器残留，从传送门进小游戏后点HUD/倒计时到点会把玩家拉回旧剧情——stopTypewriter现同时清除onclick，renderScene把清理移到函数最顶部覆盖全部小游戏早退分支",
@@ -6078,6 +6078,7 @@ function renderBandGame() {
     market: [], usedSpecial: {},
     live: false,   // 本回合是否已安排Live House专场
     vocalUid: null, // 主唱兼任队员uid
+    benchUids: {},  // 手动替补名单（uid→true；空=自动选最强5人）
     logs: [],
   };
   bandState.market = bandGenMarket(1);
@@ -6237,25 +6238,33 @@ function bandHasFull(band) {
   return g >= 2 && d >= 1 && b >= 1;
 }
 
-// 出场阵容：最多5人（主唱优先入选，其余按能力+稳定选最强；替补不演出不成长）
-function bandLineup(band, vocalUid) {
+// 出场阵容：≤5人全员上场；>5人时手动替补名单优先（benchUids标记的不上场），
+// 首发仍超5则按老规则截断（主唱优先+能力稳定最强）；AI不传benchUids走自动
+function bandLineup(band, vocalUid, benchUids) {
   if (band.length <= 5) return band.slice();
-  var vocal = null, rest = [];
+  var pool = [];
   for (var i = 0; i < band.length; i++) {
-    if (vocalUid != null && band[i].uid === vocalUid) vocal = band[i];
-    else rest.push(band[i]);
+    if (!(benchUids && benchUids[band[i].uid])) pool.push(band[i]);
+  }
+  if (!pool.length) return band.slice();   // 防呆：全被标替补则全员上场
+  if (pool.length <= 5) return pool;
+  // 防御性截断：手动首发超过5人（UI已禁止，保险）
+  var vocal = null, rest = [];
+  for (var j = 0; j < pool.length; j++) {
+    if (vocalUid != null && pool[j].uid === vocalUid) vocal = pool[j];
+    else rest.push(pool[j]);
   }
   rest.sort(function(a, b) { return (b.ability + b.stability) - (a.ability + a.stability); });
   var lineup = vocal ? [vocal] : [];
-  for (var j = 0; j < rest.length && lineup.length < 5; j++) lineup.push(rest[j]);
+  for (var k = 0; k < rest.length && lineup.length < 5; k++) lineup.push(rest[k]);
   return lineup;
 }
 
 // 演出结算：上场≤5人；主唱位知名度按 能力×50%+唱腔 计算（专职主唱无惩罚，兼任稳定-12）
-function bandPerform(band, vocalUid) {
+function bandPerform(band, vocalUid, benchUids) {
   var events = [];
   if (!band.length) return { gold: 0, fame: 0, events: ["乐队空无一人，只能对着空气弹奏……"] };
-  var lineup = bandLineup(band, vocalUid);
+  var lineup = bandLineup(band, vocalUid, benchUids);
   if (band.length > 5) {
     var names = [];
     for (var ln = 0; ln < lineup.length; ln++) names.push(lineup[ln].name);
@@ -6373,7 +6382,7 @@ function bandStartShow() {
     aiVocalUid = best.uid;
     st.logs.push("🤖 AI指定 " + best.name + " 担任主唱（唱腔" + (best.vocal || 0) + "）！");
   }
-  var mine = bandPerform(st.band, st.vocalUid);
+  var mine = bandPerform(st.band, st.vocalUid, st.benchUids);
   var theirs = bandPerform(st.aiBand, aiVocalUid);
   if (st.live) { mine.gold = Math.round(mine.gold * 1.5); }
   if (aiLive) { theirs.gold = Math.round(theirs.gold * 1.5); }
@@ -6457,6 +6466,38 @@ function bandToggleVocal(uid) {
   bandRender();
 }
 
+// 手动切换首发/替补：替补不演出不成长；提回首发时若已满员自动换下最弱的非主唱首发
+function bandToggleBench(uid) {
+  var st = bandState;
+  if (!st || st.phase !== "sign") return;
+  if (st.band.length <= 5) { showToast("队伍≤5人时全员上场，不需要替补"); return; }
+  var name = "";
+  for (var i = 0; i < st.band.length; i++) if (st.band[i].uid === uid) name = st.band[i].name;
+  var lineup = bandLineup(st.band, st.vocalUid, st.benchUids);
+  var onStageNow = false;
+  for (var l = 0; l < lineup.length; l++) if (lineup[l].uid === uid) onStageNow = true;
+  if (onStageNow) {
+    // 首发→替补：直接标记
+    st.benchUids[uid] = true;
+    showToast(name + " 已换下替补席（不演出不成长）");
+  } else {
+    // 替补/自动落选→首发：若首发已满，自动换下能力+稳定最弱的非主唱首发腾位置
+    var starters = [];
+    for (var j = 0; j < st.band.length; j++) if (!st.benchUids[st.band[j].uid]) starters.push(st.band[j]);
+    if (starters.length >= 5) {
+      var weakest = null;
+      for (var k = 0; k < starters.length; k++) {
+        if (st.vocalUid === starters[k].uid) continue;   // 主唱不被自动换下
+        if (!weakest || starters[k].ability + starters[k].stability < weakest.ability + weakest.stability) weakest = starters[k];
+      }
+      if (weakest) { st.benchUids[weakest.uid] = true; showToast(weakest.name + " 被换下替补席"); }
+    }
+    delete st.benchUids[uid];
+    showToast(name + " 提回首发！");
+  }
+  bandRender();
+}
+
 // 转会卖出：按签约价20%回收金币（特殊艺人卖出后不回市场）
 function bandSell(idx) {
   var st = bandState;
@@ -6466,6 +6507,7 @@ function bandSell(idx) {
   var back = Math.max(1, Math.floor(m.price * 0.2));
   st.gold += back;
   if (st.vocalUid === m.uid) st.vocalUid = null;   // 卖掉主唱则空缺
+  delete st.benchUids[m.uid];                      // 清理替补名单残留
   st.band.splice(idx, 1);
   st.logs.push("💸 " + m.name + " 被转会卖出，回收 " + back + " 金币。");
   showToast(m.name + " 已卖出，回收 " + back + " 金币");
@@ -6523,9 +6565,9 @@ function bandRender() {
   }
   html += '</div>';
 
-  // 我的乐队（签约阶段：🎙指派主唱 / ✖转会卖出；超5人显示上场/替补；标题显示编制状态）
+  // 我的乐队（签约阶段：🎙指派主唱 / 🔄首发替补切换 / ✖转会卖出；超5人显示上场/替补；标题显示编制状态）
   var lineupUids = {};
-  var lineupPrev = bandLineup(st.band, st.vocalUid);
+  var lineupPrev = bandLineup(st.band, st.vocalUid, st.benchUids);
   for (var lu = 0; lu < lineupPrev.length; lu++) lineupUids[lineupPrev[lu].uid] = true;
   var benchMode = st.band.length > 5;
   html += '<div class="band-section-title">🎤 你的乐队（' + st.band.length + '人·上场' + lineupPrev.length + (benchMode ? '<span style="color:rgba(224,224,224,0.4);">（替补' + (st.band.length - lineupPrev.length) + '）</span>' : '') + (bandHasFull(lineupPrev) ? '·<span style="color:#ffc832;">标准编制✓</span>' : '·<span style="color:rgba(224,224,224,0.4);">编制不全</span>') + '）</div><div class="band-roster">';
@@ -6537,6 +6579,7 @@ function bandRender() {
     html += '<span class="band-member' + (isVocal ? ' vocal' : '') + (benchMode && !onStage ? ' benched' : '') + '">' + p.emoji + " " + p.name + '<small>' + p.ability + '/' + p.stability + '/🎵' + p.vocal + (isVocal ? '·🎤主唱' : '') + (p.perkName ? '·' + p.perkName : '') + (benchMode ? (onStage ? '<em class="band-stage-tag">上场</em>' : '<em class="bench-tag">替补</em>') : '') + '</small>'
       + (st.phase === "sign"
         ? '<i class="band-vocal-btn" onclick="bandToggleVocal(' + p.uid + ')" title="' + (isVocal ? '取消主唱' : '指派主唱：知名度按能力50%+唱腔，专职无惩罚/兼任稳定-12') + '">' + (isVocal ? '🎤' : '🎙') + '</i>'
+          + (benchMode ? '<i class="band-bench-btn" onclick="bandToggleBench(' + p.uid + ')" title="' + (onStage ? '换下替补席（不演出不成长）' : '提回首发（若已满员自动换下最弱首发）') + '">' + (onStage ? '🔄' : '⬆') + '</i>' : '')
           + '<i class="band-sell-x" onclick="bandSell(' + b + ')" title="转会卖出(回收' + Math.max(1, Math.floor(p.price * 0.2)) + '金)">✖</i>'
         : '')
       + '</span>';

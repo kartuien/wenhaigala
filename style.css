@@ -692,6 +692,12 @@ body {
   transition: color 0.2s;
 }
 .band-vocal-btn:hover { color: #ffc832; }
+.band-bench-btn {
+  font-style: normal; cursor: pointer; margin-left: 2px;
+  color: rgba(92,184,92,0.6); font-size: 11px; padding: 0 2px;
+  transition: color 0.2s;
+}
+.band-bench-btn:hover { color: #5cb85c; }
 .band-member.vocal {
   border-color: rgba(255,200,50,0.55);
   box-shadow: 0 0 6px rgba(255,200,50,0.25);
