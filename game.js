@@ -4314,18 +4314,26 @@ function renderBossNearDeath() {
                       // 天台边：只能跳下去了吗
                       switchImg("572258136ea08391503e8a6809ad94f0.jpg");
                       seqTypeAndWait("怎么还没醒.....|想回去....只能跳下去了吗...|这不是我的地方...我得回去|再见...梦|对不起......", function() {
-                        // 9. 疯狂闪烁 → 结束画面
+                        // 9. 疯狂闪烁 → 结束画面（停留，等玩家点击继续）
                         flicker(12, 100, true, function() {
                           switchImg("569e50202fd9f20e02fdb228049e34bf.jpg");
                           fade.classList.remove("active");
-                          // 10. 结束游戏按钮
-                          actionsArea.innerHTML = "";
-                          actionsArea.style.display = "flex";
-                          var endBtn = document.createElement("button");
-                          endBtn.className = "action-btn";
-                          endBtn.textContent = "结束游戏";
-                          endBtn.onclick = backToStartScreen;
-                          actionsArea.appendChild(endBtn);
+                          // 10. 结束画面停留：打字机播完后不自动出按钮，包装"点击继续"——玩家点了才显示结束游戏按钮
+                          seqTypeAndWait("......", function() {
+                            var descArea = document.getElementById("description-area");
+                            var origClick = descArea.onclick;
+                            descArea.onclick = function() {
+                              if (origClick) origClick();   // 清除"▼ 点击继续"提示
+                              descArea.onclick = null;
+                              actionsArea.innerHTML = "";
+                              actionsArea.style.display = "flex";
+                              var endBtn = document.createElement("button");
+                              endBtn.className = "action-btn";
+                              endBtn.textContent = "结束游戏";
+                              endBtn.onclick = backToStartScreen;
+                              actionsArea.appendChild(endBtn);
+                            };
+                          });
                         });
                       });
                     });
