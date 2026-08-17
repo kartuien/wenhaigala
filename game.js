@@ -74,6 +74,10 @@ var ACHIEVEMENT_CONFIG = {
   sandbox_lose:       { id: "sandbox_lose",       name: "沙盘失败", desc: "在沙盘对决中败给了企鹅狗", icon: "😔" },
   sandbox_hard_win:   { id: "sandbox_hard_win",   name: "击败困难企鹅狗", desc: "在困难模式下击败了企鹅狗", icon: "🎖️" },
   lost_to_bigfoot:    { id: "lost_to_bigfoot",    name: "丢人现眼", desc: "在化学决斗中输给了大脚鸡", icon: "💀" },
+  first_meet:         { id: "first_meet",         name: "初遇", desc: "在教学楼一楼遇见了她", icon: "✨" },
+  canteen_king:       { id: "canteen_king",       name: "抢饭大王", desc: "在食堂抢饭里抢到了超多的饭", icon: "🍚" },
+  canteen_got_some:   { id: "canteen_got_some",   name: "好歹抢到饭了", desc: "在食堂抢饭里勉强带出了饭", icon: "🍛" },
+  dream_eternal:      { id: "dream_eternal",      name: "梦境永续", desc: "选择永远留在了梦境里", icon: "🌌" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -150,7 +154,7 @@ var SCENE_CONFIG = {
     buttons: [
       { text: "抬头看天", target: "gate_look" },
       { text: "都说中国人能飞，我也要飞！！！", target: "gate_fly" },
-      { text: "去教学楼吧", popup: "前面的地点以后再去探索吧！" },
+      { text: "去教学楼吧", target: "teaching_1f" },
       { text: "欸……左边的小树林里似乎有异动", target: "path_to_grove" },
       { text: "小学的十字路口那里似乎发出了点动静……", target: "hermit_1" },
       { text: "去拜访孔子像", target: "confucius_1" },
@@ -987,6 +991,18 @@ var SCENE_CONFIG = {
     autoJump: "lab_floor",
     buttons: []
   },
+  // 教学楼一楼（初遇剧情序列，由专用handler渲染）
+  teaching_1f: {
+    id: "teaching_1f", name: "教学楼一楼", img: "e1eb7eb8d869b6d61fd38988bf69f750.jpg",
+    desc: "",
+    buttons: []
+  },
+  // 食堂抢饭小游戏（由专用handler渲染）
+  canteen_game: {
+    id: "canteen_game", name: "食堂抢饭", img: "",
+    desc: "",
+    buttons: []
+  },
   // 文海少年科技院
   tech_academy_1: {
     id: "tech_academy_1", name: "文海少年科技院", img: "tech_academy_1.jpg",
@@ -1049,6 +1065,68 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.77", date: "2026-08-17", items: [
+    "教学楼一楼'初遇'剧情线完整开放：闲逛→揉眼模糊渐清晰→她登场→一起逛学校",
+    "续篇'跟上去'：二楼糖人二选一（吃蜜糖/甜话被揍）→旧教室变回原样→坐回当年座位",
+    "续篇2'一起上课'：课件竟是初中的→晕倒黑屏→散心→'永远留在这里'二选一→管理手册被电→摄像头→饮水机自动出水悬疑→空走廊→瞥见'同学们'她慌张否认",
+    "新增亭子剧情（孔子像吃草梗）与食堂剧情（帮你带两份饭、被推入食堂）",
+    "新增小游戏'食堂抢饭'：35秒限时拖拽搬饭，10个幽灵同学挤撞；≥14分抢饭大王/7-13分好歹抢到饭了/<7分她让你再抢一次（无限重试）",
+    "终章'天台'：她展示'让你永远留在这里的东西'→二选一分支",
+    "真结局线'是什么'：选择留下→解锁成就'梦境永续'→新闻弹窗揭示真相（感谢游玩）",
+    "反抗线'我不要留在这里'：戳破虚幻→???登场'执迷不悟'→最终BOSS战",
+    "新增最终BOSS战'执念鱿鱼'：黑色鱿鱼10血三阶段（触手冲撞/墨雾遮视野/狂暴弹幕），撞击造成伤害，锁血2点+叙事提示，80秒后终局环形弹幕必收尾",
+    "濒死序列：0血不判负→美好回忆闪回→她的道歉送别→领域坍塌→完成最后一击→疯狂闪烁→结束画面回开始界面",
+    "打字机体验优化：打字中单击快进整句；新增全局'⏭跳过'按钮一键跳过全部文案",
+    "成就页分组：🌙梦之旅途/⚔️决斗与小游戏/😈整活与隐藏，各组显示解锁进度",
+    "食堂抢饭、执念鱿鱼决战加入梦境裂隙精选小游戏",
+    "修复：教学楼/天台/鱿鱼对话残留选项按钮、'完成最后一击'需点两次、BOSS战0血黑屏遮字等bug",
+  ]},
+  { version: "v1.5.76.98", date: "2026-08-17", items: [
+    "BOSS战锁血叙事引导：鱿鱼锁血后HUD显示???台词'斩不断的……执念，与你同在'+伤害无效提示",
+    "BOSS战终局机制：战斗超过80秒触发'???：挣扎够了吗'，360°旋转环形弹幕收尾，战斗不再无限拖延",
+    "成就页分组显示：🌙梦之旅途/⚔️决斗与小游戏/😈整活与隐藏，各组显示解锁进度（如8/16），组内已解锁在前",
+    "执念鱿鱼决战加入梦境裂隙精选小游戏（🦑），可随时直接挑战",
+  ]},
+  { version: "v1.5.76.97", date: "2026-08-17", items: [
+    "修复天台选择后、鱿鱼对话期间残留选项按钮误显示的bug（点击继续不再显示已清空的按钮区）",
+    "取消BOSS战玩家0血时的黑屏，濒死文案直接可见",
+    "鱿鱼模型改为黑色（红色眼睛+亮色核心），墨弹加亮描边保证可见",
+    "玩家撞击鱿鱼本体即可造成伤害（0.55秒冷却，仍锁血2点）",
+    "三阶段墨弹密度提升：P1 0.9s双发/P2 0.55s三发/P3 0.32s四连扇形",
+    "修复'完成最后一击'需点击两次的bug：按钮onclick清空按钮区，防止打字机'点击继续'复活旧按钮（同类隐患一并修复：糖人二选一/上课二选一）",
+  ]},
+  { version: "v1.5.76.96", date: "2026-08-17", items: [
+    "终章剧情：食堂结局后她带你上天台，展示'让你永远留在这里的东西'",
+    "新增真结局线'是什么'：愿意留下来——解锁成就'梦境永续'，新闻弹窗揭示真相（感谢游玩）",
+    "新增反抗线'我不要留在这里'：戳破梦境虚幻，???登场宣布执念坍塌",
+    "新增最终BOSS战：执念鱿鱼（10血）vs 玩家（5血），触屏拖拽移动",
+    "BOSS三阶段：P1触手冲撞+慢速墨弹 / P2墨雾干扰视野+双触手拍打+弹幕加密 / P3狂暴高速横扫+大量弹幕",
+    "鱿鱼血量锁定2点不再下降；玩家0血不判负——进入'濒死'剧情（黑屏+美好回忆闪回）",
+    "濒死后她道歉送别，领域坍塌，'完成最后一击'（疯狂闪烁）→ 结束画面 → 回到开始界面",
+  ]},
+  { version: "v1.5.76.95", date: "2026-08-17", items: [
+    "开放教学楼一楼路线：校门口'去教学楼吧'按钮正式可用",
+    "新增初遇剧情：教学楼闲逛→眼睛痒→揉眼后屏幕模糊渐清晰→她登场",
+    "新增模糊渐清晰特效：揉眼后图片区从模糊逐渐恢复清晰",
+    "她登场时屏幕震动并解锁新成就'初遇'",
+    "初遇对话剧情×9阶段：她等你回来、带主角逛学校，结尾'跟上去'按钮待续",
+    "修复教学楼一楼剧情中会显示校门口残留按钮的bug（进入序列时清空按钮区）",
+    "初遇剧情续篇'跟上去'：走路→到二楼→嘴甜二选一（吃蜜糖/糖人甜话）",
+    "选择'糖人甜话'触发被揍剧情：切图+屏幕震动+道歉原谅后切回原图",
+    "续篇结尾：旧教室变回原样对话→坐回当年座位，显示'待续'按钮",
+    "续篇2'一起上课'：她想和你待近一点→上课发现讲的是初中内容→晕倒",
+    "晕倒时屏幕突然全黑，黑屏2秒后恢复（复用fade-overlay黑幕）",
+    "她打断晕倒话题带你去散心，新增'你想不想永远留在这里'二选一（当然想/为什么突然说这个）",
+    "管理手册拿取被电（震动+好痛）、发现摄像头、被扶到饮水机旁（黑屏切换）",
+    "饮水机自动出水（震动），她称是自己开的但明明在厕所——悬疑氛围结尾'拿你没办法...下楼吧'",
+    "下楼续段：空无一人的走廊→走路→瞥见'同学们'的身影→她慌张否认'你看错啦'催促跟上——悬疑感加深",
+    "新增亭子剧情（标题'亭子'）：文雅感觉/孔子像吃草梗/一起去食堂",
+    "新增食堂剧情（标题'食堂'）：她不进去、求你带两份饭、把你推入食堂",
+    "新增'食堂抢饭'小游戏：35秒限时，拖拽/滑动控制角色（禁止双指缩放）",
+    "玩法：右侧打饭窗口每2秒出饭菜（黄点），搬回左侧大门积分，最多同时带2份；10个白色幽灵NPC乱飘会把玩家挤开；游戏中剧情图片隐藏不占空间",
+    "结算：≥14分流程A+成就'抢饭大王'，7~13分流程B+成就'好歹抢到饭了'，不足7分她要求回去重新打饭再来一次",
+    "食堂抢饭已加入梦境裂隙精选小游戏",
+  ]},
   { version: "v1.5.76.94", date: "2026-08-16", items: [
     "哈基高也能解放誓约胜利之哈：蓄满3气后按局势概率发动，破盾——无视玩家格挡直接命中",
     "新增双誓约对轰：双方同回合释放誓约胜利之哈会相互抵消，气尽数耗散——用你的誓约对冲它的誓约！",
@@ -1331,10 +1409,14 @@ var currentSentenceIndex = 0;
 var currentCharIndex = 0;
 var typewriterDone = false;
 var showButtonsAfter = false;  // 是否在打完当前句后显示按钮
+var typewriterSession = null;  // 当前打字机会话参数（跳过按钮用）
 
 
 // 渲染当前场景
 function renderScene(sceneId) {
+  // 切场景时若食堂抢饭/BOSS战仍在运行，强制停止并清理画布
+  stopCanteenGame();
+  stopBossFight();
   // 厕所蹲坑计数：第二次点击进入后室剧情
   if (sceneId === "toilet_stay_check") {
     gameState.toiletStayCount++;
@@ -1406,6 +1488,12 @@ function renderScene(sceneId) {
     return;
   }
 
+  // 食堂抢饭小游戏
+  if (sceneId === "canteen_game") {
+    startCanteenGame();
+    return;
+  }
+
   // 化学决斗介绍
   if (sceneId === "chem_lab_battle_intro") {
     stopTypewriter();
@@ -1463,6 +1551,11 @@ function renderScene(sceneId) {
   // 实验楼二楼 → 企鹅狗沙盘剧情
   if (sceneId === "lab_2f") {
     renderLab2FSequence();
+    return;
+  }
+  // 教学楼一楼 → 初遇剧情
+  if (sceneId === "teaching_1f") {
+    renderTeaching1FSequence();
     return;
   }
 
@@ -1636,6 +1729,38 @@ function stopTypewriter() {
     typewriterTimer = null;
   }
   typewriterDone = false;
+  typewriterSession = null;
+  hideSkipBtn();
+}
+
+// ===== 打字机跳过按钮 =====
+function ensureSkipBtn() {
+  var b = document.getElementById("skip-btn");
+  if (b) return b;
+  b = document.createElement("button");
+  b.id = "skip-btn";
+  b.textContent = "⏭ 跳过";
+  b.onclick = function(e) { e.stopPropagation(); skipTypewriter(); };
+  document.getElementById("game-container").appendChild(b);
+  return b;
+}
+function showSkipBtn() { ensureSkipBtn().style.display = "block"; }
+function hideSkipBtn() {
+  var b = document.getElementById("skip-btn");
+  if (b) b.style.display = "none";
+}
+// 跳过：立即显示全部文案并走完成流程（序列剧情的轮询会自动接续）
+function skipTypewriter() {
+  if (typewriterDone || !currentSentences.length) return;
+  if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+  currentSentenceIndex = currentSentences.length;
+  currentCharIndex = 0;
+  var descArea = document.getElementById("description-area");
+  descArea.innerHTML = currentSentences.join("<br>");
+  descArea.onclick = null;
+  hideSkipBtn();
+  var s = typewriterSession;
+  typeNextChar(s ? s.autoNext : null, s ? s.autoJump : null, s ? s.getItem : null);
 }
 
 // 黑幕过渡效果：缓慢变黑再变回去
@@ -2877,6 +3002,1325 @@ function renderLab2FSequence() {
   var check = setInterval(lab2fCheck, 100);
 }
 
+// 教学楼一楼 → 初遇剧情序列（无聊闲逛 → 眼睛痒揉一揉 → 模糊渐清晰 → 她登场 → 对话 → 陪她逛学校）
+function renderTeaching1FSequence() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+
+  var scene = SCENE_CONFIG["teaching_1f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = scene.img;
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  document.getElementById("location-name").textContent = scene.name;
+  // 清空并隐藏按钮区：防止打字机"点击继续"后把上一场景（校门口）残留的按钮重新显示出来
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 剧情序列：img为null表示沿用当前图片；meet=true时触发揉眼后模糊渐清晰+登场震动+成就
+  var seq = [
+    { img: null, text: "好无聊啊.....教学楼有什么好来的呢....|或者说....我来这个学校....都是在做什么呢.....|眼睛好痒....." },
+    { img: "0e92574bb5859c94e9658e7a15e54117.jpg", text: "揉一揉吧" },
+    { img: "e44953fe91bea8bd111de733bc3fca1e.jpg", meet: true, text: "她：喂！！！！！！|欸....欸？！|她：我等了你好久啦！|她：你终于舍得回来看我了......|（这.....我不是在做梦吧....）" },
+    { img: "9091bd44e6712c44730b1c56ddb2d6b5.jpg", text: "她：怎么呆住了？" },
+    { img: "5470a144d4233a4467c8e6a4d193688e.jpg", text: "她：是不是被本大人的美貌吓到啦？！|只是太久没见到你了而已|再见有点不适应..." },
+    { img: "9091bd44e6712c44730b1c56ddb2d6b5.jpg", text: "她：什么嘛...这时候不该夸我好看吗|好好好,大小姐最好看了~" },
+    { img: "5470a144d4233a4467c8e6a4d193688e.jpg", text: "她：嘿嘿....原谅你啦！|她：你一直过的不太好呢...|她：我得想想要去哪玩让你开心起来" },
+    { img: "846c893916a8a51b2ca4510df2cb93e6.jpg", text: "她：居然你好久没回来了...|她：我就带你到学校各处逛逛如何!|这算哪门子好主意....." },
+    { img: "90c31247c5481f8b40b86751ba451ed2.jpg", text: "她：诶诶？我想了好久的....|明明是刚想到的吧......|她：由不得你愿不愿意,现在就陪我去！！！|好....." },
+  ];
+  var idx = 0;
+  var check = null;
+
+  // 打字机播完 → 停顿片刻进入下一步
+  function waitDone() {
+    if (typewriterDone) {
+      clearInterval(check);
+      setTimeout(playStep, 600);
+    }
+  }
+
+  function playStep() {
+    // 序列播放完毕：显示"跟上去"按钮（后续剧情待续，返回校门口）
+    if (idx >= seq.length) {
+      var actionsArea = document.getElementById("actions-area");
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      var btn = document.createElement("button");
+      btn.className = "action-btn";
+      btn.textContent = "（跟上去）";
+      btn.onclick = function() { renderTeachingTourSequence(); };
+      actionsArea.appendChild(btn);
+      return;
+    }
+    var step = seq[idx];
+    idx++;
+    if (step.img) {
+      // 规范：同步清空src + 取消旧RAF + 单次RAF设置新图
+      img.src = "";
+      cancelRAF();
+      pendingImageRAF = requestAnimationFrame(function() {
+        pendingImageRAF = null;
+        img.src = step.img;
+        img.style.display = "block";
+        placeholder.style.display = "none";
+      });
+    }
+    if (step.meet) {
+      // 揉眼睁眼：图片区从模糊逐渐清晰，快看清时她"喂！"登场——震动+解锁成就+开始打字
+      var area = document.getElementById("image-area");
+      area.classList.remove("blur-clear");
+      void area.offsetWidth; // 强制重排，确保动画重新播放
+      area.classList.add("blur-clear");
+      setTimeout(function() {
+        var gc = document.getElementById("game-container");
+        gc.classList.add("shake");
+        setTimeout(function() { gc.classList.remove("shake"); }, 1000);
+        unlockAchievement("first_meet");
+        startTypewriter(step.text, null, null, null);
+        check = setInterval(waitDone, 100);
+      }, 1400);
+    } else {
+      startTypewriter(step.text, null, null, null);
+      check = setInterval(waitDone, 100);
+    }
+  }
+
+  playStep();
+}
+
+// 教学楼"跟上去"续篇：走路 → 二楼 → 糖人二选一（蜜糖/糖人吐槽） → 回教室 → 坐回当年座位
+function renderTeachingTourSequence() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 规范切图：同步清空src + 取消旧RAF + 单次RAF设置新图
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 打字机播完 → 停顿片刻执行下一步
+  function typeAndWait(text, done) {
+    startTypewriter(text, null, null, null);
+    var check = setInterval(function() {
+      if (typewriterDone) {
+        clearInterval(check);
+        setTimeout(done, 600);
+      }
+    }, 100);
+  }
+
+  // 阶段1：走路 → 阶段2：到二楼
+  switchImg("90c31247c5481f8b40b86751ba451ed2.jpg");
+  typeAndWait("（走路ing）", function() {
+    switchImg("b606df558e411f75e8b5b79bd9529c4a.jpg");
+    typeAndWait("她：到啦~二楼~|她：欸。。你怎么一直看着我|因为你好看啊|她：欸↓~↑？今天怎么嘴这么甜", showSweetChoice);
+  });
+
+  // 糖人二选一
+  function showSweetChoice() {
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "flex";
+    var btn1 = document.createElement("button");
+    btn1.className = "action-btn";
+    btn1.textContent = "我出门前吃蜜糖了";
+    btn1.onclick = function() {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "none";
+      typeAndWait("她：哈哈~终于开窍了", goClassroom);
+    };
+    var btn2 = document.createElement("button");
+    btn2.className = "action-btn";
+    btn2.textContent = "对待糖人当然要说甜话啦~";
+    btn2.onclick = choiceTease;
+    actionsArea.appendChild(btn1);
+    actionsArea.appendChild(btn2);
+  }
+
+  // 选项二：糖人吐槽 → 被揍（切图+屏幕震动） → 原谅后切回原图
+  function choiceTease() {
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "none";
+    switchImg("90c31247c5481f8b40b86751ba451ed2.jpg");
+    startTypewriter("她：混蛋！！！打死你！！！", null, null, null);
+    var gc = document.getElementById("game-container");
+    gc.classList.add("shake");
+    setTimeout(function() { gc.classList.remove("shake"); }, 1000);
+    var check = setInterval(function() {
+      if (typewriterDone) {
+        clearInterval(check);
+        setTimeout(function() {
+          typeAndWait("她：哼！！|欸欸欸我错了，对不起宝宝|她：原谅你啦下次不许了！", function() {
+            // 切回二楼原图，汇合到回教室
+            switchImg("b606df558e411f75e8b5b79bd9529c4a.jpg");
+            setTimeout(goClassroom, 600);
+          });
+        }, 600);
+      }
+    }, 100);
+  }
+
+  // 汇合：一起回教室看看 → 旧教室变回来 → 坐回当年座位
+  function goClassroom() {
+    typeAndWait("我们一起回教室看看吧", function() {
+      switchImg("e56e887305c3fe11a571739b991317d3.jpg");
+      typeAndWait("以前的教室呢......我记得已经改成会议室了来着|她：我给你变回来啦~厉害吧~|要变也是我想成这样的....|她：你可以假装是我变的|好好好...宝宝好厉害|她：哼哼~谢谢啦", function() {
+        switchImg("4362fc91070218685e8efbe7c7edd4e1.jpg");
+        typeAndWait("你又坐到当时你的座位了呢...", function() {
+          // 接续：一起上课剧情
+          renderTeachingClassSequence();
+        });
+      });
+    });
+  }
+}
+
+// 教学楼续篇2：一起上课（初中课件异样）→晕倒黑屏→她带去别处散心→"永远留在这"二选一→管理手册被电→摄像头→饮水机自动出水
+function renderTeachingClassSequence() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 规范切图：同步清空src + 取消旧RAF + 单次RAF设置新图
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 打字机播完 → 停顿片刻执行下一步
+  function typeAndWait(text, done) {
+    startTypewriter(text, null, null, null);
+    var check = setInterval(function() {
+      if (typewriterDone) {
+        clearInterval(check);
+        setTimeout(done, 600);
+      }
+    }, 100);
+  }
+
+  // 屏幕震动1秒
+  function shakeScreen() {
+    var gc = document.getElementById("game-container");
+    gc.classList.add("shake");
+    setTimeout(function() { gc.classList.remove("shake"); }, 1000);
+  }
+
+  // 突然全黑 → 黑透时切图 → 停2秒 → 恢复 → 继续
+  function blackoutSwitch(src, done) {
+    var fade = document.getElementById("fade-overlay");
+    fade.classList.add("active");
+    setTimeout(function() {
+      switchImg(src);
+      setTimeout(function() {
+        fade.classList.remove("active");
+        setTimeout(done, 600);
+      }, 2000);
+    }, 1300);
+  }
+
+  // 剧情步骤队列：img=切图 / blackoutImg=黑屏切图 / shake=步骤开始时震动 / choice=二选一
+  var steps = [
+    { text: "她：不行吗~我想和你待的近一点|倒也不是不行....|她：嘿嘿，我们一起上课吧~|她：我好久没和你一起上课了....|她：好久好久....." },
+    { img: "dbc46936853d06081e2ddb316de0214e.jpg", text: "(课上在讲什么呢....)|(我无心听讲)|欸....|这些东西....是初中的吗" },
+    { blackoutImg: "2d9eae028eb12b1ab6d5f417761b8376.jpg", text: "唔.....刚才好像有点头晕|欸....她呢？" },
+    { img: "9b30a6cad1207cf33249299412f5f0dd.jpg", text: "她：喂喂喂，我在这边呢|我刚才...好像", shake: true },
+    { img: "90c31247c5481f8b40b86751ba451ed2.jpg", text: "她：（打断）停停停，你要把你在教室里晕倒的事情再说一遍吗|我刚才....在教室里晕倒了？|她：够了我可不想听你再说|她：超级影响氛围的你知道吗！" },
+    { img: "9b30a6cad1207cf33249299412f5f0dd.jpg", text: "她：居然你晕倒了，我就带你去别的地方看看吧|。。。好" },
+    { img: "66c4d6ab9776b1fdd4565b1f53c34f3f.jpg", text: "这里真好看....|她：那可不....你想不想永远留在这里" },
+    { choice: [
+      { label: "当然想", text: "她：嘿嘿，就知道宝宝会陪着我哒" },
+      { label: "为什么突然说这个", text: "她：这不是怕你又走了|你，....会想念我吗|她：....这是什么话，当然啦！|......|（对话在一个奇怪的氛围里结束了)" },
+    ]},
+    { img: "0f8838731ecb4c15bf52fe7723d0bad3.jpg", text: "那里有一个管理手册！|她：怎么，你想看看吗|这里不会有人吧|她：应该只有你一个人吧|那我就放心了" },
+    { img: "a03aa84e49080e21372f461c85e318da.jpg", text: "我要拿了" },
+    { text: "好痛！！！", shake: true },
+    { img: "b662ffd6f7692078b8c0f61d485bced4.jpg", text: "这里怎么有个摄像头！！！|头好疼.....|她：你没事吧（把你扶到了一边坐着）" },
+    { blackoutImg: "f614a90846a85770b84ae375b5d46ed0.jpg", text: "欸...为什么要把我放在饮水机旁边" },
+    { img: "4a225150156297390d532ae642a653cf.jpg", text: "水！为什么水自动流出来了！", shake: true },
+    { text: "（水停了）|她：怎么了|刚才饮水机自动启动了|她：是我开的哦|欸....骗人....明明你刚才还在厕所|她：我都说了是我开的哦（微笑）|好....好吧|她：拿你没办法...下楼吧" },
+    { img: "fd2ff25e9326c42bb230387802fa811c.jpg", text: "一个人都没有呢....." },
+    { img: "4aa5c3e229fcf6a4277707e43b5c42d3.jpg", text: "（走路ing）" },
+    { img: "9553eed9844709499308fc823afc8ff7.jpg", text: "欸....这是同学们吗...." },
+    { img: "76a0d9eb879ee6b1b463c6e7cdc3a5fe.jpg", text: "她：喂！你发什么呆呢！|额...我刚才好像看到其他人了|她：你看错啦！！|她：赶紧跟我来！！！|好...的" },
+    { img: "ff98d35198eea6891cd6a788cd5ef331.jpg", title: "亭子", text: "她：就到这里吧~|她：在这里坐一会把" },
+    { img: "d17d538b5aa3b53f11665b1afe9ca276.jpg", text: "（坐下）|她：嘿嘿，这里有股文雅的感觉~|毕竟孔子像就在旁边|她：你要去吃草吗|不了谢谢....|她：说到这里....我有点饿了..|要不要一起去食堂吃饭|她：好啊~走吧！" },
+    { img: "c31bc5670e3d7e6f2542e47960c39856.jpg", title: "食堂", text: "她：到啦~|她：我就不进去啦~你能帮我带两份饭出来吗|两份....有点难拿啊...." },
+    { img: "7ec103d78421548f56e847447ec8720b.jpg", text: "她：我相信你一定可以的|喂喂喂不要这样子求我啊|就算这样子求我...我也不会|她：嗯嗯嗯嗯帮我去拿吧|不要！！！！|她：（将你推入食堂）|喂喂喂不要这么突然！" },
+    { game: "canteen" },
+  ];
+
+  function runStep(i) {
+    // 全部播完：待续按钮返回校门口
+    if (i >= steps.length) {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      var endBtn = document.createElement("button");
+      endBtn.className = "action-btn";
+      endBtn.textContent = "（待续）";
+      endBtn.onclick = function() { renderScene("gate"); };
+      actionsArea.appendChild(endBtn);
+      return;
+    }
+    var s = steps[i];
+    var next = function() { runStep(i + 1); };
+
+    // 切换标题（如：亭子/食堂）
+    if (s.title) document.getElementById("location-name").textContent = s.title;
+
+    // 触发小游戏（食堂抢饭）
+    if (s.game === "canteen") {
+      setTimeout(startCanteenGame, 600);
+      return;
+    }
+
+    // 二选一分支：各自文案播完汇合到下一步
+    if (s.choice) {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      for (var c = 0; c < s.choice.length; c++) {
+        (function(opt) {
+          var b = document.createElement("button");
+          b.className = "action-btn";
+          b.textContent = opt.label;
+          b.onclick = function() {
+            actionsArea.innerHTML = "";
+            actionsArea.style.display = "none";
+            typeAndWait(opt.text, next);
+          };
+          actionsArea.appendChild(b);
+        })(s.choice[c]);
+      }
+      return;
+    }
+
+    var begin = function() {
+      if (s.shake) shakeScreen();
+      if (s.text) typeAndWait(s.text, next);
+      else setTimeout(next, 600);
+    };
+    if (s.blackoutImg) {
+      blackoutSwitch(s.blackoutImg, begin);
+    } else {
+      if (s.img) switchImg(s.img);
+      begin();
+    }
+  }
+
+  runStep(0);
+}
+
+// ===== 食堂抢饭小游戏 =====
+// 规则：35秒限时；滑动/拖拽控制角色；从右侧打饭窗口拿饭菜（黄点，每2秒生成），送回左侧大门积分
+// 10个白色幽灵NPC乱飘，撞到玩家会把玩家挤开；最多同时携带2份
+// ≥14分流程A+成就"抢饭大王"，7~13分流程B+成就"好歹抢到饭了"，<7分失败饿肚子
+var canteenGame = null;
+
+// 通用：打字机播完 → 停顿片刻执行回调
+function seqTypeAndWait(text, done) {
+  startTypewriter(text, null, null, null);
+  var check = setInterval(function() {
+    if (typewriterDone) {
+      clearInterval(check);
+      setTimeout(done, 600);
+    }
+  }, 100);
+}
+
+// 强制停止小游戏并清理画布（切场景时调用）
+function stopCanteenGame() {
+  if (!canteenGame) return;
+  var g = canteenGame;
+  canteenGame = null;
+  if (g.raf) cancelAnimationFrame(g.raf);
+  if (g.spawnTimer) clearInterval(g.spawnTimer);
+  if (g.canvas && g.canvas.parentNode) g.canvas.parentNode.removeChild(g.canvas);
+  // 恢复HUD区为剧情描述区
+  var descArea = document.getElementById("description-area");
+  if (descArea) descArea.innerHTML = "";
+}
+
+function startCanteenGame() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+
+  document.getElementById("location-name").textContent = "食堂抢饭";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 游戏内：剧情图片不显示也不占空间（画布填充图片区）
+  var area = document.getElementById("image-area");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  var placeholder = document.getElementById("scene-placeholder");
+  placeholder.style.display = "none";
+
+  var canvas = document.createElement("canvas");
+  canvas.id = "canteen-canvas";
+  canvas.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none;";
+  canvas.oncontextmenu = function(e) { e.preventDefault(); return false; };
+  area.appendChild(canvas);
+
+  var rect = area.getBoundingClientRect();
+  var W = Math.max(300, Math.floor(rect.width));
+  var H = Math.max(240, Math.floor(rect.height));
+  canvas.width = W;
+  canvas.height = H;
+  var ctx = canvas.getContext("2d");
+
+  // 游戏状态
+  var DURATION = 35000;           // 限时35秒
+  var GATE_W = 30;                // 左侧大门宽度
+  var WIN_W = 48;                 // 右侧打饭窗口宽度
+  var MAX_CARRY = 2;              // 最多同时携带2份（对应剧情"带两份饭"）
+  var state = {
+    timeLeft: DURATION,
+    score: 0,
+    player: { x: W * 0.35, y: H / 2, r: 14, carry: 0, speed: 195 },
+    foods: [],
+    npcs: [],
+    drag: null,                    // {sx, sy, cx, cy} 滑动/拖拽向量
+    lastTs: 0,
+    hudTick: 0,
+  };
+
+  // 10个白色幽灵NPC：全场乱飘，定时随机转向
+  for (var i = 0; i < 10; i++) {
+    state.npcs.push({
+      x: GATE_W + 40 + Math.random() * (W - GATE_W - WIN_W - 80),
+      y: 20 + Math.random() * (H - 40),
+      r: 12 + Math.random() * 3,
+      vx: 0, vy: 0,
+      turnIn: 500 + Math.random() * 1200,
+    });
+  }
+  function npcTurn(n) {
+    var ang = Math.random() * Math.PI * 2;
+    var spd = 60 + Math.random() * 90;
+    n.vx = Math.cos(ang) * spd;
+    n.vy = Math.sin(ang) * spd;
+    n.turnIn = 500 + Math.random() * 1200;
+  }
+
+  // 饭菜每2秒生成一个（右侧打饭窗口内，场上最多8个）
+  function spawnFood() {
+    if (state.foods.length >= 8) return;
+    state.foods.push({
+      x: W - WIN_W / 2 - 6 + (Math.random() * 14 - 7),
+      y: 24 + Math.random() * (H - 48),
+      r: 9,
+    });
+  }
+  spawnFood();
+  var spawnTimer = setInterval(spawnFood, 2000);
+
+  // HUD（复用描述区）
+  var descArea = document.getElementById("description-area");
+  descArea.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;font-size:15px;margin-bottom:6px;">' +
+    '<span>⏱ 剩余 <b id="cg-time" style="color:#ffd54f;">35</b> 秒</span>' +
+    '<span>🍚 已抢 <b id="cg-score" style="color:#ffd54f;">0</b> 份</span>' +
+    '<span>🎯 目标 <b style="color:#ffd54f;">7份</b> / <b style="color:#ff8a65;">14份</b></span>' +
+    '</div>' +
+    '<div style="font-size:12px;color:rgba(224,224,224,0.75);text-align:center;">' +
+    '拖拽/滑动控制移动：去右侧打饭窗口拿<b style="color:#ffd54f;">黄色饭菜</b>（最多带2份），送回左侧<b style="color:#81c784;">大门</b>积分！小心白色幽灵同学会把你挤开！</div>';
+
+  // 指针输入：鼠标拖拽 + 触屏滑动（双指操作被拦截，禁止缩放）
+  function ptrPos(e) {
+    var cr = canvas.getBoundingClientRect();
+    return { x: e.clientX - cr.left, y: e.clientY - cr.top };
+  }
+  function onDown(e) {
+    e.preventDefault();
+    var p = ptrPos(e);
+    state.drag = { sx: p.x, sy: p.y, cx: p.x, cy: p.y };
+    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  }
+  function onMove(e) {
+    if (!state.drag) return;
+    e.preventDefault();
+    var p = ptrPos(e);
+    state.drag.cx = p.x;
+    state.drag.cy = p.y;
+  }
+  function onUp() { state.drag = null; }
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointermove", onMove);
+  canvas.addEventListener("pointerup", onUp);
+  canvas.addEventListener("pointercancel", onUp);
+  canvas.addEventListener("touchstart", function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchmove", function(e) { e.preventDefault(); }, { passive: false });
+
+  // ===== 结算 =====
+  function endGame() {
+    stopCanteenGame();
+    var score = state.score;
+    if (score >= 14) {
+      unlockAchievement("canteen_king");
+      showCanteenResult("A", score);
+    } else if (score >= 7) {
+      unlockAchievement("canteen_got_some");
+      showCanteenResult("B", score);
+    } else {
+      // <7分：还是食堂背景图，她要求回去重新打饭，然后再来一次
+      showCanteenRetry();
+    }
+  }
+
+  // ===== 主循环 =====
+  function loop(ts) {
+    if (!canteenGame) return;
+    var dt = Math.min(0.033, (ts - state.lastTs) / 1000 || 0);
+    state.lastTs = ts;
+    state.timeLeft -= dt * 1000;
+
+    // 倒计时结束直接结算
+    if (state.timeLeft <= 0) { endGame(); return; }
+
+    // 玩家移动：按拖拽向量方向移动（超过死区才动，速度随拖拽长度提升）
+    var pl = state.player;
+    if (state.drag) {
+      var dx = state.drag.cx - state.drag.sx;
+      var dy = state.drag.cy - state.drag.sy;
+      var len = Math.sqrt(dx * dx + dy * dy);
+      if (len > 8) {
+        var k = Math.min(1, len / 70);
+        pl.x += (dx / len) * pl.speed * k * dt;
+        pl.y += (dy / len) * pl.speed * k * dt;
+      }
+    }
+    // 玩家边界
+    if (pl.x < pl.r) pl.x = pl.r;
+    if (pl.x > W - pl.r) pl.x = W - pl.r;
+    if (pl.y < pl.r) pl.y = pl.r;
+    if (pl.y > H - pl.r) pl.y = H - pl.r;
+
+    // NPC游走 + 撞击把玩家挤开
+    for (var n = 0; n < state.npcs.length; n++) {
+      var c = state.npcs[n];
+      c.turnIn -= dt * 1000;
+      if (c.turnIn <= 0 || (c.vx === 0 && c.vy === 0)) npcTurn(c);
+      c.x += c.vx * dt;
+      c.y += c.vy * dt;
+      if (c.x < GATE_W + c.r) { c.x = GATE_W + c.r; c.vx = Math.abs(c.vx); }
+      if (c.x > W - c.r) { c.x = W - c.r; c.vx = -Math.abs(c.vx); }
+      if (c.y < c.r) { c.y = c.r; c.vy = Math.abs(c.vy); }
+      if (c.y > H - c.r) { c.y = H - c.r; c.vy = -Math.abs(c.vy); }
+      // 与玩家碰撞：沿连线把双方推开（玩家被挤开）
+      var pdx = pl.x - c.x, pdy = pl.y - c.y;
+      var pd = Math.sqrt(pdx * pdx + pdy * pdy);
+      var pmin = pl.r + c.r;
+      if (pd < pmin && pd > 0.001) {
+        var overlap = pmin - pd;
+        pl.x += (pdx / pd) * overlap * 0.75;
+        pl.y += (pdy / pd) * overlap * 0.75;
+        c.x -= (pdx / pd) * overlap * 0.35;
+        c.y -= (pdy / pd) * overlap * 0.35;
+      }
+    }
+
+    // 拾取饭菜（右侧窗口，最多带2份）
+    for (var f = state.foods.length - 1; f >= 0; f--) {
+      var fd = state.foods[f];
+      var fdx = pl.x - fd.x, fdy = pl.y - fd.y;
+      if (pl.carry < MAX_CARRY && Math.sqrt(fdx * fdx + fdy * fdy) < pl.r + fd.r) {
+        pl.carry++;
+        state.foods.splice(f, 1);
+      }
+    }
+    // 送回左侧大门：积分
+    if (pl.x - pl.r < GATE_W && pl.carry > 0) {
+      state.score += pl.carry;
+      pl.carry = 0;
+    }
+
+    // ===== 绘制 =====
+    ctx.clearRect(0, 0, W, H);
+    // 地板
+    ctx.fillStyle = "#2b2622";
+    ctx.fillRect(0, 0, W, H);
+    // 左侧大门
+    ctx.fillStyle = "#2e5d3e";
+    ctx.fillRect(0, 0, GATE_W, H);
+    ctx.fillStyle = "#a5d6a7";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.save();
+    ctx.translate(14, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("大门", 0, 4);
+    ctx.restore();
+    // 右侧打饭窗口
+    ctx.fillStyle = "#5d4037";
+    ctx.fillRect(W - WIN_W, 0, WIN_W, H);
+    ctx.fillStyle = "#ffcc80";
+    ctx.save();
+    ctx.translate(W - WIN_W / 2, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("打饭窗口", 0, 4);
+    ctx.restore();
+    // 饭菜（黄色圆点）
+    for (var d = 0; d < state.foods.length; d++) {
+      var fo = state.foods[d];
+      ctx.beginPath();
+      ctx.arc(fo.x, fo.y, fo.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffd54f";
+      ctx.fill();
+      ctx.strokeStyle = "#f9a825";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    // NPC白色幽灵
+    for (var v = 0; v < state.npcs.length; v++) {
+      var gh = state.npcs[v];
+      ctx.beginPath();
+      ctx.arc(gh.x, gh.y, gh.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.fill();
+      // 幽灵眼睛
+      ctx.fillStyle = "#333";
+      ctx.beginPath();
+      ctx.arc(gh.x - 4, gh.y - 2, 2, 0, Math.PI * 2);
+      ctx.arc(gh.x + 4, gh.y - 2, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 玩家（蓝色）+ 携带的饭
+    ctx.beginPath();
+    ctx.arc(pl.x, pl.y, pl.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#4fc3f7";
+    ctx.fill();
+    ctx.strokeStyle = "#e1f5fe";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    if (pl.carry > 0) {
+      for (var cc = 0; cc < pl.carry; cc++) {
+        ctx.beginPath();
+        ctx.arc(pl.x - 7 + cc * 14, pl.y - pl.r - 6, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffd54f";
+        ctx.fill();
+      }
+    }
+    // 拖拽方向指示
+    if (state.drag) {
+      var ax = state.drag.cx - state.drag.sx;
+      var ay = state.drag.cy - state.drag.sy;
+      if (Math.sqrt(ax * ax + ay * ay) > 8) {
+        ctx.beginPath();
+        ctx.moveTo(state.drag.sx, state.drag.sy);
+        ctx.lineTo(state.drag.cx, state.drag.cy);
+        ctx.strokeStyle = "rgba(79,195,247,0.5)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+
+    // HUD刷新（节流）
+    state.hudTick += dt * 1000;
+    if (state.hudTick > 100) {
+      state.hudTick = 0;
+      var tEl = document.getElementById("cg-time");
+      var sEl = document.getElementById("cg-score");
+      if (tEl) tEl.textContent = Math.ceil(state.timeLeft / 1000);
+      if (sEl) sEl.textContent = state.score;
+    }
+
+    canteenGame.raf = requestAnimationFrame(loop);
+  }
+
+  canteenGame = { raf: null, spawnTimer: spawnTimer, canvas: canvas };
+  canteenGame.raf = requestAnimationFrame(loop);
+}
+
+// 食堂抢饭失败（<7分）：食堂背景图 + 她要求重打，然后再来一次
+function showCanteenRetry() {
+  // 恢复图片区：显示食堂门口背景图
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "c31bc5670e3d7e6f2542e47960c39856.jpg";
+    img.style.display = "block";
+  });
+  document.getElementById("location-name").textContent = "食堂";
+
+  seqTypeAndWait("她：这明显不够吃！！！回去重新打饭！！！", function() {
+    var actionsArea = document.getElementById("actions-area");
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "flex";
+    var btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = "（再去抢一次）";
+    btn.onclick = function() { startCanteenGame(); };
+    actionsArea.appendChild(btn);
+  });
+}
+
+// 食堂抢饭结算剧情：A(≥14)/B(7~13) 各自对话后汇入同一结局
+function showCanteenResult(flow, score) {
+  // 恢复图片区：显示食堂门口背景图
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  if (pendingImageRAF) { cancelAnimationFrame(pendingImageRAF); pendingImageRAF = null; }
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "c31bc5670e3d7e6f2542e47960c39856.jpg";
+    img.style.display = "block";
+  });
+  document.getElementById("location-name").textContent = "食堂";
+
+  var textA = "她：哇你真的抢到了好多|嘿嘿，不要膜拜我|她：行行行我不膜拜你|要不你还是膜拜一下|她：行行行我膜拜你|好敷衍.......|她：就敷衍就敷衍，我要吃饭了！|完全只在意饭啊........";
+  var textB = "她：呃呜....有点不够呢|没事我不用吃，都你吃吧|她：不不不，不吃饭你会胃疼的|为了你胃疼，我心甘情愿|她：我会心疼的！！！|好吧那我就勉为其难吃两口....|她：你真的不客气啊啊啊！！！";
+  seqTypeAndWait(flow === "A" ? textA : textB, function() {
+    // 两个流程汇入同一结局：天台终章
+    showFinaleSequence();
+  });
+}
+
+// ===== 终章：天台 =====
+// 食堂结局汇合 → 吃太多吐槽 → 天台 → 她展示"让你永远留在这里的东西" → 二选一
+function showFinaleSequence() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 规范切图
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 图1：吃太多吐槽（5470a144）→ 走路 → 图2：天台
+  switchImg("5470a144d4233a4467c8e6a4d193688e.jpg");
+  seqTypeAndWait("她：你怎么吃了这么多！！我都没东西吃了！！！|红豆泥私密马赛！！|太久没吃东西有些饿了...|她：你啊！在外面要照顾好自己！！（敲脑壳）|她：算了...我还有个方法，我带你去看个东西|(走路ing)", function() {
+    switchImg("d4148613c6b8b609b9d462cf9b5f9465.jpg");
+    document.getElementById("location-name").textContent = "天台";
+    seqTypeAndWait("这里....是哪里....|她：嘿嘿....我要带你去见一个东西|什么....|她：一个可以让你永远留在这里的东西", function() {
+      // 二选一：是什么 / 我不要留在这里
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      var btn1 = document.createElement("button");
+      btn1.className = "action-btn";
+      btn1.textContent = "是什么";
+      btn1.onclick = renderStayEnding;
+      var btn2 = document.createElement("button");
+      btn2.className = "action-btn";
+      btn2.textContent = "我不要留在这里";
+      btn2.onclick = renderRefusePath;
+      actionsArea.appendChild(btn1);
+      actionsArea.appendChild(btn2);
+    });
+  });
+}
+
+// 真结局线：愿意留下来（梦境永续）
+function renderStayEnding() {
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+
+  img.src = "";
+  cancelRAF();
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "9091bd44e6712c44730b1c56ddb2d6b5.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  seqTypeAndWait("欸？你真的愿意留下来陪我吗？|当然啦~|她：我还以为你会再次离开我呢...|怎么...会.....|她：那个东西...就是...你的执念......", function() {
+    // 解锁成就：梦境永续
+    unlockAchievement("dream_eternal");
+    // 切终图
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = "eba4f533b30f0f618e206e5d5b244305.jpg";
+      img.style.display = "block";
+    });
+    // 选项：继续游戏 → 新闻弹窗揭示真相 → 回校门口
+    setTimeout(function() {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "flex";
+      var btn = document.createElement("button");
+      btn.className = "action-btn";
+      btn.textContent = "继续游戏";
+      btn.onclick = function() {
+        showPopupModal(
+          "近日一初中肄业生在秋叶原大街自杀抢救无效死亡，死亡原因系安眠药过量，具同学了解死者生前在校内极其孤僻，经常独处，中考失利并未考上高中。通过这起案件可以看出.........<br><br>感谢游玩...",
+          function() { renderScene("gate"); }
+        );
+      };
+      actionsArea.appendChild(btn);
+    }, 800);
+  });
+}
+
+// 反抗线：我不要留在这里 → ???登场 → BOSS战
+function renderRefusePath() {
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+
+  // 图1：戳破虚幻
+  img.src = "";
+  cancelRAF();
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "7d1920bc68a84af90beab85fcccca21d.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  seqTypeAndWait("她：欸....为什么？你不是很讨厌外面的生活吗|她：待在这里难道不比外面强吗|她：你可以获得永恒的幸福|她：你不是喜欢我吗？你可以呆在这里陪我啊|你是假的吧|这里的一切....也都是假的吧|外面的世界很痛苦|外面的世界很孤单|外面的世界没有能相伴的人|冰天雪地....|但我还想有承受痛苦的机会|这里不是幸福|我不想拿虚幻的东西敷衍自己了....|你让我看到了生的希望|她：可..这", function() {
+    // 图2：???登场
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = "af9d888a79b17eaf4139565220713be9.jpg";
+      img.style.display = "block";
+    });
+    seqTypeAndWait("???：已经晚了....|???：我们本来能好好谈谈，让这里存续下去的|???：我看到了你的【求生意志】|???：这样下去这里会因你而崩坏掉，你在这里的一切，包括'她'，都会消失|???：你真的做好决定了吗|我很确定|???：执迷不悟", function() {
+      // 进入BOSS战
+      setTimeout(startBossFight, 600);
+    });
+  });
+}
+
+// ===== 最终BOSS战：执念鱿鱼 =====
+// 玩家5血（触屏拖拽移动），鱿鱼10血（锁血2点不再下降）
+// P1(100-70%)：1触手慢旋+慢速墨弹 / P2(70-40%)：墨雾干扰视野+双触手+弹幕加密 / P3(40-20%)：三触手高速横扫+大量弹幕
+// 玩家0血不判负 → 进入濒死剧情
+var bossFight = null;
+
+function stopBossFight() {
+  if (!bossFight) return;
+  var b = bossFight;
+  bossFight = null;
+  if (b.raf) cancelAnimationFrame(b.raf);
+  if (b.canvas && b.canvas.parentNode) b.canvas.parentNode.removeChild(b.canvas);
+  var descArea = document.getElementById("description-area");
+  if (descArea) descArea.innerHTML = "";
+}
+
+function startBossFight() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopBossFight();
+  stopCanteenGame();
+
+  document.getElementById("location-name").textContent = "执念鱿鱼";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 游戏内剧情图不显示不占空间
+  var area = document.getElementById("image-area");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var canvas = document.createElement("canvas");
+  canvas.id = "boss-canvas";
+  canvas.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none;";
+  canvas.oncontextmenu = function(e) { e.preventDefault(); return false; };
+  area.appendChild(canvas);
+
+  var rect = area.getBoundingClientRect();
+  var W = Math.max(300, Math.floor(rect.width));
+  var H = Math.max(240, Math.floor(rect.height));
+  canvas.width = W;
+  canvas.height = H;
+  var ctx = canvas.getContext("2d");
+
+  var state = {
+    time: 0,
+    player: { x: W * 0.22, y: H / 2, r: 12, hp: 5, speed: 200, inv: 0, hitCd: 0 },
+    squid: { x: W * 0.74, y: H / 2, r: 42, hp: 10, maxHp: 10, coreR: 11, baseY: H / 2, floatT: 0 },
+    tentacles: [],     // {ang, spin, len, pulse, phase}
+    ink: [],           // 墨弹 {x,y,vx,vy,r}
+    inkTimer: 0,
+    inkSpawnGap: 900,
+    phase: 1,
+    lockAnnounced: false,   // 锁血叙事是否已播报
+    finaleTriggered: false, // 终局弹幕是否已触发（防无限拖延）
+    drag: null,
+    lastTs: 0,
+    hudTick: 0,
+  };
+
+  // 按阶段重建触手
+  function buildTentacles() {
+    var p = state.phase;
+    var count = p === 1 ? 1 : p === 2 ? 2 : 3;
+    var spin = p === 1 ? 1.2 : p === 2 ? 1.8 : 2.6;
+    state.tentacles = [];
+    for (var i = 0; i < count; i++) {
+      state.tentacles.push({
+        ang: (Math.PI * 2 / count) * i,
+        spin: spin,
+        baseLen: 95 + p * 18,
+        pulse: p === 1 ? 0.25 : p === 2 ? 0.45 : 0.7,   // 拍打伸缩强度
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+    state.inkSpawnGap = p === 1 ? 900 : p === 2 ? 550 : 320;
+  }
+  buildTentacles();
+
+  // HUD
+  var descArea = document.getElementById("description-area");
+  function renderHud() {
+    var hearts = "";
+    for (var i = 0; i < 5; i++) hearts += i < state.player.hp ? "♥" : "♡";
+    var barLen = Math.round((state.squid.hp / state.squid.maxHp) * 20);
+    var bar = "";
+    for (var j = 0; j < 20; j++) bar += j < barLen ? "█" : "░";
+    // 锁血/终局的叙事提示：把机制翻译成???的台词
+    var warnLine = "";
+    if (state.finaleTriggered) {
+      warnLine = '<div style="font-size:12px;color:#ff5252;text-align:center;margin-top:3px;font-weight:700;text-shadow:0 0 8px rgba(255,82,82,0.7);">???：挣扎够了吗</div>';
+    } else if (state.squid.hp <= 2) {
+      warnLine = '<div style="font-size:11px;color:#ff8a80;text-align:center;margin-top:3px;">???：斩不断的……执念，与你同在<br>⚠ 伤害无效——它在等你亲手倒下</div>';
+    }
+    var phaseName = state.finaleTriggered ? "终局" : state.phase === 1 ? "P1 触手初现" : state.phase === 2 ? "P2 墨雾弥漫" : "P3 狂暴";
+    descArea.innerHTML =
+      '<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">' +
+      '<span style="color:#4fc3f7;">你 ' + hearts + ' ' + state.player.hp + '</span>' +
+      '<span style="color:#ff8a65;">' + phaseName + '</span></div>' +
+      '<div style="font-size:13px;color:#ff8a65;">🦑 执念 <span style="font-family:monospace;">' + bar + '</span> ' + state.squid.hp + '/10</div>' +
+      '<div style="font-size:11px;color:rgba(224,224,224,0.7);text-align:center;margin-top:2px;">拖拽移动躲避触手与墨弹，撞击鱿鱼本体造成伤害！</div>' +
+      warnLine;
+  }
+  renderHud();
+
+  // 输入：拖拽/滑动
+  function ptrPos(e) {
+    var cr = canvas.getBoundingClientRect();
+    return { x: e.clientX - cr.left, y: e.clientY - cr.top };
+  }
+  canvas.addEventListener("pointerdown", function(e) {
+    e.preventDefault();
+    var p = ptrPos(e);
+    state.drag = { sx: p.x, sy: p.y, cx: p.x, cy: p.y };
+    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  });
+  canvas.addEventListener("pointermove", function(e) {
+    if (!state.drag) return;
+    e.preventDefault();
+    var p = ptrPos(e);
+    state.drag.cx = p.x; state.drag.cy = p.y;
+  });
+  canvas.addEventListener("pointerup", function() { state.drag = null; });
+  canvas.addEventListener("pointercancel", function() { state.drag = null; });
+  canvas.addEventListener("touchstart", function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchmove", function(e) { e.preventDefault(); }, { passive: false });
+
+  // 点到线段距离（触手碰撞）
+  function distToSeg(px, py, x1, y1, x2, y2) {
+    var dx = x2 - x1, dy = y2 - y1;
+    var l2 = dx * dx + dy * dy;
+    if (l2 === 0) return Math.sqrt((px - x1) * (px - x1) + (py - y1) * (py - y1));
+    var t = ((px - x1) * dx + (py - y1) * dy) / l2;
+    if (t < 0) t = 0; if (t > 1) t = 1;
+    var cx = x1 + t * dx, cy = y1 + t * dy;
+    return Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy));
+  }
+
+  function playerHit() {
+    if (state.player.inv > 0) return;
+    state.player.hp--;
+    state.player.inv = 1200;
+    renderHud();
+    if (state.player.hp <= 0) {
+      // 剧本要求：0血不判负 → 濒死剧情
+      stopBossFight();
+      renderBossNearDeath();
+    }
+  }
+
+  function loop(ts) {
+    if (!bossFight) return;
+    var dt = Math.min(0.033, (ts - state.lastTs) / 1000 || 0);
+    state.lastTs = ts;
+    state.time += dt;
+    var pl = state.player, sq = state.squid;
+
+    // 阶段切换（按鱿鱼血量比例；锁血后停留P3）
+    var ratio = sq.hp / sq.maxHp;
+    var newPhase = ratio > 0.7 ? 1 : ratio > 0.4 ? 2 : 3;
+    if (newPhase !== state.phase) {
+      state.phase = newPhase;
+      buildTentacles();
+      renderHud();
+    }
+
+    // 玩家移动
+    if (state.drag) {
+      var dx = state.drag.cx - state.drag.sx;
+      var dy = state.drag.cy - state.drag.sy;
+      var len = Math.sqrt(dx * dx + dy * dy);
+      if (len > 8) {
+        var k = Math.min(1, len / 70);
+        pl.x += (dx / len) * pl.speed * k * dt;
+        pl.y += (dy / len) * pl.speed * k * dt;
+      }
+    }
+    if (pl.x < pl.r) pl.x = pl.r;
+    if (pl.x > W - pl.r) pl.x = W - pl.r;
+    if (pl.y < pl.r) pl.y = pl.r;
+    if (pl.y > H - pl.r) pl.y = H - pl.r;
+    if (pl.inv > 0) pl.inv -= dt * 1000;
+
+    // 鱿鱼浮动（P3大幅加快）
+    sq.floatT += dt * (state.phase === 3 ? 2.6 : state.phase === 2 ? 1.6 : 1);
+    sq.y = sq.baseY + Math.sin(sq.floatT) * (state.phase === 3 ? 46 : 26);
+
+    // 触手旋转与拍打
+    for (var t = 0; t < state.tentacles.length; t++) {
+      var tn = state.tentacles[t];
+      tn.ang += tn.spin * dt;
+      tn.phase += dt * (state.phase === 3 ? 6 : state.phase === 2 ? 4 : 2.4);
+    }
+
+    // 终局机制：战斗拖过80秒，???失去耐心——环形弹幕收尾，战斗必有终点
+    if (state.time > 80 && !state.finaleTriggered) {
+      state.finaleTriggered = true;
+      state.inkSpawnGap = 200;          // 终局弹幕间隔
+      state.inkTimer = state.inkSpawnGap; // 立即开始
+      renderHud();
+    }
+
+    // 墨弹生成
+    state.inkTimer += dt * 1000;
+    if (state.inkTimer >= state.inkSpawnGap) {
+      state.inkTimer = 0;
+      if (state.finaleTriggered) {
+        // 终局：360°旋转环形弹幕，几乎无死角
+        var ringN = 8;
+        for (var r0 = 0; r0 < ringN; r0++) {
+          var aR = (Math.PI * 2 / ringN) * r0 + state.time * 0.9;
+          state.ink.push({ x: sq.x, y: sq.y, vx: Math.cos(aR) * 150, vy: Math.sin(aR) * 150, r: 6 });
+        }
+      } else {
+        var baseAng = Math.atan2(pl.y - sq.y, pl.x - sq.x);
+        var shots = state.phase === 1 ? 2 : state.phase === 2 ? 3 : 4;
+        var spd = state.phase === 1 ? 100 : state.phase === 2 ? 130 : 160;
+        for (var s = 0; s < shots; s++) {
+          var a2 = baseAng + (s - (shots - 1) / 2) * 0.22 + (Math.random() * 0.12 - 0.06);
+          state.ink.push({ x: sq.x, y: sq.y, vx: Math.cos(a2) * spd, vy: Math.sin(a2) * spd, r: 6 });
+        }
+      }
+    }
+    // 墨弹飞行
+    for (var k2 = state.ink.length - 1; k2 >= 0; k2--) {
+      var b = state.ink[k2];
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.x < -20 || b.x > W + 20 || b.y < -20 || b.y > H + 20) { state.ink.splice(k2, 1); continue; }
+      var bdx = pl.x - b.x, bdy = pl.y - b.y;
+      if (Math.sqrt(bdx * bdx + bdy * bdy) < pl.r + b.r) {
+        state.ink.splice(k2, 1);
+        playerHit();
+        if (!bossFight) return;
+      }
+    }
+
+    // 触手碰撞
+    for (var t2 = 0; t2 < state.tentacles.length; t2++) {
+      var tu = state.tentacles[t2];
+      var L = tu.baseLen * (1 + tu.pulse * Math.sin(tu.phase));
+      var ex = sq.x + Math.cos(tu.ang) * L;
+      var ey = sq.y + Math.sin(tu.ang) * L;
+      if (distToSeg(pl.x, pl.y, sq.x, sq.y, ex, ey) < pl.r + 5) {
+        playerHit();
+        if (!bossFight) return;
+        break;
+      }
+    }
+
+    // 玩家撞击鱿鱼本体造成伤害（冷却0.55秒）；锁血2点不再下降
+    if (pl.hitCd > 0) pl.hitCd -= dt * 1000;
+    var cdx = pl.x - sq.x, cdy = pl.y - sq.y;
+    if (pl.hitCd <= 0 && Math.sqrt(cdx * cdx + cdy * cdy) < sq.r + pl.r) {
+      pl.hitCd = 550;
+      sq.hp--;
+      if (sq.hp <= 2) sq.hp = 2;   // 锁血：不再下降
+      renderHud();
+    }
+
+    // ===== 绘制 =====
+    ctx.clearRect(0, 0, W, H);
+    // 天台夜空背景
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#1a2238");
+    grad.addColorStop(1, "#0d1120");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // 触手（黑色，画在鱿鱼身后）
+    for (var d0 = 0; d0 < state.tentacles.length; d0++) {
+      var tt = state.tentacles[d0];
+      var LL = tt.baseLen * (1 + tt.pulse * Math.sin(tt.phase));
+      var exx = sq.x + Math.cos(tt.ang) * LL;
+      var eyy = sq.y + Math.sin(tt.ang) * LL;
+      ctx.beginPath();
+      ctx.moveTo(sq.x, sq.y);
+      ctx.lineTo(exx, eyy);
+      ctx.strokeStyle = "#17171f";
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.stroke();
+      ctx.strokeStyle = "#44445c";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    // 鱿鱼本体（黑色）
+    ctx.beginPath();
+    ctx.arc(sq.x, sq.y, sq.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#101018";
+    ctx.fill();
+    ctx.strokeStyle = "#3d3d55";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    // 鱿鱼眼（红色发光）
+    ctx.fillStyle = "#ff5252";
+    ctx.beginPath();
+    ctx.arc(sq.x - 12, sq.y - 10, 5, 0, Math.PI * 2);
+    ctx.arc(sq.x + 12, sq.y - 10, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // 核心弱点（发光）
+    var glow = 0.5 + 0.5 * Math.sin(state.time * 5);
+    ctx.beginPath();
+    ctx.arc(sq.x, sq.y, sq.coreR + glow * 3, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,235,120,0.35)";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sq.x, sq.y, sq.coreR, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffeb8a";
+    ctx.fill();
+    ctx.strokeStyle = "#ffb300";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 墨弹（黑色本体+亮描边，深色背景下可见）
+    for (var d1 = 0; d1 < state.ink.length; d1++) {
+      var bb = state.ink[d1];
+      ctx.beginPath();
+      ctx.arc(bb.x, bb.y, bb.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#05050c";
+      ctx.fill();
+      ctx.strokeStyle = "#7a7a9e";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // 玩家（无敌帧闪烁）
+    if (pl.inv <= 0 || Math.floor(pl.inv / 120) % 2 === 0) {
+      ctx.beginPath();
+      ctx.arc(pl.x, pl.y, pl.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#4fc3f7";
+      ctx.fill();
+      ctx.strokeStyle = "#e1f5fe";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // 墨雾（P2起）：以玩家为中心，近处透明远处漆黑，干扰视野
+    if (state.phase >= 2) {
+      var fogR = state.phase === 3 ? 115 : 95;
+      var fogA = state.phase === 3 ? 0.8 : 0.72;
+      var fog = ctx.createRadialGradient(pl.x, pl.y, 20, pl.x, pl.y, fogR);
+      fog.addColorStop(0, "rgba(5,5,10,0)");
+      fog.addColorStop(1, "rgba(5,5,10," + fogA + ")");
+      ctx.fillStyle = fog;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    bossFight.raf = requestAnimationFrame(loop);
+  }
+
+  bossFight = { raf: null, canvas: canvas };
+  bossFight.raf = requestAnimationFrame(loop);
+}
+
+// BOSS战0血 → 濒死剧情 → 她的道歉送别 → 完成最后一击 → 疯狂闪烁 → 结束画面
+function renderBossNearDeath() {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // fade闪烁：times次快闪后结束（finalOn=闪完是否保持黑）
+  function flicker(times, interval, finalOn, done) {
+    var fade = document.getElementById("fade-overlay");
+    var n = 0;
+    var on = false;
+    var timer = setInterval(function() {
+      on = !on;
+      if (on) fade.classList.add("active");
+      else fade.classList.remove("active");
+      n++;
+      if (n >= times * 2) {
+        clearInterval(timer);
+        if (finalOn) fade.classList.add("active");
+        else fade.classList.remove("active");
+        setTimeout(done, 300);
+      }
+    }, interval);
+  }
+
+  // 1. 濒死：标题濒死 + 文案（不黑屏，保证文字可见）
+  var fade = document.getElementById("fade-overlay");
+  fade.classList.remove("active");
+  setTimeout(function() {
+    // 2. 濒死文案（图片隐藏，纯文案）
+    img.src = "";
+    img.style.display = "none";
+    placeholder.style.display = "none";
+    document.getElementById("location-name").textContent = "濒死";
+    seqTypeAndWait("要....死了吗...|留在这里也不错.....", function() {
+      // 3. 美好回忆闪回（显示图）
+      switchImg("7ec103d78421548f56e847447ec8720b.jpg");
+      seqTypeAndWait("真是美好的回忆呢....|活一次..也值了...", function() {
+        // 4. 闪两秒
+        flicker(5, 200, false, function() {
+          // 5. 标题切回天台：她的道歉
+          document.getElementById("location-name").textContent = "天台";
+          switchImg("a24a8aa84a5626ab8b63e7f554a055eb.jpg");
+          seqTypeAndWait("欸...欸？！|她：对不起......|她：我太自作主张...了....我不...该替你...做留下来...的决定|她：你是...对的...你不该属于这里....你属于真....实的世....界....|别...别这样|你别吓我....你在吓我对吧！", function() {
+            // 6. 她的送别
+            switchImg("0008d198b935b87ad7b79e0f875e4b72.jpg");
+            seqTypeAndWait("她：去吧....别管我....回去....|不....不...我可以带你出去的...我可以带你出去的！|她：我不.....属于外面.....|她：我....是...出不...去的...", function() {
+              // 7. 领域坍塌
+              switchImg("d428d74b0185d199f7c23c3b074e9639.jpg");
+              seqTypeAndWait("她：这里的....领域...已....经开....始....坍塌了....|快回....去...", function() {
+                // 8. ??? + 完成最后一击
+                switchImg("af9d888a79b17eaf4139565220713be9.jpg");
+                actionsArea.innerHTML = "";
+                actionsArea.style.display = "flex";
+                var btn = document.createElement("button");
+                btn.className = "action-btn";
+                btn.textContent = "完成最后一击";
+                btn.onclick = function() {
+                  // 清空按钮区：防止后续打字机"点击继续"把本按钮重新显示出来（需点两次bug）
+                  actionsArea.innerHTML = "";
+                  actionsArea.style.display = "none";
+                  seqTypeAndWait("只能这么做了吗.....|对不起......", function() {
+                    // 9. 疯狂闪烁 → 结束画面
+                    flicker(12, 100, true, function() {
+                      switchImg("569e50202fd9f20e02fdb228049e34bf.jpg");
+                      fade.classList.remove("active");
+                      // 10. 结束游戏按钮
+                      actionsArea.innerHTML = "";
+                      actionsArea.style.display = "flex";
+                      var endBtn = document.createElement("button");
+                      endBtn.className = "action-btn";
+                      endBtn.textContent = "结束游戏";
+                      endBtn.onclick = backToStartScreen;
+                      actionsArea.appendChild(endBtn);
+                    });
+                  });
+                };
+                actionsArea.appendChild(btn);
+              });
+            });
+          });
+        });
+      });
+    });
+  }, 300);
+}
+
+// 结束游戏 → 回到最上层开始界面
+function backToStartScreen() {
+  stopCanteenGame();
+  stopBossFight();
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  var fade = document.getElementById("fade-overlay");
+  fade.classList.remove("active");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "flex";
+  document.getElementById("location-name").textContent = "";
+  document.getElementById("description-area").innerHTML = "";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+  document.getElementById("float-btns").style.display = "none";
+  document.getElementById("start-screen").classList.remove("hidden");
+}
+
 // ===== 沙盘游戏 =====
 var sandboxState = null;
 
@@ -3650,10 +5094,12 @@ function startTypewriter(text, autoNext, autoJump, getItem) {
   currentSentenceIndex = 0;
   currentCharIndex = 0;
   typewriterDone = false;
+  typewriterSession = { autoNext: autoNext, autoJump: autoJump, getItem: getItem };
 
   var descArea = document.getElementById("description-area");
   descArea.innerHTML = "<span class=\"cursor\"></span>";
   descArea.onclick = null;
+  showSkipBtn();
 
   typeNextChar(autoNext, autoJump, getItem);
 }
@@ -3664,6 +5110,8 @@ function typeNextChar(autoNext, autoJump, getItem) {
   if (currentSentenceIndex >= currentSentences.length) {
     // 所有句子打完
     typewriterDone = true;
+    typewriterSession = null;
+    hideSkipBtn();
     descArea.innerHTML = descArea.innerHTML.replace("<span class=\"cursor\"></span>", "");
     if (autoJump) {
       // 自动跳转场景
@@ -3699,21 +5147,18 @@ function typeNextChar(autoNext, autoJump, getItem) {
       descArea.onclick = function() {
         descArea.onclick = null;
         descArea.innerHTML = descArea.innerHTML.replace("<span class=\"tap-hint\">▼ 点击继续</span>", "");
-        document.getElementById("actions-area").style.display = "flex";
+        // 仅当按钮区有内容时才显示：防止已清空的序列剧情把残留按钮重新显示出来
+        var actionsEl = document.getElementById("actions-area");
+        if (actionsEl.innerHTML.trim()) actionsEl.style.display = "flex";
       };
     }
     return;
   }
 
   var sentence = currentSentences[currentSentenceIndex];
-  if (currentCharIndex < sentence.length) {
-    // 还在当前句子中，逐字显示
-    var typed = sentence.substring(0, currentCharIndex + 1);
-    descArea.innerHTML = typed + "<span class=\"cursor\"></span>";
-    currentCharIndex++;
-    typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump, getItem); }, 50);
-  } else {
-    // 当前句子打完，等待点击
+
+  // 当前句子打完的展示与点击推进
+  function showSentenceDone() {
     descArea.innerHTML = sentence + "<span class=\"tap-hint\">▼ 点击继续</span>";
     descArea.onclick = function() {
       descArea.onclick = null;
@@ -3722,6 +5167,24 @@ function typeNextChar(autoNext, autoJump, getItem) {
       descArea.innerHTML = "<span class=\"cursor\"></span>";
       typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump, getItem); }, 50);
     };
+  }
+
+  if (currentCharIndex < sentence.length) {
+    // 还在当前句子中，逐字显示
+    var typed = sentence.substring(0, currentCharIndex + 1);
+    descArea.innerHTML = typed + "<span class=\"cursor\"></span>";
+    currentCharIndex++;
+    // 打字中单击：快进显示整句
+    descArea.onclick = function() {
+      descArea.onclick = null;
+      if (typewriterTimer) { clearTimeout(typewriterTimer); typewriterTimer = null; }
+      currentCharIndex = sentence.length;
+      showSentenceDone();
+    };
+    typewriterTimer = setTimeout(function() { typeNextChar(autoNext, autoJump, getItem); }, 50);
+  } else {
+    // 当前句子打完，等待点击
+    showSentenceDone();
   }
 }
 
@@ -3983,6 +5446,27 @@ function refreshBackpackContent(overlay) {
 }
 
 // 打开成就列表
+// 成就分组：主线剧情 / 决斗与小游戏 / 整活与隐藏
+var ACHIEVEMENT_GROUPS = [
+  { name: "🌙 梦之旅途", ids: [
+    "first_meet", "dream_eternal", "drunk_dream", "hachi_legend",
+    "stuck_in_backrooms", "red_room", "starved_to_death", "level1",
+    "unhygienic", "skin_stealer", "past_running_ground",
+    "strange_place", "eternal_sleep", "lab_1f", "library_fail", "chem_lab_enter",
+  ]},
+  { name: "⚔️ 决斗与小游戏", ids: [
+    "hachi_king", "hachi_emperor", "not_strong", "retry_courage",
+    "beat_bigfoot", "easy_bigfoot", "chem_king", "nightmare_bigfoot", "lost_to_bigfoot",
+    "penguin_dog", "sandbox_win", "sandbox_lose", "sandbox_hard_win",
+    "canteen_king", "canteen_got_some",
+    "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king",
+    "beat_alien", "pooped_on", "nasa_detected", "capture_pig", "desert_pig_sight",
+  ]},
+  { name: "😈 整活与隐藏", ids: [
+    "flying_pig", "so_free", "toilet_lover", "heavy_taste", "flat_fall", "fly_higher",
+  ]},
+];
+
 function openAchievements() {
   // 清除新成就提醒
   gameState.newAchievements = [];
@@ -3991,23 +5475,29 @@ function openAchievements() {
   var overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   var achHtml = "";
-  var allAch = Object.values(ACHIEVEMENT_CONFIG);
 
-  // 已解锁排前面
-  var unlocked = allAch.filter(function(a) { return hasAchievement(a.id); });
-  var locked = allAch.filter(function(a) { return !hasAchievement(a.id); });
-
-  unlocked.concat(locked).forEach(function(ach) {
-    var isUnlocked = hasAchievement(ach.id);
-    achHtml +=
-      '<div class="ach-card ' + (isUnlocked ? "unlocked" : "locked") + '">' +
-      '<div class="ach-icon">' + (isUnlocked ? ach.icon : "❓") + '</div>' +
-      '<div class="ach-info">' +
-      '<div class="ach-name">' + ach.name + '</div>' +
-      '<div class="ach-desc">' + ach.desc + '</div>' +
-      '</div>' +
-      '</div>';
-  });
+  // 分组渲染：组内已解锁排前面；未入组的成就兜底进"其他"
+  var grouped = {};
+  for (var g = 0; g < ACHIEVEMENT_GROUPS.length; g++) {
+    var grp = ACHIEVEMENT_GROUPS[g];
+    var items = [];
+    for (var i = 0; i < grp.ids.length; i++) {
+      var cfg = ACHIEVEMENT_CONFIG[grp.ids[i]];
+      if (cfg) { items.push(cfg); grouped[grp.ids[i]] = true; }
+    }
+    items.sort(function(a, b) { return (hasAchievement(a.id) ? -1 : 1) - (hasAchievement(b.id) ? -1 : 1); });
+    var got = 0;
+    for (var k = 0; k < items.length; k++) if (hasAchievement(items[k].id)) got++;
+    achHtml += '<div class="ach-group-title">' + grp.name + ' <span class="ach-group-count">' + got + '/' + items.length + '</span></div>';
+    achHtml += renderAchCards(items);
+  }
+  // 兜底：不在任何分组的成就
+  var rest = Object.values(ACHIEVEMENT_CONFIG).filter(function(a) { return !grouped[a.id]; });
+  if (rest.length) {
+    rest.sort(function(a, b) { return (hasAchievement(a.id) ? -1 : 1) - (hasAchievement(b.id) ? -1 : 1); });
+    achHtml += '<div class="ach-group-title">📦 其他 <span class="ach-group-count"></span></div>';
+    achHtml += renderAchCards(rest);
+  }
 
   overlay.innerHTML =
     '<div class="modal">' +
@@ -4021,6 +5511,23 @@ function openAchievements() {
 
   overlay.querySelector("#ach-close-btn").addEventListener("click", function() { overlay.remove(); });
   overlay.addEventListener("click", function(e) { if (e.target === overlay) overlay.remove(); });
+}
+
+// 渲染一组成就卡片
+function renderAchCards(items) {
+  var html = "";
+  items.forEach(function(ach) {
+    var isUnlocked = hasAchievement(ach.id);
+    html +=
+      '<div class="ach-card ' + (isUnlocked ? "unlocked" : "locked") + '">' +
+      '<div class="ach-icon">' + (isUnlocked ? ach.icon : "❓") + '</div>' +
+      '<div class="ach-info">' +
+      '<div class="ach-name">' + ach.name + '</div>' +
+      '<div class="ach-desc">' + ach.desc + '</div>' +
+      '</div>' +
+      '</div>';
+  });
+  return html;
 }
 
 // 更新背包角标
@@ -4486,6 +5993,12 @@ function openPortal() {
 
   html += '<button class="portal-game-btn" id="portal-sandbox-btn">';
   html += '<span class="game-icon">🏆</span>沙盘决斗</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderScene(\'canteen_game\');">';
+  html += '<span class="game-icon">🍚</span>食堂抢饭</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();startBossFight();">';
+  html += '<span class="game-icon">🦑</span>执念鱿鱼决战</button>';
 
   html += '</div></div>';
 
