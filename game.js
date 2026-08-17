@@ -4301,19 +4301,33 @@ function renderBossNearDeath() {
                   // 清空按钮区：防止后续打字机"点击继续"把本按钮重新显示出来（需点两次bug）
                   actionsArea.innerHTML = "";
                   actionsArea.style.display = "none";
-                  seqTypeAndWait("只能这么做了吗.....|对不起......", function() {
-                    // 9. 疯狂闪烁 → 结束画面
-                    flicker(12, 100, true, function() {
-                      switchImg("569e50202fd9f20e02fdb228049e34bf.jpg");
-                      fade.classList.remove("active");
-                      // 10. 结束游戏按钮
-                      actionsArea.innerHTML = "";
-                      actionsArea.style.display = "flex";
-                      var endBtn = document.createElement("button");
-                      endBtn.className = "action-btn";
-                      endBtn.textContent = "结束游戏";
-                      endBtn.onclick = backToStartScreen;
-                      actionsArea.appendChild(endBtn);
+                  // 最后一击后：她消失，主角试图从梦中醒来（接原疯狂闪烁结尾前的新剧情）
+                  switchImg("66630a7d2b73509647772022ea943daa.jpg");
+                  seqTypeAndWait("我....成功了吗.....|怎么.....还没有回到现实世界|她消失了....|这是梦对吧....我要醒来", function() {
+                    // 猛扇自己一巴掌：屏幕持续剧烈震动
+                    var gc = document.getElementById("game-container");
+                    gc.classList.remove("shake-hard");
+                    void gc.offsetWidth;
+                    gc.classList.add("shake-hard");
+                    seqTypeAndWait("（猛扇自己一巴掌）", function() {
+                      gc.classList.remove("shake-hard");
+                      // 天台边：只能跳下去了吗
+                      switchImg("572258136ea08391503e8a6809ad94f0.jpg");
+                      seqTypeAndWait("怎么还没醒.....|想回去....只能跳下去了吗...|这不是我的地方...我得回去|再见...梦|对不起......", function() {
+                        // 9. 疯狂闪烁 → 结束画面
+                        flicker(12, 100, true, function() {
+                          switchImg("569e50202fd9f20e02fdb228049e34bf.jpg");
+                          fade.classList.remove("active");
+                          // 10. 结束游戏按钮
+                          actionsArea.innerHTML = "";
+                          actionsArea.style.display = "flex";
+                          var endBtn = document.createElement("button");
+                          endBtn.className = "action-btn";
+                          endBtn.textContent = "结束游戏";
+                          endBtn.onclick = backToStartScreen;
+                          actionsArea.appendChild(endBtn);
+                        });
+                      });
                     });
                   });
                 };
