@@ -3007,7 +3007,7 @@ function renderLab2FSequence() {
           img.style.display = "block";
           placeholder.style.display = "none";
         });
-        startTypewriter("企鹅狗：跟我一起来摆一下吧|是战斗吗.....我不会低头的|企鹅狗：你这家伙...真是满脑子都只想着战斗呢|塔塔开！！！！！", null, null, null);
+        startTypewriter("企鹅狗：跟我一起来摆一下吧|是战斗吗.....我不会低头的|企鹅狗：你这家伙...真是满脑子都只想着战斗呢|企鹅狗：这里……原本是让人把心里的东西摆出来的地方哦|塔塔开！！！！！", null, null, null);
         step = 5;
         check = setInterval(lab2fCheck, 100);
       } else if (step === 5) {
@@ -5082,7 +5082,7 @@ function sandboxVictory() {
     img.style.display = "block";
   });
   document.getElementById("actions-area").style.display = "none";
-  startTypewriter("企鹅狗：是我输了|哈哈哈哈！胜利者！是我", null, null, null);
+  startTypewriter("企鹅狗：是我输了|企鹅狗：……你的心里，好多东西啊|哈哈哈哈！胜利者！是我", null, null, null);
   var check = setInterval(function() {
     if (typewriterDone) {
       clearInterval(check);
