@@ -1054,17 +1054,18 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 var CHANGELOG = [
   { version: "v1.5.78", date: "2026-08-17", items: [
     "新增小游戏'乐队大赛'（传送门精选直达🎸）：与AI经纪人10回合经营对抗，比拼总知名度",
-    "双方各150金币开局，每回合市场随机刷新5名乐手（特殊艺人每回合最多2个，全游戏唯一，签完不补）",
-    "5位特殊艺人(数值=初始设计×2，无视160上限)：山田凉60金180能力150稳定(偷10金)/伊地知虹夏140金172/166(全队稳定+14)/广井菊里60金170/168(喝醉能力-120)/喜多郁代150金166/156(知名度+30%)/后藤独100金190能力80稳定",
-    "普通艺人随机生成（日式名池50个+唐人整活名3个，位置：吉他手×2/鼓手/贝斯手/主唱），价格≈(能力+稳定)/2，能力随回合成长(r1:30-60→r10:111-141封顶160)，15%概率附带特殊能力",
+    "玩家150金币 vs AI经纪人300金币开局（AI资金雄厚需靠策略取胜），每回合市场随机刷新5名乐手（特殊艺人每回合最多2个，全游戏唯一，签完不补）",
+    "8位特殊艺人(数值无视160上限)：山田凉60金180能力150稳定(50%偷50金!)/伊地知虹夏140金172/166(全队稳定+14)/广井菊里60金170/168(喝醉能力-120)/喜多郁代150金166/156(知名度+30%)/后藤独100金190能力80稳定/丰川祥子120金177/58唱腔80(乐队粉碎机：每3回合40%逼退一名队员25%自己退队)/高松灯115金140/82唱腔95(专职主唱)/千早爱音100金183/85唱腔78(全面强力无短板)",
+    "普通艺人随机生成（日式名池50个+唐人整活名3个，位置：吉他手×2/鼓手/贝斯手/主唱），价格≈(能力+稳定)/2，能力随回合成长(r1:30-60→r10:111-141封顶160)，20%概率附带特殊能力",
+    "搞怪perk池(11种)：练习狂(演出能力+6)/气氛担当(全队稳定+4)/偶像气质(金币+30%)/老油条(发挥下限0.9)/富二代(返10金)/天才型(入队能力+15)/赌狗之魂(50%收益翻倍50%减半)/干饭王(入队+20能力每回合吃3金)/人来疯(编制达成发挥×1.5)/摇滚巨星(知名度+50%)/甩手掌柜(每回合分红+5金)",
     "成长系统：队员每次演出后35%概率能力+2~4，练得越久越强（特殊艺人可突破160上限，普通艺人封顶160）",
     "标准编制加成：凑齐吉他×2+鼓+贝斯全员收益+30%；基础收益已下调(金币0.55/知名度0.4系数)",
     "Live House专场：演出前花20金币安排，本轮金币收益×1.5（AI也有30%概率办）",
     "随机事件：每回合15%概率触发街头星探(+知名度)/器材损坏(-金币)/粉丝应援(+金币)",
     "转会系统：签约阶段可按20%签约价卖出队员腾编制换血",
     "主唱位：签约阶段点🎙指派主唱——唱腔仅在担任主唱时生效：知名度按能力×50%+唱腔计算；专职主唱无惩罚，兼任稳定-12",
-    "新增唱腔属性：特殊艺人山田凉25/虹夏65/广井40/喜多85/后藤独1；普通乐手唱腔10-90，市场可刷出专职主唱（唱腔50-90，价格计入唱腔）",
     "上场限制：每场最多5名乐手（主唱优先入选，其余按能力+稳定自动选最强，替补不演出不成长；AI同规则）",
+    "AI经纪人智商优化：①卖弱买强(能力<90自动换血回收资金) ②攒钱策略(无特殊艺人时55%概率存钱等大牌) ③特殊艺人优先级(灯>爱音>后藤>虹夏>喜多>广井>祥子>山田凉——AI懂风险) ④编制意识(优先补缺失位置再按性价比)，每回合最多签2名普通艺人且预留30金运营",
     "新成就：🏆乐队之王(击败AI经纪人)、🎸结成乐队吧！(签下后藤独)",
     "修复游戏中跳回对话框的bug：打字机'点击继续/快进'onclick与800ms自动跳转定时器残留，从传送门进小游戏后点HUD/倒计时到点会把玩家拉回旧剧情——stopTypewriter现同时清除onclick，renderScene把清理移到函数最顶部覆盖全部小游戏早退分支",
   ]},
@@ -5981,24 +5982,33 @@ function getHachiLine(hachiAction, playerAction, mindReadUsed) {
 // 与AI经纪人经营乐队对抗：10回合内比拼总知名度
 // 特殊艺人配置（全游戏唯一，每回合市场最多刷出2个；数值=初始设计×2，能力无视160上限，演出成长可继续突破）
 var BAND_SPECIAL_ARTISTS = [
-  { specialId: "yamada",  name: "山田凉",     role: "贝斯手", price: 60, ability: 180, stability: 150, vocal: 25, emoji: "🦎", desc: "每次演出后可能偷走 10 金币演出收益" },
+  { specialId: "yamada",  name: "山田凉",     role: "贝斯手", price: 60, ability: 180, stability: 150, vocal: 25, emoji: "🦎", desc: "每次演出后可能偷走 50 金币演出收益（超级败家）" },
   { specialId: "nijika",  name: "伊地知虹夏", role: "鼓手",   price: 140, ability: 172, stability: 166, vocal: 65, emoji: "🥁", desc: "提升本队其他队员每人 14 点稳定度" },
   { specialId: "hirokita",name: "广井菊里",   role: "贝斯手", price: 60, ability: 170, stability: 168, vocal: 40, emoji: "🍺", desc: "演出前有概率喝醉，能力值下降 120 点" },
   { specialId: "kita",    name: "喜多郁代",   role: "吉他手", price: 150, ability: 166, stability: 156, vocal: 85, emoji: "✨", desc: "吉他英雄变身：个人知名度收益 +30%" },
   { specialId: "bocchi",  name: "后藤独",     role: "吉他手", price: 100, ability: 190, stability: 80, vocal: 1, emoji: "📮", desc: "社恐吉他英雄：能力登峰造极但情绪极不稳定，唱腔稀烂" },
+  { specialId: "sakiko",  name: "丰川祥子",   role: "吉他手", price: 120, ability: 177, stability: 58, vocal: 80, emoji: "🎹", desc: "乐队粉碎机：每过3回合可能逼退队内一名队员，也可能自己退队" },
+  { specialId: "tomori",  name: "高松灯",     role: "主唱",   price: 115, ability: 140, stability: 82, vocal: 95, emoji: "🐧", desc: "想把歌…唱好。唱腔登峰造极的专职主唱" },
+  { specialId: "anon",    name: "千早爱音",   role: "吉他手", price: 100, ability: 183, stability: 85, vocal: 78, emoji: "🌟", desc: "爱音也要搞乐队！全面强力无短板" },
 ];
 // 普通艺人随机名池（大部分日式风格，保留几个唐人整活名）
 var BAND_NORMAL_NAMES = ["田中太郎","铃木花子","佐藤悠希","渡边葵","山本樱","中村陆","小林芽衣","春日纯","林田空","斋藤莲","伊藤奈奈","阿部由美","上田真","森太阳","池田枫","石川纯菜","白石澪","高桥凉","松本雪菜","藤原翼","加藤浩二","水野枫","星野辉","栗原遥","雨宫莲","桥本奈奈未","矢野绫音","远藤樱","绫濑遥","菊池幸代","堀越丽奈","相泽慧","守屋瞳","冈崎绘里","村上葵","本多光太郎","长谷川堇","三浦春马","宫本岚","大冢爱美","西田结衣","东云玲","楠木灯里","一之濑翼","神谷诗织","月冈恋钟","日向翔阳","樱井优斗","望月聪","有马加奈","阿强","狗蛋","铁柱"];
 // 乐队位置：吉他手×2、鼓手、贝斯手、主唱（吉他双权重）
 var BAND_ROLES = ["吉他手","吉他手","贝斯手","鼓手","主唱"];
 var BAND_ROLE_EMOJI = { "吉他手": "🎸", "贝斯手": "🎻", "鼓手": "🥁", "主唱": "🎤" };
-// 普通艺人特殊能力（生成时15%概率附带一个）
+// 普通艺人特殊能力（生成时20%概率附带一个；后半为搞怪高数值款）
 var BAND_NORMAL_PERKS = [
-  { perk: "practice", name: "练习狂",   desc: "每次演出后能力永久+3" },
+  { perk: "practice", name: "练习狂",   desc: "每次演出后能力永久+6" },
   { perk: "cheer",    name: "气氛担当", desc: "全队其他队员稳定+4" },
   { perk: "idol",     name: "偶像气质", desc: "个人金币收益+30%" },
   { perk: "veteran",  name: "老油条",   desc: "发挥下限0.9，几乎不失误" },
   { perk: "rich",     name: "富二代",   desc: "签约后返还10金币" },
+  { perk: "genius",   name: "天才型",   desc: "入队时能力立即+15" },
+  { perk: "gambler",  name: "赌狗之魂", desc: "每场演出50%收益翻倍，50%收益减半" },
+  { perk: "eater",    name: "干饭王",   desc: "入队能力+20，但每回合吃掉3金币伙食费" },
+  { perk: "crowd",    name: "人来疯",   desc: "标准编制达成时个人发挥×1.5" },
+  { perk: "rockstar", name: "摇滚巨星", desc: "个人知名度收益+50%" },
+  { perk: "dividend", name: "甩手掌柜", desc: "每回合固定分红+5金币（无需上场）" },
 ];
 var bandState = null;
 var BAND_UID = 0;   // 队员唯一编号（主唱指派用）
@@ -6027,11 +6037,11 @@ function renderBandGame() {
   panel.id = "band-panel";
   area.appendChild(panel);
 
-  // 初始化对局状态
+  // 初始化对局状态（AI资金更雄厚，玩家需靠策略取胜）
   bandState = {
     round: 1, maxRound: 10, phase: "sign",
     gold: 150, fame: 0,
-    aiGold: 150, aiFame: 0,
+    aiGold: 300, aiFame: 0,
     band: [], aiBand: [],
     market: [], usedSpecial: {},
     live: false,   // 本回合是否已安排Live House专场
@@ -6039,7 +6049,7 @@ function renderBandGame() {
     logs: [],
   };
   bandState.market = bandGenMarket(1);
-  bandState.logs.push("📢 乐队大赛开幕！你与AI经纪人各持 150 金币，10 回合后比拼总知名度！");
+  bandState.logs.push("📢 乐队大赛开幕！你持 150 金币 vs AI经纪人 300 金币，10 回合后比拼总知名度！");
   bandRender();
 }
 
@@ -6061,7 +6071,7 @@ function bandGenNormal(round) {
     ? Math.round((ability + vocal + stability) / 2 * (0.9 + Math.random() * 0.2))
     : Math.round((ability + stability) / 2 * (0.9 + Math.random() * 0.2));
   var perkCfg = null;
-  if (Math.random() < 0.15) perkCfg = BAND_NORMAL_PERKS[Math.floor(Math.random() * BAND_NORMAL_PERKS.length)];
+  if (Math.random() < 0.2) perkCfg = BAND_NORMAL_PERKS[Math.floor(Math.random() * BAND_NORMAL_PERKS.length)];
   return {
     name: name, role: role, price: price, ability: ability, stability: stability, vocal: vocal,
     emoji: BAND_ROLE_EMOJI[role] || "🎤", specialId: null,
@@ -6102,6 +6112,9 @@ function bandSign(idx) {
   if (artist.specialId) bandState.usedSpecial[artist.specialId] = true;
   var signed = Object.assign({}, artist);   // 克隆入队：演出成长不污染全局特殊艺人配置
   signed.uid = ++BAND_UID;
+  // 入队即生效的天赋
+  if (signed.perk === "genius") { signed.ability += 15; showToast(signed.name + " 是天才型！入队能力+15（" + signed.ability + "）"); }
+  if (signed.perk === "eater") { signed.ability += 20; showToast(signed.name + " 是干饭王！能力+20（" + signed.ability + "），但每回合吃3金币"); }
   bandState.band.push(signed);
   if (artist.specialId === "bocchi") unlockAchievement("bocchi_band");
   if (artist.perk === "rich") { bandState.gold += 10; showToast(artist.name + " 是富二代，返还了 10 金币！"); }
@@ -6114,12 +6127,33 @@ function bandAiSign() {
   var st = bandState;
   var left = st.market.filter(function(m) { return !m.soldTo; });
   var bought = [];
-  // 优先特殊艺人：虹夏 > 后藤 > 喜多 > 广井 > 山田凉
-  var prio = { nijika: 0, bocchi: 1, kita: 2, hirokita: 3, yamada: 4 };
+  var sold = [];
+
+  // 【智商1】卖弱买强：转卖能力<90的弱队员回收资金（AI也懂换血）
+  for (var w = st.aiBand.length - 1; w >= 0; w--) {
+    if (st.aiBand[w].ability < 90 && st.aiBand.length > 1) {
+      var weak = st.aiBand.splice(w, 1)[0];
+      var back = Math.max(1, Math.floor(weak.price * 0.2));
+      st.aiGold += back;
+      sold.push(weak.name + "(回收" + back + "金)");
+    }
+  }
+  if (sold.length) st.logs.push("🤖 AI经纪人转会卖出了：" + sold.join("、"));
+
+  // 【智商2】攒钱策略：市场无特殊艺人且金币<120时，55%概率跳过买普通，攒钱等下回合特殊
   var specials = left.filter(function(m) { return m.specialId; });
-  specials.sort(function(a, b) { return prio[a.specialId] - prio[b.specialId]; });
+  var saveMode = !specials.length && st.aiGold < 120 && Math.random() < 0.55;
+  if (saveMode) {
+    st.logs.push("🤖 AI经纪人按兵不动，似乎在攒钱等待大牌……");
+    return;
+  }
+
+  // 【智商3】特殊艺人优先级（灯主唱>爱音>后藤>虹夏>喜多>广井>祥子>山田凉——AI知道偷钱鬼和乐队粉碎机的风险）
+  var prio = { tomori: 0, anon: 1, bocchi: 2, nijika: 3, kita: 4, hirokita: 5, sakiko: 6, yamada: 7 };
+  specials.sort(function(a, b) { return (prio[a.specialId] !== undefined ? prio[a.specialId] : 9) - (prio[b.specialId] !== undefined ? prio[b.specialId] : 9); });
+  // 有钱就全收特殊（AI资金雄厚，但留30金运营）
   for (var i = 0; i < specials.length; i++) {
-    if (st.aiGold >= specials[i].price) {
+    if (st.aiGold >= specials[i].price + 30) {
       st.aiGold -= specials[i].price;
       specials[i].soldTo = "ai";
       st.usedSpecial[specials[i].specialId] = true;
@@ -6129,24 +6163,35 @@ function bandAiSign() {
       bought.push(specials[i].name);
     }
   }
-  // 普通艺人：性价比(能力+稳定)/价格 降序，留15金币运营
+
+  // 【智商4】编制意识：普通艺人优先补缺失位置（吉他×2+鼓+贝斯），编制全了再按性价比
   var normals = left.filter(function(m) { return !m.specialId && !m.soldTo; });
-  normals.sort(function(a, b) { return (b.ability + b.stability) / b.price - (a.ability + a.stability) / a.price; });
-  var saveMode = Math.random() < 0.25;  // 25%概率存钱只买特殊
+  var needRoles = { "吉他手": 2, "鼓手": 1, "贝斯手": 1 };
+  for (var r = 0; r < st.aiBand.length; r++) {
+    if (needRoles[st.aiBand[r].role]) needRoles[st.aiBand[r].role]--;
+  }
+  // 先挑补位的
+  var normalsSorted = normals.slice().sort(function(a, b) {
+    var aNeed = needRoles[a.role] > 0 ? 1 : 0;
+    var bNeed = needRoles[b.role] > 0 ? 1 : 0;
+    if (aNeed !== bNeed) return bNeed - aNeed;   // 缺位优先
+    return (b.ability + b.stability) / b.price - (a.ability + a.stability) / a.price;  // 再性价比
+  });
   var normalBought = 0;
-  for (var n = 0; n < normals.length && normalBought < 2 && !saveMode; n++) {
-    if (st.aiGold >= normals[n].price + 15) {
-      st.aiGold -= normals[n].price;
-      normals[n].soldTo = "ai";
-      var aiN = Object.assign({}, normals[n]);
+  for (var n = 0; n < normalsSorted.length && normalBought < 2; n++) {
+    if (st.aiGold >= normalsSorted[n].price + 30) {
+      st.aiGold -= normalsSorted[n].price;
+      normalsSorted[n].soldTo = "ai";
+      var aiN = Object.assign({}, normalsSorted[n]);
       aiN.uid = ++BAND_UID;
       st.aiBand.push(aiN);
-      bought.push(normals[n].name);
+      bought.push(normalsSorted[n].name);
+      if (needRoles[normalsSorted[n].role] > 0) needRoles[normalsSorted[n].role]--;
       normalBought++;
     }
   }
   if (bought.length) st.logs.push("🤖 AI经纪人签下了：" + bought.join("、"));
-  else st.logs.push("🤖 AI经纪人这回合按兵不动……");
+  else if (!sold.length) st.logs.push("🤖 AI经纪人这回合按兵不动……");
 }
 
 // 标准编制判断：吉他×2 + 鼓 + 贝斯（特殊艺人位置也计入）
@@ -6216,11 +6261,20 @@ function bandPerform(band, vocalUid) {
     var f = fBase * factor * 0.4;
     if (m.specialId === "kita") f *= 1.3;
     if (m.perk === "idol") g *= 1.3;
+    // 赌狗之魂：50%个人收益翻倍，50%减半
+    if (m.perk === "gambler") {
+      if (Math.random() < 0.5) { g *= 2; f *= 2; events.push("🎲 " + m.name + " 赌狗之魂爆发！梭哈成功，个人收益翻倍！！"); }
+      else { g *= 0.5; f *= 0.5; events.push("🎲 " + m.name + " 赌输了……个人收益减半。"); }
+    }
+    // 人来疯：标准编制达成时个人发挥×1.5
+    if (m.perk === "crowd" && fullBand) { g *= 1.5; f *= 1.5; events.push("🔥 " + m.name + " 人来疯！台下人越多越兴奋，发挥×1.5！"); }
+    // 摇滚巨星：个人知名度收益+50%
+    if (m.perk === "rockstar") f *= 1.5;
     gold += g; fame += f;
-    // 山田凉：50%偷10金币
+    // 山田凉：50%偷50金币（超级败家）
     if (m.specialId === "yamada" && Math.random() < 0.5) {
-      stolen += 10;
-      events.push("🦎 " + m.name + " 偷走了 10 金币演出收益！");
+      stolen += 50;
+      events.push("🦎 " + m.name + " 偷走了 50 金币演出收益！！");
     }
     // 练习狂：演出后能力+6（特殊艺人可突破160上限，普通艺人封顶160）
     if (m.perk === "practice") {
@@ -6240,6 +6294,29 @@ function bandPerform(band, vocalUid) {
   }
   gold = Math.max(0, Math.round(gold - stolen));
   return { gold: gold, fame: Math.round(fame), events: events };
+}
+
+// 丰川祥子·乐队粉碎机：每过3回合发作——40%逼退一名其他队员，25%自己退队「无可救药」
+function bandSakikoTick(band, label, logs) {
+  var idx = -1;
+  for (var i = 0; i < band.length; i++) if (band[i].specialId === "sakiko") { idx = i; break; }
+  if (idx < 0) return null;
+  var r = Math.random();
+  if (r < 0.4 && band.length > 1) {
+    // 随机逼退一名其他队员（戏剧效果拉满）
+    var victims = [];
+    for (var v = 0; v < band.length; v++) if (v !== idx) victims.push(v);
+    var pick = victims[Math.floor(Math.random() * victims.length)];
+    var out = band.splice(pick, 1)[0];
+    logs.push("🎹 " + label + "的丰川祥子突然发作：「你，离开这个乐队。」—— " + out.name + " 被逼退了！！");
+    return out;
+  } else if (r < 0.65) {
+    band.splice(idx, 1);
+    logs.push("🎹 " + label + "的丰川祥子：「这个乐队，已经无可救药了。」她自己退队了！");
+    return "self";
+  }
+  logs.push("🎹 " + label + "的丰川祥子脸色阴沉，但这次什么都没做……");
+  return null;
 }
 
 // 玩家点击「开始演出」：AI先签人 → 双方演出（含Live加成）→ 随机事件 → 展示战报
@@ -6288,6 +6365,27 @@ function bandStartShow() {
       st.gold += gift;
       st.logs.push("💌 随机事件：粉丝应援集资！获得 " + gift + " 金币！");
     }
+  }
+  // 干饭王伙食费 / 甩手掌柜分红（每回合结算，含替补，双方乐队同规则）
+  var plEat = 0, plDiv = 0, aiEat = 0, aiDiv = 0;
+  for (var pe = 0; pe < st.band.length; pe++) {
+    if (st.band[pe].perk === "eater") plEat += 3;
+    if (st.band[pe].perk === "dividend") plDiv += 5;
+  }
+  for (var ae = 0; ae < st.aiBand.length; ae++) {
+    if (st.aiBand[ae].perk === "eater") aiEat += 3;
+    if (st.aiBand[ae].perk === "dividend") aiDiv += 5;
+  }
+  if (plEat) { st.gold = Math.max(0, st.gold - plEat); st.logs.push("🍚 干饭王们干掉了 " + plEat + " 金币的伙食……"); }
+  if (plDiv) { st.gold += plDiv; st.logs.push("💼 甩手掌柜们躺赚分红 +" + plDiv + " 金币！"); }
+  if (aiEat) st.aiGold = Math.max(0, st.aiGold - aiEat);
+  if (aiDiv) st.aiGold += aiDiv;
+  // 丰川祥子·乐队粉碎机：每过3回合（第3/6/9回合演出后）发作，双方乐队各自判定
+  if (st.round % 3 === 0) {
+    var kicked = bandSakikoTick(st.band, "你的乐队", st.logs);
+    // 被逼退的恰好是兼任主唱 → 主唱位空缺
+    if (kicked && kicked !== "self" && st.vocalUid === kicked.uid) st.vocalUid = null;
+    bandSakikoTick(st.aiBand, "AI乐队", st.logs);
   }
   st.live = false;  // Live为单回合增益，下回合需重新安排
   st.phase = "result";
@@ -6473,7 +6571,7 @@ function bandRender() {
 
 // ===== 游玩提示 =====
 function showTips() {
-  showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
+  showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>本游戏纯前端，没有存档功能，若想再次游玩可借助传送门和背包控制台手动回到上次游玩进度……<br><br>教学楼是剧情主线，实验楼像小游戏大全，地下室算主线前传，其他算奇异古怪搞笑猎奇路线大全……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>作者语文很差，所以剧情写的很烂，ai标也懒得去……<br><br>技术力有限，十分低质……<br><br>如果看的云里雾里一头雾水那就对了，因为凡人是无法理解神的（bushi）<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
 }
 
 // ===== 梦境裂隙 =====
