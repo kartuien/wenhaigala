@@ -617,6 +617,105 @@ body {
   overflow: hidden; text-overflow: ellipsis;
 }
 
+/* ===== 乐队大赛样式 ===== */
+#band-panel {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  overflow-y: auto; padding: 10px 14px;
+  box-sizing: border-box; font-size: 13px;
+}
+.band-section-title {
+  font-size: 13px; font-weight: 700; color: #e8d5b7;
+  margin: 10px 0 6px; letter-spacing: 1px;
+}
+.band-market {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+.band-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(232,213,183,0.15);
+  border-radius: 8px; padding: 8px 10px;
+  transition: background 0.2s;
+}
+.band-card.special {
+  border-color: rgba(255,200,50,0.55);
+  box-shadow: 0 0 8px rgba(255,200,50,0.15), inset 0 0 6px rgba(255,200,50,0.06);
+}
+.band-card.sold { opacity: 0.45; }
+.band-card-top {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.band-name { font-weight: 700; color: #e8d5b7; }
+.band-role { font-size: 11px; color: rgba(224,224,224,0.55); }
+.band-sold {
+  font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: auto;
+}
+.band-sold.mine { background: rgba(92,184,92,0.2); color: #5cb85c; }
+.band-sold.ai { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+.band-stats { color: rgba(224,224,224,0.8); font-size: 12px; }
+.band-stats b { color: #ffd54f; }
+.band-perk {
+  font-size: 11px; color: #9fa8bf; margin: 4px 0 2px; line-height: 1.4;
+}
+.band-sign-btn {
+  width: 100%; margin-top: 5px; padding: 4px 0;
+  border: none; border-radius: 6px; cursor: pointer;
+  background: rgba(255,200,50,0.2); color: #ffc832;
+  font-size: 12px; font-weight: 700;
+  transition: background 0.2s;
+}
+.band-sign-btn:hover:not(:disabled) { background: rgba(255,200,50,0.35); }
+.band-sign-btn:disabled {
+  background: rgba(255,255,255,0.06); color: rgba(224,224,224,0.3);
+  cursor: not-allowed;
+}
+.band-roster { display: flex; flex-wrap: wrap; gap: 6px; }
+.band-member {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(92,184,92,0.12); border: 1px solid rgba(92,184,92,0.35);
+  border-radius: 6px; padding: 3px 8px; color: #a5d6a7; font-size: 12px;
+}
+.band-member.ai {
+  background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); color: #ffab91;
+}
+.band-member small { color: rgba(224,224,224,0.5); font-size: 10px; }
+.band-sell-x {
+  font-style: normal; cursor: pointer; margin-left: 2px;
+  color: rgba(255,107,107,0.55); font-size: 11px; padding: 0 2px;
+  transition: color 0.2s;
+}
+.band-sell-x:hover { color: #ff6b6b; }
+.band-vocal-btn {
+  font-style: normal; cursor: pointer; margin-left: 2px;
+  color: rgba(255,200,50,0.5); font-size: 11px; padding: 0 2px;
+  transition: color 0.2s;
+}
+.band-vocal-btn:hover { color: #ffc832; }
+.band-member.vocal {
+  border-color: rgba(255,200,50,0.55);
+  box-shadow: 0 0 6px rgba(255,200,50,0.25);
+}
+.band-member.benched { opacity: 0.5; }
+.band-stage-tag {
+  font-style: normal; font-size: 9px; color: #5cb85c;
+  border: 1px solid rgba(92,184,92,0.4); border-radius: 3px;
+  padding: 0 3px; margin-left: 2px;
+}
+.bench-tag {
+  font-style: normal; font-size: 9px; color: rgba(224,224,224,0.4);
+  border: 1px solid rgba(224,224,224,0.25); border-radius: 3px;
+  padding: 0 3px; margin-left: 2px;
+}
+.band-empty { color: rgba(224,224,224,0.35); font-size: 12px; font-style: italic; }
+.band-logs {
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(232,213,183,0.08);
+  border-radius: 6px; padding: 5px 9px; max-height: 92px; overflow-y: auto;
+}
+.band-log-line {
+  font-size: 11px; line-height: 1.65; color: rgba(224,224,224,0.72);
+}
+
 /* 沙盘行动按钮 - 6个，三列两行 */
 .sandbox-action-btn {
   flex: 0 0 calc(33.33% - 4px);
