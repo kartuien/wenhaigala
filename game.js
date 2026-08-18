@@ -1052,6 +1052,68 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.87", date: "2026-08-18", items: [
+    "全游戏互动框加大：所有选项按钮字号16→17px、内边距加厚、最小高度锁定52px并垂直居中——不再又小又难点",
+    "选项区限高 40vh→56vh：选项多时按钮区整体向上扩展（剧情图自动让位），不再挤在屏幕底部的小窗里滚动，误触大降",
+    "互动框大改版：乐队按钮此前漏挂样式类全是浏览器默认小按钮——现在全部接入大按钮样式，不再又小又难按",
+    "按钮区改为双列网格布局：整备阶段9个按钮不再挤成一长列，主操作（起拍/加价/开演/下一回合）跨全行加大，阴招/演出形式两列并排",
+    "小按钮同步加大：Boss战选项15→17px、沙盘行动按钮12→14px并加厚；自定义出价输入框撑满整行、字号14→16px",
+    "「放弃比赛」弱化为半透明小按钮，防止和主操作混淆误触",
+    "反抗线女主对话加长：新增'我之前是疯了吗'反思段——女主以'现实的痛苦你体会过'最后劝阻，玩家以'属于我的美好会降临我身'与'难道我会因为水是苦的就不喝水吗'回应，女主动摇'唔...'后玩家以'我已经做了很久的梦了'作别，再衔接原有的'生的希望'与???登场",
+  ]},
+  { version: "v1.5.86", date: "2026-08-18", items: [
+    "特殊艺人扩容14→22名：🍀户山香澄(主唱,每回合35%概率捡10~25金)/🐇花园多惠(吉他,20%概率神solo全队知名度+12)/🌹美竹兰(主唱,Battle开打个人发挥×1.35)/🍞青叶摩卡(吉他,薪水减半+发挥下限0.92摸鱼但稳)/🎈弦卷心(主唱,签约返30金,每回合10%乱办活动烧20金换全队知名度+8)/🐱要楽奈(吉他,30金超便宜能力185,但35%演出中段睡着发挥减半)/🎧井芹仁菜(主唱,落后×1.5绝不认输领先×0.95飘了)/🎸智(吉他,反资本——挖角大战也挖不走,连AI都挖不动)",
+    "新增4条CP：🌟Popipa双吉他(香澄+多惠:能力各+10,神solo收益12→18)/🍡青梅竹马(兰+摩卡:稳定各+15)/🐾大小姐与猫(心+楽奈:楽奈睡着概率35%→15%,心不再乱烧钱)/💎孤注一掷(仁菜+智:能力各+12,Battle全队发挥+10%)",
+    "拍卖自定义出价：跟价阶段新增打字输入框——可输入任意金额出价（回车或点✍出价），保留+1快捷键；想一步压死对手直接甩高价",
+    "8名新艺人全部接入原队召回文案（大小姐直升机接人/楽奈追烤鱼香味消失）与AI竞价优先级（兰/心与灯同档最高优先）",
+    "AI开局资金 300→450 金币（财大气粗版经纪人，竞价更凶狠）",
+    "对局节奏调整：回合数10→12回合，玩家开局150→230金币——更多回合凑CP/续合同，前期资金也更宽裕",
+  ]},
+  { version: "v1.5.85", date: "2026-08-18", items: [
+    "签约改为合同制：买下乐手=签6回合合同，每场演出后合同-1，到期自动解约恢复自由身回市场（9折再就业挂牌，特殊艺人释放唯一性可被再签，传奇到期直接消失）；成员卡显示📜约N剩余回合",
+    "解约规则：合同未到期主动卖出需支付违约金（身价20%）且分文无收——解约变成纯止损手段（腾编制/省薪水），想要回血只能等合同自然到期或被挖角（对方付转会费）；挖角来的乐手在新东家重签6回合新合同",
+    "新增6个狠事件(第2回合起入池)：🧾税务稽查(双方金币各-20%)/🤒集体流感(各随机1人病倒本回合无法上场)/🌧️暴雨演出季(双方全员稳定-20)/😱狂热私生饭(各1名特殊艺人50%不堪骚扰直接隐退消失,否则稳定-40)/🔥器材火灾(双方各-40金)/📉黑粉抵制(本回合双方知名度收益×0.5)/⚖️合同风暴(各1名普通艺人被仲裁提前解约回市场)",
+  ]},
+  { version: "v1.5.84", date: "2026-08-18", items: [
+    "拍卖加价改为1块1块抬：出价按钮简化为「加价1金」，AI跟价同样只加1金——每1块钱都是心理博弈，谁先眨眼谁输",
+    "乐手身价更新为成交价：竞拍成交后乐手的转会/挖角/抵债回收全部按实际花费计算（拍出高价的乐手卖出/被挖都更值钱）",
+    "Battle改为需双方同意：单方选Battle只是「下战书」，对方未应战则各演各的；单人模式AI会决定应战（落后10+知名度时65%应战搏翻盘，领先时仅25%），双人模式双方都选Battle才开打",
+    "演出形式双方独立：你选你的（街头/音乐节/战书），AI/对方选自己的，互不干扰；HUD实时显示「战书已下(等对方应战)」",
+  ]},
+  { version: "v1.5.83", date: "2026-08-18", items: [
+    "特殊艺人扩容8→14名，新增姐妹CP与百合CP体系：🌹冰川纱夜(吉他,完美主义发挥下限0.95)/💫冰川日菜(吉他,成长概率+15%)/🔥宇田川巴(鼓,标准编制时全队金币+15%)/🦇宇田川亚子(鼓,30%中二爆发知名度+50%)/🌳若叶睦(吉他,人偶精准发挥下限0.85)/🍵长崎素世(贝斯,全队其他队员稳定+6)",
+    "姐妹CP：♊双子心弦(纱夜+日菜:两人能力+10稳定+18,且发挥roll完全同步——一起完美或一起暴走)/🥁姐妹双鼓(巴+亚子:全队稳定+12,姐妹能力各+8,双鼓占编制位是甜蜜的代价)",
+    "百合CP：🎀牵线人偶(祥子+睦:睦在场时祥子粉碎机50%被按住,睦永不被逼退且稳定+20)/☔共撑一伞(素世+爱音:爱音稳定+15素世能力+10)/🧩拼图残片(素世+灯:灯唱腔+10素世稳定+10)",
+    "☕修罗场debuff：素世和祥子同台时（非CP是孽缘）两人稳定-15——签CP前先想想修罗场排面",
+    "6名新艺人全部接入原队召回文案库与AI竞价优先级（纱夜/睦/素世/巴与虹夏喜多同档）",
+  ]},
+  { version: "v1.5.82", date: "2026-08-18", items: [
+    "乐队大赛新增通用羁绊系统：普通艺人也能触发的组合效果（成员卡青色标签，与特殊CP粉色标签并行共存）——🎸吉他双子(两名普通吉他手同台能力各+8)/🏮唐人街传奇(阿强/狗蛋/铁柱任意2人同台能力各+15)/🎲赌狗天团(两名赌狗之魂同台,赌赢概率50%→65%)/🍚干饭二人组(两名干饭王同台能力各+12)/🤝老乡见老乡(同姓氏普通艺人同台稳定各+12)/⭐全明星阵容(上场3人以上带perk,全队含特殊艺人稳定+8)",
+    "普通艺人名池扩容53→63名：新增10名同姓搭档（田中次郎/铃木一郎/佐藤美咲/山本健/小林拓真/伊藤诚/高桥留美/星野千秋/宫本武/藤原千花）支撑老乡羁绊——凑同姓老乡成为新策略",
+  ]},
+  { version: "v1.5.81", date: "2026-08-18", items: [
+    "乐队大赛新增CP羁绊系统：特定特殊艺人同队上场触发组合效果（成员卡显示粉色CP标签，市场卡片显示可组CP提示）——🤝纽带(后藤独+虹夏:独稳定+50/虹夏+20)/🎸吉他英雄传授(喜多+独:能力各+10)/🕯️无法割舍的过去(祥子+灯:祥子永不逼退灯+灯唱腔+12,但15%旧事重提两人稳定-25)/🎶迷子也要唱歌(爱音+灯:能力各+12稳定各+15)/🍻醉鬼二人组(山田凉+广井:广井醉时凉能力+30,但偷钱概率50%→70%)",
+    "新增4个拆队风云事件(第2回合起入池)：📉绯闻风暴(双方各1人被曝,30%直接塌房退队否则本回合稳定-40,特殊艺人不能幸免)/🏠原队召回(双方每名特殊艺人各45%被老队友劝回直接离队,定制8套召回文案)/⚔️挖角大战(本回合挖角解锁特殊/传奇艺人价×1.5,AI也55%优先撬你的特殊艺人)/💥内讧爆发(阵容总能力更高一方随机1人摔门离队零回收)",
+    "AI新增挖角阴招：平时25%撬走玩家最强普通乐手(价×1.3对方得一半)，挖角大战事件下提升至55%且优先拆特殊艺人——领先阵容不再高枕无忧",
+    "新增普通艺人perk：💗天生一对(与任意特殊艺人同队上场发挥×1.4)/😤宿敌(对方知名度领先时发挥×1.6,反滚雪球逆风型)",
+  ]},
+  { version: "v1.5.80", date: "2026-08-18", items: [
+    "乐队大赛新增'风云事件'系统：每回合开始随机触发一事件改写本回合规则——资本涌入(双方+50金)/唱片公司选秀(知名度×2)/地下时期(金币减半但成长率翻倍)/合同危机(双方强制卖最弱一人)/星探来袭(市场必出2特殊)/传奇回归(第5回合起，追加数值爆炸的第6件传说拍品，每回合35%再次隐退)",
+    "翻盘元素：神秘投资人(差距30+时落后方+60金)/卫冕魔咒(差距20+时领先方全员稳定-15)——领先未必安全，落后自有金主",
+    "新增阴招系统(每回合各限1次)：🕵挖角(挂牌价×1.3撬对方普通乐手，对方得一半转会费)/📢炒作(30金买15-30知名度，20%假唱被扒翻车-15)/💊黑料(20金让对方随机一人本回合稳定-30)；单人模式AI也会使阴招(落后时40%炒作/25%放黑料)",
+    "演出形式多样化(整备阶段三选一)：🎸街头卖艺(基线稳)/🎪音乐节(金币×1.6但发挥波动翻倍)/⚔️同台Battle(双方演出正面对轰，赢家+35知名度平局各+10)；AI落后时会主动下战书Battle",
+    "特殊艺人刷新率下调：2个特殊25%→12%，1个55%→33%；AI竞价思考700ms→350ms",
+  ]},
+  { version: "v1.5.79", date: "2026-08-18", items: [
+    "乐队大赛购买系统升级为明标拍卖制：每回合5名乐手逐个上台拍卖，双方轮流表态——起拍（挂牌价）/跳过，出价后对方当场决定跟价（+5/+20）或放弃，价高者得，全流程当面抬价",
+    "拍卖节奏：AI思考700ms后当场响应（跟价/放弃/起拍），每次出价即时刷新当前价与领先者，当前拍品卡片金色脉冲高亮",
+    "流拍机制：双方都跳过的乐手下回合8折回场（🔻标记，只打折一次），捡漏窗口成立",
+    "AI当场竞价智商：内部估值上限含性价比+特殊优先级+编制缺口（缺位+25%）+缺主唱（高唱腔+30%）+落后反制（落后30+知名度加价45%）+后期止损（第8回合起只抢特殊和超值货），每次估值±8%扰动——AI会跟你缠斗到估值线才松手",
+    "双人热座模式（传送门选择）：玩家1 vs 玩家2各200金公平对局，明标轮流竞价（奇数回合P1先手，偶数回合P2先手），拍完进入整备阶段（双方轮流操作主唱/替补/转会/Live）后开演，操作方横幅提示轮到谁",
+    "双人模式可配合远程控制（向日葵/ToDesk/腾讯会议）实现线上同学对战",
+    "薪水制：每回合演出后每人按能力收费（floor(能力/20)+2，含替补），付不起自动转会最弱者抵债——签得起还要养得起，无脑囤人有代价",
+    "AI办Live策略升级：落后且金币≥80时概率提至50%（原30%）",
+  ]},
   { version: "v1.5.78", date: "2026-08-17", items: [
     "新增小游戏'乐队大赛'（传送门精选直达🎸）：与AI经纪人10回合经营对抗，比拼总知名度",
     "玩家150金币 vs AI经纪人300金币开局（AI资金雄厚需靠策略取胜），每回合市场随机刷新5名乐手（特殊艺人每回合最多2个，全游戏唯一，签完不补）",
@@ -3848,7 +3910,7 @@ function renderRefusePath() {
     img.style.display = "block";
     placeholder.style.display = "none";
   });
-  seqTypeAndWait("她：欸....为什么？你不是很讨厌外面的生活吗|她：待在这里难道不比外面强吗|她：你可以获得永恒的幸福|她：你不是喜欢我吗？你可以呆在这里陪我啊|你是假的吧|这里的一切....也都是假的吧|外面的世界很痛苦|外面的世界很孤单|外面的世界没有能相伴的人|冰天雪地....|但我还想有承受痛苦的机会|这里不是幸福|我不想拿虚幻的东西敷衍自己了....|你让我看到了生的希望|她：可..这", function() {
+  seqTypeAndWait("她：欸....为什么？你不是很讨厌外面的生活吗|她：待在这里难道不比外面强吗|她：你可以获得永恒的幸福|她：你不是喜欢我吗？你可以呆在这里陪我啊|你是假的吧|这里的一切....也都是假的吧|外面的世界很痛苦|外面的世界很孤单|外面的世界没有能相伴的人|冰天雪地....|但我还想有承受痛苦的机会|这里不是幸福|我不想拿虚幻的东西敷衍自己了....|我之前是疯了吗...|她：现实的世界充满痛苦....你体会过的|但是我相信在未来某个时刻|属于我的美好会降临我身|她：唔...|难道我会因为水是苦的就不喝水吗....|我已经做了很久的梦了...|你让我看到了生的希望|她：可..这", function() {
     // 图2：???登场
     img.src = "";
     cancelRAF();
@@ -6022,9 +6084,23 @@ var BAND_SPECIAL_ARTISTS = [
   { specialId: "sakiko",  name: "丰川祥子",   role: "吉他手", price: 120, ability: 177, stability: 58, vocal: 80, emoji: "🎹", desc: "乐队粉碎机：每过3回合可能逼退队内一名队员，也可能自己退队" },
   { specialId: "tomori",  name: "高松灯",     role: "主唱",   price: 115, ability: 140, stability: 82, vocal: 95, emoji: "🐧", desc: "想把歌…唱好。唱腔登峰造极的专职主唱" },
   { specialId: "anon",    name: "千早爱音",   role: "吉他手", price: 100, ability: 183, stability: 85, vocal: 78, emoji: "🌟", desc: "爱音也要搞乐队！全面强力无短板" },
+  { specialId: "sayo",    name: "冰川纱夜",   role: "吉他手", price: 135, ability: 172, stability: 158, vocal: 35, emoji: "🌹", desc: "完美主义：个人发挥下限0.95，几乎从不失误" },
+  { specialId: "hina",    name: "冰川日菜",   role: "吉他手", price: 125, ability: 176, stability: 118, vocal: 68, emoji: "💫", desc: "啊哈~天才的直觉：能力成长概率+15%，越练越强更快" },
+  { specialId: "tomoe",   name: "宇田川巴",   role: "鼓手",   price: 105, ability: 168, stability: 150, vocal: 40, emoji: "🔥", desc: "祭典鼓点：标准编制达成时全队金币收益+15%" },
+  { specialId: "ako",     name: "宇田川亚子", role: "鼓手",   price: 70,  ability: 162, stability: 130, vocal: 30, emoji: "🦇", desc: "漆黑烈焰使：每场演出30%概率中二爆发，个人知名度收益+50%" },
+  { specialId: "mutsumi", name: "若叶睦",     role: "吉他手", price: 110, ability: 174, stability: 100, vocal: 20, emoji: "🌳", desc: "人偶般精准：个人发挥下限0.85，情绪波动小" },
+  { specialId: "soyo",    name: "长崎素世",   role: "贝斯手", price: 115, ability: 170, stability: 140, vocal: 55, emoji: "🍵", desc: "八面玲珑：全队其他队员稳定+6（妈妈桑气质）" },
+  { specialId: "kasumi",  name: "户山香澄",   role: "主唱",   price: 95,  ability: 165, stability: 130, vocal: 82, emoji: "🍀", desc: "闪闪发光探索者：每回合市场刷新时35%概率捡到10~25金币" },
+  { specialId: "tae",     name: "花园多惠",   role: "吉他手", price: 105, ability: 178, stability: 125, vocal: 40, emoji: "🐇", desc: "20秒吉他solo：每场演出20%概率来段神solo，全队知名度+12" },
+  { specialId: "ran",     name: "美竹兰",     role: "主唱",   price: 110, ability: 175, stability: 135, vocal: 88, emoji: "🌹", desc: "不服输：Battle开打时个人发挥×1.35（越是对轰越兴奋）" },
+  { specialId: "moca",    name: "青叶摩卡",   role: "吉他手", price: 85,  ability: 160, stability: 165, vocal: 35, emoji: "🍞", desc: "摸鱼大师：薪水减半（便宜又大碗），发挥下限0.92（摸鱼但稳）" },
+  { specialId: "kokoro",  name: "弦卷心",     role: "主唱",   price: 130, ability: 168, stability: 120, vocal: 90, emoji: "🎈", desc: "弦卷财阀大小姐：签约立即返还30金；每回合10%乱办活动烧20金换全队知名度+8" },
+  { specialId: "rana",    name: "要楽奈",     role: "吉他手", price: 30,  ability: 185, stability: 90,  vocal: 25, emoji: "🐱", desc: "猫猫：只要吃的所以超便宜，但35%概率演出中段睡着（个人发挥减半）" },
+  { specialId: "nina",    name: "井芹仁菜",   role: "主唱",   price: 100, ability: 170, stability: 110, vocal: 85, emoji: "🎧", desc: "绝不认输：落后时个人发挥×1.5，但领先时×0.95（赢麻了就飘）" },
+  { specialId: "momoka",  name: "智",         role: "吉他手", price: 90,  ability: 176, stability: 115, vocal: 45, emoji: "🎸", desc: "反资本吉他手：谁也挖不走（挖角/挖角大战全免疫），包括AI" },
 ];
 // 普通艺人随机名池（大部分日式风格，保留几个唐人整活名）
-var BAND_NORMAL_NAMES = ["田中太郎","铃木花子","佐藤悠希","渡边葵","山本樱","中村陆","小林芽衣","春日纯","林田空","斋藤莲","伊藤奈奈","阿部由美","上田真","森太阳","池田枫","石川纯菜","白石澪","高桥凉","松本雪菜","藤原翼","加藤浩二","水野枫","星野辉","栗原遥","雨宫莲","桥本奈奈未","矢野绫音","远藤樱","绫濑遥","菊池幸代","堀越丽奈","相泽慧","守屋瞳","冈崎绘里","村上葵","本多光太郎","长谷川堇","三浦春马","宫本岚","大冢爱美","西田结衣","东云玲","楠木灯里","一之濑翼","神谷诗织","月冈恋钟","日向翔阳","樱井优斗","望月聪","有马加奈","阿强","狗蛋","铁柱"];
+var BAND_NORMAL_NAMES = ["田中太郎","铃木花子","佐藤悠希","渡边葵","山本樱","中村陆","小林芽衣","春日纯","林田空","斋藤莲","伊藤奈奈","阿部由美","上田真","森太阳","池田枫","石川纯菜","白石澪","高桥凉","松本雪菜","藤原翼","加藤浩二","水野枫","星野辉","栗原遥","雨宫莲","桥本奈奈未","矢野绫音","远藤樱","绫濑遥","菊池幸代","堀越丽奈","相泽慧","守屋瞳","冈崎绘里","村上葵","本多光太郎","长谷川堇","三浦春马","宫本岚","大冢爱美","西田结衣","东云玲","楠木灯里","一之濑翼","神谷诗织","月冈恋钟","日向翔阳","樱井优斗","望月聪","有马加奈","阿强","狗蛋","铁柱","田中次郎","铃木一郎","佐藤美咲","山本健","小林拓真","伊藤诚","高桥留美","星野千秋","宫本武","藤原千花"];
 // 乐队位置：吉他手×2、鼓手、贝斯手、主唱（吉他双权重）
 var BAND_ROLES = ["吉他手","吉他手","贝斯手","鼓手","主唱"];
 var BAND_ROLE_EMOJI = { "吉他手": "🎸", "贝斯手": "🎻", "鼓手": "🥁", "主唱": "🎤" };
@@ -6041,12 +6117,123 @@ var BAND_NORMAL_PERKS = [
   { perk: "crowd",    name: "人来疯",   desc: "标准编制达成时个人发挥×1.5" },
   { perk: "rockstar", name: "摇滚巨星", desc: "个人知名度收益+50%" },
   { perk: "dividend", name: "甩手掌柜", desc: "每回合固定分红+5金币（无需上场）" },
+  { perk: "soulmate", name: "天生一对", desc: "与任意特殊艺人同队上场时，个人发挥×1.4（蹭大牌光环）" },
+  { perk: "rivalry",  name: "宿敌",     desc: "对方知名度领先时，个人发挥×1.6——越逆风越猛的反滚雪球型" },
 ];
+// CP羁绊配置：指定特殊艺人同队上场时触发的组合效果（成员须全部在场）
+var BAND_CP_CONFIG = [
+  { id: "kizuna",     members: ["bocchi", "nijika"],   name: "纽带",           emoji: "🤝",
+    desc: "虹夏是波奇的鼓手兼心灵支柱：后藤独稳定+50、虹夏稳定+20" },
+  { id: "guitarhero", members: ["kita", "bocchi"],     name: "吉他英雄传授",   emoji: "🎸",
+    desc: "喜多向前辈取经：两人能力各+10" },
+  { id: "crychic",    members: ["sakiko", "tomori"],   name: "无法割舍的过去", emoji: "🕯️",
+    desc: "CRYCHIC的旧日羁绊：祥子永不逼退灯、灯唱腔+12；但每场演出15%旧事重提（两人稳定-25）" },
+  { id: "mygo",       members: ["anon", "tomori"],     name: "迷子也要唱歌",   emoji: "🎶",
+    desc: "爱音紧紧牵着灯的手：两人能力各+12、稳定各+15" },
+  { id: "drunkmate",  members: ["yamada", "hirokita"], name: "醉鬼二人组",     emoji: "🍻",
+    desc: "一起喝到天亮：广井喝醉时山田凉能力+30（酒友掩护）；但山田凉偷钱概率升至70%（断片忘了收敛）" },
+  // 姐妹CP
+  { id: "twins",      members: ["sayo", "hina"],     name: "双子心弦",       emoji: "♊",
+    desc: "冰川双子同台：两人能力各+10、稳定各+18，且发挥起伏完全同步——一起完美或一起暴走" },
+  { id: "sisters",    members: ["tomoe", "ako"],     name: "姐妹双鼓",       emoji: "🥁",
+    desc: "宇田川姐妹双鼓齐鸣：全队（含特殊艺人）稳定+12，姐妹俩能力各+8" },
+  // 百合CP
+  { id: "doll",       members: ["sakiko", "mutsumi"], name: "牵线人偶",      emoji: "🎀",
+    desc: "祥子×睦：睦在场时祥子的乐队粉碎机50%被按住，且睦永不被逼退；睦稳定+20" },
+  { id: "umbrella",   members: ["soyo", "anon"],      name: "共撑一伞",      emoji: "☔",
+    desc: "素世×爱音：被素世念叨着收敛了，爱音稳定+15、素世能力+10" },
+  { id: "puzzle",     members: ["soyo", "tomori"],    name: "拼图残片",      emoji: "🧩",
+    desc: "素世×灯：灯唱腔+10、素世稳定+10——但素世和祥子同台时会触发修罗场" },
+  // 新批次CP
+  { id: "popipa",     members: ["kasumi", "tae"],    name: "Popipa双吉他",  emoji: "🌟",
+    desc: "香澄×多惠：两人能力各+10，多惠的神solo触发时收益提升至+18" },
+  { id: "childhood",  members: ["ran", "moca"],      name: "青梅竹马",      emoji: "🍡",
+    desc: "兰×摩卡：从小一起长大默契十足，两人稳定各+15" },
+  { id: "catlady",    members: ["kokoro", "rana"],   name: "大小姐与猫",    emoji: "🐾",
+    desc: "心每天喂楽奈吃点心：楽奈睡着概率35%→15%，心也不再乱烧钱办活动" },
+  { id: "diamond",    members: ["nina", "momoka"],   name: "孤注一掷",      emoji: "💎",
+    desc: "仁菜×智：两人能力各+12；Battle开打时全队发挥+10%" },
+];
+// 检测一支乐队的上场阵容中激活了哪些CP（members须全部在上场名单）
+function bandActiveCps(lineup) {
+  var ids = {};
+  for (var i = 0; i < lineup.length; i++) if (lineup[i].specialId) ids[lineup[i].specialId] = true;
+  var out = [];
+  for (var c = 0; c < BAND_CP_CONFIG.length; c++) {
+    var cfg = BAND_CP_CONFIG[c];
+    var all = true;
+    for (var m = 0; m < cfg.members.length; m++) if (!ids[cfg.members[m]]) { all = false; break; }
+    if (all) out.push(cfg);
+  }
+  return out;
+}
+// 按specialId查特殊艺人名（市场卡片CP提示用）
+function bandSpecialName(sid) {
+  for (var i = 0; i < BAND_SPECIAL_ARTISTS.length; i++) {
+    if (BAND_SPECIAL_ARTISTS[i].specialId === sid) return BAND_SPECIAL_ARTISTS[i].name;
+  }
+  return "???";
+}
+// 通用羁绊：普通艺人也能触发的组合（检测只认普通艺人，与特殊CP系统并行）
+// 返回 [{ id, name, emoji, desc, members:[uid...] }]，members为涉及的成员uid集合
+function bandActiveGenericBonds(lineup) {
+  var out = [];
+  var norm = lineup.filter(function(m) { return !m.specialId && !m.legend; });
+  // 🎸吉他双子：两名普通吉他手同台
+  var guitarists = norm.filter(function(m) { return m.role === "吉他手"; });
+  if (guitarists.length >= 2) {
+    var gIds = guitarists.map(function(m) { return m.uid; });
+    out.push({ id: "twinguitar", name: "吉他双子", emoji: "🎸", members: gIds,
+      desc: "双吉他火力全开：两名吉他手能力各+8" });
+  }
+  // 🏮唐人街传奇：阿强/狗蛋/铁柱任意2人同台
+  var tangs = norm.filter(function(m) { return ["阿强","狗蛋","铁柱"].indexOf(m.name) >= 0; });
+  if (tangs.length >= 2) {
+    var tIds = tangs.map(function(m) { return m.uid; });
+    out.push({ id: "chinatown", name: "唐人街传奇", emoji: "🏮", members: tIds,
+      desc: "老乡见老乡两眼泪汪汪：唐人组能力各+15" });
+  }
+  // 🎲赌狗天团：两名赌狗之魂同台
+  var gamblers = norm.filter(function(m) { return m.perk === "gambler"; });
+  if (gamblers.length >= 2) {
+    var gmIds = gamblers.map(function(m) { return m.uid; });
+    out.push({ id: "gamblerduo", name: "赌狗天团", emoji: "🎲", members: gmIds,
+      desc: "互相怂恿梭哈：赌狗之魂赌赢概率50%→65%" });
+  }
+  // 🍚干饭二人组：两名干饭王同台
+  var eaters = norm.filter(function(m) { return m.perk === "eater"; });
+  if (eaters.length >= 2) {
+    var eIds = eaters.map(function(m) { return m.uid; });
+    out.push({ id: "eaterduo", name: "干饭二人组", emoji: "🍚", members: eIds,
+      desc: "一起干饭就是香：干饭王们能力各+12（伙食照吃）" });
+  }
+  // 🤝老乡见老乡：同姓氏（名字前2字相同）的普通艺人
+  var surNames = {};
+  for (var n = 0; n < norm.length; n++) {
+    var key = norm[n].name.slice(0, 2);
+    surNames[key] = surNames[key] || [];
+    surNames[key].push(norm[n]);
+  }
+  for (var sk in surNames) {
+    if (surNames[sk].length >= 2 && surNames[sk][0].name !== surNames[sk][1].name) {
+      var sameIds = surNames[sk].map(function(m) { return m.uid; });
+      out.push({ id: "namesake", name: "老乡见老乡", emoji: "🤝", members: sameIds,
+        desc: "他乡遇故知：" + sk + "家的孩子们稳定各+12" });
+    }
+  }
+  // ⭐全明星阵容：上场3人以上带perk
+  var perked = norm.filter(function(m) { return !!m.perk; });
+  if (perked.length >= 3) {
+    out.push({ id: "allstar", name: "全明星阵容", emoji: "⭐", members: [],
+      desc: "全员皆主角：全队（含特殊艺人）稳定+8" });
+  }
+  return out;
+}
 var bandState = null;
 var BAND_UID = 0;   // 队员唯一编号（主唱指派用）
 
 // 入口：开始乐队大赛（传送门直接调用）
-function renderBandGame() {
+function renderBandGame(mode) {
   stopTypewriter();
   if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
   stopCanteenGame();
@@ -6056,7 +6243,10 @@ function renderBandGame() {
   document.getElementById("location-name").textContent = "乐队大赛";
   var actionsArea = document.getElementById("actions-area");
   actionsArea.innerHTML = "";
-  actionsArea.style.display = "flex";
+  // 互动框优化：双列网格布局+大按钮，隐藏空描述区让按钮区上移、防误触
+  actionsArea.style.display = "grid";
+  actionsArea.className = "band-actions";
+  document.getElementById("description-area").style.display = "none";
 
   // 隐藏剧情图，游戏面板填充图片区
   var area = document.getElementById("image-area");
@@ -6069,27 +6259,314 @@ function renderBandGame() {
   panel.id = "band-panel";
   area.appendChild(panel);
 
-  // 初始化对局状态（AI资金更雄厚，玩家需靠策略取胜）
+  mode = mode || "single";
+  // 初始化对局状态（单人：玩家230金 vs AI资金雄厚450金；双人热座：公平对局各200金）
   bandState = {
-    round: 1, maxRound: 10, phase: "sign",
-    gold: 150, fame: 0,
-    aiGold: 300, aiFame: 0,
+    round: 1, maxRound: 12, phase: "auction",
+    mode: mode, turn: "p1",            // auction阶段用auction.decider轮流竞价；sign阶段duo用turn交接
+    gold: mode === "duo" ? 200 : 230, fame: 0,
+    aiGold: mode === "duo" ? 200 : 450, aiFame: 0,
     band: [], aiBand: [],
-    market: [], usedSpecial: {},
-    live: false,   // 本回合是否已安排Live House专场
-    vocalUid: null, // 主唱兼任队员uid
-    benchUids: {},  // 手动替补名单（uid→true；空=自动选最强5人）
+    market: [], usedSpecial: {}, flowed: [],   // flowed：流拍艺人池（下回合8折回场）
+    auction: null,                    // 当前拍卖状态（idx/price/leader/decider/active/thinking）
+    event: null,                      // 本回合风云事件（每回合随机改写规则）
+    showType: "street", aiShowType: "street",   // 演出形式：street街头/festival音乐节/battle同台对决
+    dirty: {}, aiDirty: {},           // 本回合阴招使用记录（挖角/炒作/黑料各限1次）
+    live: false, aiLive: false,       // 本回合是否已安排Live House专场
+    vocalUid: null, aiVocalUid: null, // 主唱队员uid
+    benchUids: {}, aiBenchUids: {},   // 手动替补名单（uid→true；空=自动选最强5人）
     logs: [],
   };
+  bandRollEvent();
   bandState.market = bandGenMarket(1);
-  bandState.logs.push("📢 乐队大赛开幕！你持 150 金币 vs AI经纪人 300 金币，10 回合后比拼总知名度！");
-  bandRender();
+  if (mode === "duo") {
+    bandState.logs.push("📢 乐队大赛·双人热座对抗开幕！玩家1 vs 玩家2，各持 200 金币，12 回合后比拼总知名度！");
+    bandState.logs.push("🔨 明标拍卖：逐个乐手轮流竞价（奇数回合P1先手，偶数回合P2先手），价高者得，当面抬价！");
+  } else {
+    bandState.logs.push("📢 乐队大赛开幕！你持 230 金币 vs AI经纪人 450 金币，12 回合后比拼总知名度！");
+    bandState.logs.push("🔨 明标拍卖：逐个乐手轮流竞价，你先表态——起拍/跳过，AI当场跟价或放弃，价高者得！");
+  }
+  bandAuctionGoto(0);
 }
 
 // 清理乐队面板（renderScene切场景时调用）
 function stopBandGame() {
   var panel = document.getElementById("band-panel");
   if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  // 恢复常规布局：按钮区回到纵向flex、描述区重新显示
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+}
+
+// ===== 风云事件系统：每回合随机改写本回合规则，去公式化 =====
+function bandRollEvent() {
+  var st = bandState;
+  var gap = Math.abs(st.fame - st.aiFame);
+  var pool = [
+    { id: "capital", w: 1 },
+    { id: "scouting", w: 1 },
+    { id: "underground", w: 1 },
+    { id: "crisis", w: 0.7 },
+    { id: "starscout", w: 0.9 },
+  ];
+  if (st.round >= 2) {   // 拆队事件第2回合起才有意义（第1回合双方乐队为空）
+    pool.push({ id: "scandal", w: 0.9 });      // 拆队：绯闻塌房（特殊艺人也不能幸免）
+    pool.push({ id: "recall", w: 0.8 });       // 拆队：原乐队召回特殊艺人
+    pool.push({ id: "poachwar", w: 0.8 });     // 拆队：解锁特殊/传奇艺人挖角
+    pool.push({ id: "discord", w: 0.7 });      // 拆队：豪华阵容内讧离队
+    // 狠事件：见者落泪
+    pool.push({ id: "taxaudit", w: 0.8 });     // 税务稽查：双方金币各-20%
+    pool.push({ id: "flu", w: 0.9 });          // 集体流感：各1人病倒无法上场
+    pool.push({ id: "rainstorm", w: 0.9 });    // 暴雨演出季：全员稳定-20
+    pool.push({ id: "stalker", w: 0.7 });      // 狂热私生饭：盯上特殊艺人
+    pool.push({ id: "fire", w: 0.7 });         // 器材火灾：双方各-40金
+    pool.push({ id: "blacklist", w: 0.8 });    // 黑粉抵制：本回合知名度收益×0.5
+    pool.push({ id: "cstorm", w: 0.7 });       // 合同风暴：普通艺人合同提前到期
+  }
+  if (st.round >= 5) pool.push({ id: "legend", w: 0.8 });
+  if (gap >= 30) pool.push({ id: "investor", w: 1 });   // 翻盘元素：落后方的神秘金主
+  if (gap >= 20) pool.push({ id: "curse", w: 0.8 });    // 翻盘元素：领先方被咒
+  var total = 0;
+  for (var w = 0; w < pool.length; w++) total += pool[w].w;
+  var roll = Math.random() * total, picked = pool[0];
+  for (var i = 0; i < pool.length; i++) {
+    roll -= pool[i].w;
+    if (roll <= 0) { picked = pool[i]; break; }
+  }
+  var evs = {
+    capital:    { name: "资本涌入",   desc: "赞助商砸钱，双方立即+50金币" },
+    scouting:   { name: "唱片公司选秀", desc: "本回合演出知名度收益×2" },
+    underground:{ name: "地下时期",   desc: "本回合金币收益减半，但能力成长率翻倍（练兵回合）" },
+    crisis:     { name: "合同危机",   desc: "双方都被迫转会最弱的一人" },
+    starscout:  { name: "星探来袭",   desc: "本回合市场必有2名特殊艺人" },
+    scandal:    { name: "绯闻风暴",   desc: "狗仔全面开炮！双方各1人被曝塌房：30%直接退队，否则本回合稳定-40（特殊艺人也不能幸免）" },
+    recall:     { name: "原队召回",   desc: "老队友上门！双方每名特殊艺人各45%被召回原乐队，直接离队" },
+    poachwar:   { name: "挖角大战",   desc: "本回合挖角解锁特殊/传奇艺人（转会费=挂牌价×1.5），当面撬对面大牌！" },
+    discord:    { name: "内讧爆发",   desc: "木秀于林风必摧之：阵容总能力更高的一方1人被排挤离队（无回收金）" },
+    legend:     { name: "传奇回归",   desc: "退役传说复出，追加为第6件拍品（数值爆炸，可能随时再次隐退）" },
+    investor:   { name: "神秘投资人", desc: "落后方立即获得60金币（翻盘资金）" },
+    curse:      { name: "卫冕魔咒",   desc: "领先方全员本回合演出稳定-15（被针对研究）" },
+    taxaudit:   { name: "税务稽查",   desc: "国税局上门！双方各缴纳现有金币的20%补税" },
+    flu:        { name: "集体流感",   desc: "换季降温！双方各随机1人病倒，本回合无法上场" },
+    rainstorm:  { name: "暴雨演出季", desc: "连日暴雨设备泡水！本回合双方全员演出稳定-20" },
+    stalker:    { name: "狂热私生饭", desc: "私生饭跟踪骚扰！双方各1名特殊艺人（若有）：50%不堪其扰直接退圈隐退" },
+    fire:       { name: "器材火灾",   desc: "排练室电线短路起火！双方各赔偿 40 金币" },
+    blacklist:  { name: "黑粉抵制",   desc: "黑粉大规模刷差评！本回合双方知名度收益减半" },
+    cstorm:     { name: "合同风暴",   desc: "经纪行业大地震！双方各1名普通艺人合同纠纷被仲裁提前解约" },
+  };
+  var cfg = evs[picked.id];
+  st.event = { id: picked.id, name: cfg.name, desc: cfg.desc };
+  st.logs.push("⚡ 本回合风云——【" + cfg.name + "】" + cfg.desc + "！");
+  // 即时效果结算
+  if (picked.id === "capital") { st.gold += 50; st.aiGold += 50; }
+  if (picked.id === "investor") {
+    if (st.fame < st.aiFame) st.gold += 60; else st.aiGold += 60;
+  }
+  if (picked.id === "crisis") { bandForceSell("p1"); bandForceSell("ai"); }
+  if (picked.id === "curse") st.event.target = st.fame >= st.aiFame ? "p1" : "ai";   // 领先方被咒
+  if (picked.id === "scandal") { bandScandalSide("p1"); bandScandalSide("ai"); }
+  if (picked.id === "recall") { bandRecallSide("p1"); bandRecallSide("ai"); }
+  if (picked.id === "discord") bandDiscordSide();
+  // 狠事件即时结算
+  if (picked.id === "taxaudit") {
+    var t1 = Math.floor(st.gold * 0.2), t2 = Math.floor(st.aiGold * 0.2);
+    st.gold -= t1; st.aiGold -= t2;
+    st.logs.push("🧾 税务稽查结案：你补缴 " + t1 + " 金，对方补缴 " + t2 + " 金。依法纳税，人人有责！");
+  }
+  if (picked.id === "flu") { bandFluSide("p1"); bandFluSide("ai"); }
+  if (picked.id === "rainstorm") {
+    for (var rs = 0; rs < st.band.length; rs++) st.band[rs].rainActive = true;
+    for (var rs2 = 0; rs2 < st.aiBand.length; rs2++) st.aiBand[rs2].rainActive = true;
+  }
+  if (picked.id === "stalker") { bandStalkerSide("p1"); bandStalkerSide("ai"); }
+  if (picked.id === "fire") {
+    st.gold = Math.max(0, st.gold - 40); st.aiGold = Math.max(0, st.aiGold - 40);
+    st.logs.push("🔥 火灾赔偿：双方各 -40 金币。烧掉的不只是设备，还有钱包……");
+  }
+  if (picked.id === "cstorm") { bandContractStormSide("p1"); bandContractStormSide("ai"); }
+}
+
+// 集体流感：随机1人病倒，本回合无法上场（sickActive在阵容计算时剔除）
+function bandFluSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  if (!band.length) return;
+  var victim = band[Math.floor(Math.random() * band.length)];
+  victim.sickActive = true;
+  st.logs.push("🤒 " + bandSideName(side) + "的 " + victim.name + " 发高烧病倒了，本回合无法上台！");
+}
+
+// 狂热私生饭：各1名特殊艺人50%不堪其扰退圈隐退（直接消失，不回市场）
+function bandStalkerSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var specials = [];
+  for (var i = 0; i < band.length; i++) if (band[i].specialId) specials.push(band[i]);
+  if (!specials.length) return;
+  var victim = specials[Math.floor(Math.random() * specials.length)];
+  if (Math.random() < 0.5) {
+    band.splice(band.indexOf(victim), 1);
+    if (side === "ai") {
+      if (st.aiVocalUid === victim.uid) st.aiVocalUid = null;
+      delete st.aiBenchUids[victim.uid];
+    } else {
+      if (st.vocalUid === victim.uid) st.vocalUid = null;
+      delete st.benchUids[victim.uid];
+    }
+    if (victim.specialId) delete st.usedSpecial[victim.specialId];
+    st.logs.push("😱 私生饭堵门+跟踪+装窃听器！" + bandSideName(side) + "的 " + victim.name + " 不堪其扰宣布无限期隐退，直接消失了……");
+  } else {
+    victim.scandalActive = true;
+    st.logs.push("😨 " + bandSideName(side) + "的 " + victim.name + " 被私生饭缠上，本回合演出稳定-40（人身安全受到威胁）！");
+  }
+}
+
+// 合同风暴：各1名普通艺人被仲裁提前解约（离队回市场，配合合同系统）
+function bandContractStormSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var normals = [];
+  for (var i = 0; i < band.length; i++) if (!band[i].specialId && !band[i].legend) normals.push(band[i]);
+  if (!normals.length) return;
+  var victim = normals[Math.floor(Math.random() * normals.length)];
+  band.splice(band.indexOf(victim), 1);
+  if (side === "ai") {
+    if (st.aiVocalUid === victim.uid) st.aiVocalUid = null;
+    delete st.aiBenchUids[victim.uid];
+  } else {
+    if (st.vocalUid === victim.uid) st.vocalUid = null;
+    delete st.benchUids[victim.uid];
+  }
+  st.flowed.push({
+    name: victim.name, role: victim.role, price: Math.max(5, Math.round(victim.price * 0.9)),
+    ability: victim.ability, stability: victim.stability, vocal: victim.vocal,
+    emoji: victim.emoji, specialId: null, perk: victim.perk || null,
+    perkName: victim.perkName || null, perkDesc: victim.perkDesc || null, discounted: false,
+  });
+  st.logs.push("⚖️ 合同风暴！劳资仲裁裁定" + bandSideName(side) + "的 " + victim.name + " 提前解约，恢复自由身回市场（9折再就业）！");
+}
+
+// 绯闻风暴：随机1人被曝塌房——30%直接退队，否则本回合稳定-40（特殊艺人不能幸免）
+function bandScandalSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  if (!band.length) return;
+  var victim = band[Math.floor(Math.random() * band.length)];
+  if (Math.random() < 0.3) {
+    // 直接塌房退队（清理主唱/替补标记）
+    var outIdx = band.indexOf(victim);
+    band.splice(outIdx, 1);
+    if (side === "ai") {
+      if (st.aiVocalUid === victim.uid) st.aiVocalUid = null;
+      delete st.aiBenchUids[victim.uid];
+    } else {
+      if (st.vocalUid === victim.uid) st.vocalUid = null;
+      delete st.benchUids[victim.uid];
+    }
+    st.logs.push("📉 绯闻实锤！！" + bandSideName(side) + "的 " + victim.name + " 塌房退队，粉丝集体脱粉回踩！");
+  } else {
+    victim.scandalActive = true;
+    st.logs.push("📉 " + bandSideName(side) + "的 " + victim.name + " 被曝绯闻！本回合演出稳定-40（30%概率当场退队的豪赌躲过了……）");
+  }
+}
+
+// 原队召回：每名特殊艺人45%被老队友劝回原乐队，直接离队（拆对方完美阵容的核弹）
+var BAND_RECALL_TEXTS = {
+  bocchi:   "结束乐队的大家闯进后台：「小独！该回去练团了！」——后藤独被连拖带拽打包带走！",
+  nijika:   "伊地知姐姐杀到：「虹夏！店里今晚缺人手！」——伊地知虹夏被拎回下北泽！",
+  yamada:   "债主们堵住后台门口——山田凉被拖走去搬砖还债了！",
+  hirokita: "广井菊里的老队友架起她就走：「又喝断片了？！回去醒酒！」",
+  kita:     "喜多郁代接到家里电话：「该回来继承家业了！」——喜多哭着挥手告别！",
+  sakiko:   "丰川祥子收到一条短信，脸色一变：「家里……需要我。」她转身离场！",
+  tomori:   "高松灯盯着手机里CRYCHIC的旧合照，默默走向了车站……",
+  anon:     "千早爱音：「伦敦的朋友喊我去逛街！」她头也不回地跑了！",
+  sayo:     "Roselia的成员来接纱夜回去练琴——冰川纱夜礼貌地鞠躬离场！",
+  hina:     "日菜：「啊哈~那边有练习！」她挥挥手笑着跑掉了！",
+  tomoe:   "Afterglow的大家喊巴回去吃火锅——宇田川巴笑着挥手告别！",
+  ako:     "Roselia全员来抓亚子回去补课——亚子一步三回头地被拖走了！",
+  mutsumi: "Ave Mujica的工作人员带走睦：「有造型拍摄。」她毫无表情地起身离场！",
+  soyo:    "素世的妈妈打来电话：「家里有事。」她完美地鞠躬道歉后离场！",
+  kasumi:  "香澄的妹妹日菜来接姐姐回家吃火锅——「火锅是人类至宝！」她蹦蹦跳跳地走了！",
+  tae:     "多惠家的兔子「小智」生病了——她抱着吉他狂奔回家！",
+  ran:     "兰家的和果子店爆单——「爸爸腰伤了。」她系上围裙头也不回！",
+  moca:    "摩卡：「困了。」她当着所有人的面直接睡着被抬走了！",
+  kokoro:  "弦卷家的直升机降落在楼顶接大小姐回去——「下次再一起玩！」",
+  rana:    "楽奈闻到了远处烤鱼的味道，抱着吉他循着香味消失了……",
+  nina:    "仁菜收到爸爸的短信：「回家谈谈。」她攥紧拳头回了家！",
+  momoka:  "智收到老队友的电话：「重组乐队。」她背起琴箱潇洒离场！",
+};
+function bandRecallSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  for (var i = band.length - 1; i >= 0; i--) {
+    var m = band[i];
+    if (!m.specialId || !BAND_RECALL_TEXTS[m.specialId]) continue;
+    if (Math.random() < 0.45) {
+      if (side === "ai") {
+        if (st.aiVocalUid === m.uid) st.aiVocalUid = null;
+        delete st.aiBenchUids[m.uid];
+      } else {
+        if (st.vocalUid === m.uid) st.vocalUid = null;
+        delete st.benchUids[m.uid];
+      }
+      band.splice(i, 1);
+      st.logs.push("🏠 " + bandSideName(side) + "：" + BAND_RECALL_TEXTS[m.specialId]);
+      st.logs.push("　　" + m.name + " 被原队召回，离队了！（特殊艺人也保不住……）");
+    }
+  }
+}
+
+// 内讧爆发：阵容总能力更高的一方随机1人被排挤离队（无回收金——走的时候摔了门）
+function bandDiscordSide() {
+  var st = bandState;
+  var p1Pow = 0, aiPow = 0;
+  for (var i = 0; i < st.band.length; i++) p1Pow += st.band[i].ability;
+  for (var j = 0; j < st.aiBand.length; j++) aiPow += st.aiBand[j].ability;
+  var side = p1Pow > aiPow ? "p1" : (aiPow > p1Pow ? "ai" : (Math.random() < 0.5 ? "p1" : "ai"));
+  var band = side === "ai" ? st.aiBand : st.band;
+  if (!band.length) return;
+  var victim = band[Math.floor(Math.random() * band.length)];
+  band.splice(band.indexOf(victim), 1);
+  if (side === "ai") {
+    if (st.aiVocalUid === victim.uid) st.aiVocalUid = null;
+    delete st.aiBenchUids[victim.uid];
+  } else {
+    if (st.vocalUid === victim.uid) st.vocalUid = null;
+    delete st.benchUids[victim.uid];
+  }
+  st.logs.push("💥 内讧爆发！" + bandSideName(side) + "（阵容更强，被针对了）的 " + victim.name + " 和队友大吵一架，摔门而去！零回收！");
+}
+
+// 合同危机：强制转会最弱一人（回收20%）
+function bandForceSell(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  if (!band.length) return;
+  var weakest = 0;
+  for (var i = 1; i < band.length; i++) if (band[i].ability < band[weakest].ability) weakest = i;
+  var out = band.splice(weakest, 1)[0];
+  var back = Math.max(1, Math.floor(out.price * 0.2));
+  st[bandGoldKey(side)] += back;
+  if (side === "ai") {
+    if (st.aiVocalUid === out.uid) st.aiVocalUid = null;
+    delete st.aiBenchUids[out.uid];
+  } else {
+    if (st.vocalUid === out.uid) st.vocalUid = null;
+    delete st.benchUids[out.uid];
+  }
+  st.logs.push("📉 合同危机！" + bandSideName(side) + "被迫转会 " + out.name + "（回收" + back + "金）");
+}
+
+// 传奇艺人生成（风云事件'传奇回归'：第6件拍品，数值爆炸，每回合35%再次隐退）
+function bandGenLegend() {
+  return {
+    name: "传奇·弦月彻", role: "吉他手", price: 185,
+    ability: 168 + Math.floor(Math.random() * 10), stability: 85, vocal: 70,
+    emoji: "🌟", specialId: null, legend: true,
+    perk: null, perkName: "传奇巨星", perkDesc: "退役复出的传说，数值爆炸——但每回合演出后35%概率觉得无趣再次隐退",
+  };
 }
 
 // 生成普通艺人（能力随回合成长，10回合制，能力上限160；唱腔：专职主唱50-90、其他10-90）
@@ -6113,15 +6590,30 @@ function bandGenNormal(round) {
   };
 }
 
-// 生成市场：5人，特殊艺人每回合最多2个（不与已签重复）
+// 生成市场：5人，特殊艺人每回合最多2个（不与已签重复）；上回合流拍者8折回场
 function bandGenMarket(round) {
   var market = [];
+  // 流拍艺人回场（揭盅时已打过8折并标记discounted）
+  if (bandState.flowed && bandState.flowed.length) {
+    for (var f = 0; f < bandState.flowed.length && market.length < 5; f++) market.push(bandState.flowed[f]);
+    bandState.flowed = [];
+  }
+  var alreadySpecial = 0, inMarket = {};
+  for (var a = 0; a < market.length; a++) {
+    if (market[a].specialId) { alreadySpecial++; inMarket[market[a].specialId] = true; }
+  }
   var specialCount = 0;
-  var r = Math.random();
-  if (r < 0.25) specialCount = 2; else if (r < 0.8) specialCount = 1;
+  var evId = bandState.event ? bandState.event.id : null;
+  if (evId === "starscout") {
+    specialCount = 2;   // 风云事件：星探来袭，必出2特殊
+  } else {
+    var r = Math.random();
+    if (r < 0.12) specialCount = 2; else if (r < 0.45) specialCount = 1;
+  }
+  specialCount = Math.max(0, specialCount - alreadySpecial);   // 回场特殊也占特殊名额
   var pool = [];
   for (var i = 0; i < BAND_SPECIAL_ARTISTS.length; i++) {
-    if (!bandState.usedSpecial[BAND_SPECIAL_ARTISTS[i].specialId]) pool.push(BAND_SPECIAL_ARTISTS[i]);
+    if (!bandState.usedSpecial[BAND_SPECIAL_ARTISTS[i].specialId] && !inMarket[BAND_SPECIAL_ARTISTS[i].specialId]) pool.push(BAND_SPECIAL_ARTISTS[i]);
   }
   // 洗牌
   for (var j = pool.length - 1; j > 0; j--) {
@@ -6131,100 +6623,215 @@ function bandGenMarket(round) {
   specialCount = Math.min(specialCount, pool.length);
   for (var s = 0; s < specialCount; s++) market.push(pool[s]);
   while (market.length < 5) market.push(bandGenNormal(round));
+  // 风云事件：传奇回归，追加第6件传说拍品
+  if (evId === "legend") market.push(bandGenLegend());
   return market;
 }
 
-// 玩家签约
-function bandSign(idx) {
-  if (!bandState || bandState.phase !== "sign") return;
-  var artist = bandState.market[idx];
-  if (!artist || artist.soldTo) return;
-  if (bandState.gold < artist.price) { showToast("金币不够啦！"); return; }
-  bandState.gold -= artist.price;
-  artist.soldTo = "player";
-  if (artist.specialId) bandState.usedSpecial[artist.specialId] = true;
-  var signed = Object.assign({}, artist);   // 克隆入队：演出成长不污染全局特殊艺人配置
-  signed.uid = ++BAND_UID;
-  // 入队即生效的天赋
-  if (signed.perk === "genius") { signed.ability += 15; showToast(signed.name + " 是天才型！入队能力+15（" + signed.ability + "）"); }
-  if (signed.perk === "eater") { signed.ability += 20; showToast(signed.name + " 是干饭王！能力+20（" + signed.ability + "），但每回合吃3金币"); }
-  bandState.band.push(signed);
-  if (artist.specialId === "bocchi") unlockAchievement("bocchi_band");
-  if (artist.perk === "rich") { bandState.gold += 10; showToast(artist.name + " 是富二代，返还了 10 金币！"); }
-  else showToast("签下了 " + artist.name + "（" + artist.role + "）！");
+// ===== 明标拍卖系统：逐个乐手轮流竞价，价高者得，当面抬价 =====
+
+// side工具：p1=玩家1，ai=AI（duo模式下为玩家2）
+function bandGoldKey(side) { return side === "ai" ? "aiGold" : "gold"; }
+function bandSideName(side) {
+  var st = bandState;
+  if (side === "ai") return st && st.mode === "duo" ? "玩家2" : "AI";
+  return "玩家1";
+}
+
+// 操作权：auction阶段=当前决策方且AI非思考中；sign阶段=duo按turn/single恒p1
+function bandCanOperate(side) {
+  var st = bandState;
+  if (!st) return false;
+  if (st.phase === "auction") {
+    return !!st.auction && st.auction.decider === side && !st.auction.thinking;
+  }
+  if (st.phase === "sign") {
+    if (st.mode !== "duo") return side === "p1";
+    return (side === "ai") === (st.turn === "p2");
+  }
+  return false;
+}
+
+// 开始拍卖第idx个乐手（奇数回合P1先手，偶数回合P2先手——双人公平）
+function bandAuctionGoto(idx) {
+  var st = bandState;
+  st.phase = "auction";
+  var first = (st.mode === "duo" && st.round % 2 === 0) ? "ai" : "p1";
+  st.auction = {
+    idx: idx, price: st.market[idx].price, leader: null,
+    decider: first, active: false, thinking: false,
+    skipped: {},   // 记录起拍前双方是否跳过
+  };
+  st.logs.push("🔨 【第" + (idx + 1) + "/" + st.market.length + "件】拍卖 " + st.market[idx].name + "（" + st.market[idx].role + "）· 起拍价 " + st.market[idx].price + " 金——" + bandSideName(first) + "先表态");
+  // 若先手是AI，自动进入思考
+  if (st.mode === "single" && first === "ai") bandAiThink();
   bandRender();
 }
 
-// AI签约（玩家点演出时，从市场剩余中按策略买人）
-function bandAiSign() {
+// 出价（side出全价newPrice；旧领先者自动解冻，新出价方冻结全价）
+function bandAuctionBid(side, newPrice) {
   var st = bandState;
-  var left = st.market.filter(function(m) { return !m.soldTo; });
-  var bought = [];
-  var sold = [];
+  var a = st.auction;
+  if (!st || !a || st.phase !== "auction" || a.decider !== side || a.thinking) return;
+  var m = st.market[a.idx];
+  var goldKey = bandGoldKey(side);
+  if (st[goldKey] < newPrice) { showToast("金币不足！"); return; }
+  if (a.leader) st[bandGoldKey(a.leader)] += a.price;   // 旧领先者解冻
+  st[goldKey] -= newPrice;                              // 新出价方冻结全价
+  var wasActive = a.active;
+  a.leader = side; a.price = newPrice; a.active = true;
+  st.logs.push((wasActive ? "🔊 " : "🏷 ") + bandSideName(side) + " 出价 " + newPrice + " 金！（" + m.name + "）");
+  a.decider = side === "p1" ? "ai" : "p1";              // 换对方决定
+  if (st.mode === "single" && a.decider === "ai") bandAiThink();
+  bandRender();
+}
 
-  // 【智商1】卖弱买强：转卖能力<90的弱队员回收资金（AI也懂换血）
-  for (var w = st.aiBand.length - 1; w >= 0; w--) {
-    if (st.aiBand[w].ability < 90 && st.aiBand.length > 1) {
-      var weak = st.aiBand.splice(w, 1)[0];
-      var back = Math.max(1, Math.floor(weak.price * 0.2));
-      st.aiGold += back;
-      sold.push(weak.name + "(回收" + back + "金)");
+// 跳过（仅起拍前：不要此人；双方都跳过→流拍）
+function bandAuctionSkip() {
+  var st = bandState;
+  var a = st.auction;
+  if (!st || !a || st.phase !== "auction" || a.active) return;   // 已有人出价后不可跳过（只能放弃）
+  var side = a.decider;
+  if (a.thinking) return;
+  a.skipped[side] = true;
+  var other = side === "p1" ? "ai" : "p1";
+  st.logs.push("⏭ " + bandSideName(side) + " 不要 " + st.market[a.idx].name);
+  if (a.skipped[other]) { bandAuctionFlow(); return; }   // 双方都跳过→流拍
+  a.decider = other;                                     // 换对方表态
+  if (st.mode === "single" && other === "ai") bandAiThink();
+  bandRender();
+}
+
+// 放弃争夺（已有人出价时认输：领先者以当前价成交）
+function bandAuctionPass() {
+  var st = bandState;
+  var a = st.auction;
+  if (!st || !a || st.phase !== "auction" || !a.active || a.thinking) return;
+  var side = a.decider;
+  st.logs.push("🏳 " + bandSideName(side) + " 放弃争夺 " + st.market[a.idx].name);
+  bandAuctionDeal();
+}
+
+// 成交：领先者以当前冻结价拿下
+function bandAuctionDeal() {
+  var st = bandState;
+  var a = st.auction;
+  var m = st.market[a.idx];
+  m.soldTo = a.leader; m.dealPrice = a.price;
+  bandEnlist(m, a.leader);   // 金币已在冻结中扣除
+  st.logs.push("🔨 " + m.name + " 成交！" + bandSideName(a.leader) + " 以 " + a.price + " 金拿下！（身价更新为成交价）");
+  bandAuctionNext();
+}
+
+// 流拍：8折下回合回场
+function bandAuctionFlow() {
+  var st = bandState;
+  var a = st.auction;
+  var m = st.market[a.idx];
+  if (!m.discounted) { m.price = Math.round(m.price * 0.8); m.discounted = true; }
+  st.flowed.push(m);
+  st.logs.push("⚪ " + m.name + " 无人问津流拍，下回合8折（" + m.price + "金）回场");
+  bandAuctionNext();
+}
+
+// 下一个拍品；全部拍完进入整备阶段
+function bandAuctionNext() {
+  var st = bandState;
+  var next = st.auction.idx + 1;
+  if (next >= st.market.length) {
+    st.auction = null;
+    st.phase = "sign";
+    st.turn = "p1";   // duo整备阶段从P1开始
+    st.logs.push("📋 本回合竞拍全部结束，进入整备阶段（主唱/替补/转会/Live安排）");
+    bandRender();
+  } else {
+    bandAuctionGoto(next);
+  }
+}
+
+// 竞拍成交入队（出价资金已冻结，此处只入队+结算入队型天赋）
+function bandEnlist(m, side) {
+  var st = bandState;
+  if (m.specialId) st.usedSpecial[m.specialId] = true;
+  var s = Object.assign({}, m);   // 克隆入队：演出成长不污染全局特殊艺人配置
+  s.uid = ++BAND_UID;
+  s.price = m.dealPrice || m.price;   // 身价更新为实际成交价（影响转会回收/挖角费/抵债结算）
+  s.contractLeft = 6;                 // 合同制：签约6回合，到期自动解约回自由市场
+  if (s.perk === "genius") s.ability += 15;
+  if (s.perk === "eater") s.ability += 20;
+  // 弦卷心：财阀大小姐签约立即返还30金（双方通用）
+  if (s.specialId === "kokoro") {
+    st[bandGoldKey(side)] += 30;
+    st.logs.push("🎈 " + s.name + "：「钱不是问题！」弦卷财阀当场返还 30 金币！");
+  }
+  if (side === "ai") {
+    st.aiBand.push(s);
+  } else {
+    st.band.push(s);
+    if (m.specialId === "bocchi") unlockAchievement("bocchi_band");
+    if (m.perk === "rich") { st.gold += 10; st.logs.push("💰 " + m.name + " 是富二代，签约返还 10 金币！"); }
+    if (s.perk === "genius") st.logs.push("✨ " + m.name + " 是天才型！入队能力+15（" + s.ability + "）");
+    if (s.perk === "eater") st.logs.push("🍚 " + m.name + " 是干饭王！能力+20（" + s.ability + "），但每回合吃3金币");
+  }
+  return s;
+}
+
+// AI估值上限：AI对某艺人愿意出的最高价（含反制抬价/编制缺口/主唱补强/后期止损，±8%扰动）
+function bandAiCap(m) {
+  var st = bandState;
+  // 反制强度：落后越多出价越凶（落后30+知名度→加价45%）
+  var behind = st.fame - st.aiFame;
+  var aggression = behind > 30 ? 1.45 : behind > 10 ? 1.25 : behind > 0 ? 1.1 : 1.0;
+  // 编制缺口：吉他×2+鼓+贝斯
+  var need = { "吉他手": 2, "鼓手": 1, "贝斯手": 1 };
+  for (var r = 0; r < st.aiBand.length; r++) if (need[st.aiBand[r].role]) need[st.aiBand[r].role]--;
+  // 是否缺高唱腔主唱
+  var noVocal = true;
+  for (var v = 0; v < st.aiBand.length; v++) if ((st.aiBand[v].vocal || 0) >= 60) { noVocal = false; break; }
+  var ratio = (m.ability + m.stability * 0.6 + (m.vocal || 0) * 0.3) / Math.max(1, m.price * 2);   // 性价比
+  var cap = 0;
+  if (m.specialId) {
+    var prio = { tomori: 5, ran: 4, kokoro: 4, anon: 4, bocchi: 4, nijika: 3, kita: 3, sayo: 3, mutsumi: 3, soyo: 3, tomoe: 3, kasumi: 3, tae: 3, nina: 3, momoka: 3, rana: 2, hina: 2, hirokita: 2, sakiko: 2, ako: 2, moca: 2, yamada: 1 };
+    var p = prio[m.specialId] || 2;
+    cap = m.price * (0.95 + p * 0.09) * aggression;
+  } else {
+    cap = m.price * (0.85 + ratio * 0.35);
+    if (need[m.role] > 0) cap *= 1.25;                                    // 缺位加价25%
+    if (m.role === "主唱" && noVocal && (m.vocal || 0) >= 65) cap *= 1.3;  // 缺主唱再+30%
+    if (ratio < 0.9) cap = 0;                                             // 性价比太差不参与
+  }
+  if (st.round >= 8 && !m.specialId && ratio < 1.05) cap = 0;   // 后期只抢特殊和超值货
+  return Math.round(cap * (0.92 + Math.random() * 0.16));       // 每次估值±8%扰动
+}
+
+// AI思考：起拍/跟价/跳过/放弃的当场决策（350ms延迟保持节奏不拖沓）
+function bandAiThink() {
+  var st = bandState;
+  var a = st.auction;
+  if (!st || !a || st.mode !== "single") return;
+  a.thinking = true;
+  bandRender();
+  setTimeout(function() {
+    var st2 = bandState;
+    if (!st2 || !st2.auction || st2.phase !== "auction") return;   // 对局已结束/切换，丢弃
+    var a2 = st2.auction;
+    a2.thinking = false;
+    var m = st2.market[a2.idx];
+    var cap = bandAiCap(m);
+    if (!a2.active) {
+      // 起拍决策：估值够且金币够就起拍
+      if (cap >= m.price && st2.aiGold >= m.price) {
+        bandAuctionBid("ai", m.price);
+      } else {
+        bandAuctionSkip();
+      }
+      return;
     }
-  }
-  if (sold.length) st.logs.push("🤖 AI经纪人转会卖出了：" + sold.join("、"));
-
-  // 【智商2】攒钱策略：市场无特殊艺人且金币<120时，55%概率跳过买普通，攒钱等下回合特殊
-  var specials = left.filter(function(m) { return m.specialId; });
-  var saveMode = !specials.length && st.aiGold < 120 && Math.random() < 0.55;
-  if (saveMode) {
-    st.logs.push("🤖 AI经纪人按兵不动，似乎在攒钱等待大牌……");
-    return;
-  }
-
-  // 【智商3】特殊艺人优先级（灯主唱>爱音>后藤>虹夏>喜多>广井>祥子>山田凉——AI知道偷钱鬼和乐队粉碎机的风险）
-  var prio = { tomori: 0, anon: 1, bocchi: 2, nijika: 3, kita: 4, hirokita: 5, sakiko: 6, yamada: 7 };
-  specials.sort(function(a, b) { return (prio[a.specialId] !== undefined ? prio[a.specialId] : 9) - (prio[b.specialId] !== undefined ? prio[b.specialId] : 9); });
-  // 有钱就全收特殊（AI资金雄厚，但留30金运营）
-  for (var i = 0; i < specials.length; i++) {
-    if (st.aiGold >= specials[i].price + 30) {
-      st.aiGold -= specials[i].price;
-      specials[i].soldTo = "ai";
-      st.usedSpecial[specials[i].specialId] = true;
-      var aiS = Object.assign({}, specials[i]);
-      aiS.uid = ++BAND_UID;
-      st.aiBand.push(aiS);
-      bought.push(specials[i].name);
-    }
-  }
-
-  // 【智商4】编制意识：普通艺人优先补缺失位置（吉他×2+鼓+贝斯），编制全了再按性价比
-  var normals = left.filter(function(m) { return !m.specialId && !m.soldTo; });
-  var needRoles = { "吉他手": 2, "鼓手": 1, "贝斯手": 1 };
-  for (var r = 0; r < st.aiBand.length; r++) {
-    if (needRoles[st.aiBand[r].role]) needRoles[st.aiBand[r].role]--;
-  }
-  // 先挑补位的
-  var normalsSorted = normals.slice().sort(function(a, b) {
-    var aNeed = needRoles[a.role] > 0 ? 1 : 0;
-    var bNeed = needRoles[b.role] > 0 ? 1 : 0;
-    if (aNeed !== bNeed) return bNeed - aNeed;   // 缺位优先
-    return (b.ability + b.stability) / b.price - (a.ability + a.stability) / a.price;  // 再性价比
-  });
-  var normalBought = 0;
-  for (var n = 0; n < normalsSorted.length && normalBought < 2; n++) {
-    if (st.aiGold >= normalsSorted[n].price + 30) {
-      st.aiGold -= normalsSorted[n].price;
-      normalsSorted[n].soldTo = "ai";
-      var aiN = Object.assign({}, normalsSorted[n]);
-      aiN.uid = ++BAND_UID;
-      st.aiBand.push(aiN);
-      bought.push(normalsSorted[n].name);
-      if (needRoles[normalsSorted[n].role] > 0) needRoles[normalsSorted[n].role]--;
-      normalBought++;
-    }
-  }
-  if (bought.length) st.logs.push("🤖 AI经纪人签下了：" + bought.join("、"));
-  else if (!sold.length) st.logs.push("🤖 AI经纪人这回合按兵不动……");
+    // 跟价决策：领先者是玩家，AI决定跟价或放弃（统一1块1块抬价）
+    var remain = cap - a2.price;
+    if (remain < 1 || st2.aiGold < a2.price + 1) { bandAuctionPass(); return; }   // 跟不动了
+    bandAuctionBid("ai", a2.price + 1);
+  }, 350);
 }
 
 // 标准编制判断：吉他×2 + 鼓 + 贝斯（特殊艺人位置也计入）
@@ -6261,10 +6868,20 @@ function bandLineup(band, vocalUid, benchUids) {
 }
 
 // 演出结算：上场≤5人；主唱位知名度按 能力×50%+唱腔 计算（专职主唱无惩罚，兼任稳定-12）
-function bandPerform(band, vocalUid, benchUids) {
+// opts：fameMul/goldMul（风云事件倍率）、growthRate（成长概率）、volatile（音乐节大波动）
+function bandPerform(band, vocalUid, benchUids, opts) {
+  opts = opts || {};
+  var fameMul = opts.fameMul || 1, goldMul = opts.goldMul || 1;
+  var growthRate = (opts.growthRate !== undefined) ? opts.growthRate : 0.35;
   var events = [];
   if (!band.length) return { gold: 0, fame: 0, events: ["乐队空无一人，只能对着空气弹奏……"] };
-  var lineup = bandLineup(band, vocalUid, benchUids);
+  // 集体流感：病号无法上场（上场名单直接剔除）
+  var fluOut = [];
+  for (var fi = 0; fi < band.length; fi++) if (band[fi].sickActive) fluOut.push(band[fi].name);
+  if (fluOut.length) events.push("🤒 病号缺阵：" + fluOut.join("、") + " 本回合无法上台！");
+  var playable = band.filter(function(m) { return !m.sickActive; });
+  if (!playable.length) return { gold: 0, fame: 0, events: events.concat(["全员病倒！本场演出取消……"]) };
+  var lineup = bandLineup(playable, vocalUid, benchUids);
   if (band.length > 5) {
     var names = [];
     for (var ln = 0; ln < lineup.length; ln++) names.push(lineup[ln].name);
@@ -6272,8 +6889,38 @@ function bandPerform(band, vocalUid, benchUids) {
   }
   var hasNijika = lineup.some(function(m) { return m.specialId === "nijika"; });
   var hasCheer = lineup.some(function(m) { return m.perk === "cheer"; });
+  var hasSoyo = lineup.some(function(m) { return m.specialId === "soyo"; });
+  var hasTomoe = lineup.some(function(m) { return m.specialId === "tomoe"; });
+  var hasTae = lineup.some(function(m) { return m.specialId === "tae"; });
+  var hasSakikoOn = lineup.some(function(m) { return m.specialId === "sakiko"; });
   var fullBand = bandHasFull(lineup);
   if (fullBand) events.push("🎼 标准编制达成（吉他×2+鼓+贝斯）！全队收益+30%！");
+  // 修罗场：素世和祥子同台（不是CP，是孽缘）——两人稳定-15
+  var dramaShura = hasSoyo && hasSakikoOn;
+  if (dramaShura) events.push("☕ 修罗场！长崎素世死死盯着丰川祥子，全场空气凝固——两人稳定-15！");
+  // CP羁绊：检测上场阵容激活的特殊组合（须全部成员在场）
+  var cpIds = {};
+  var activeCps = bandActiveCps(lineup);
+  for (var cp0 = 0; cp0 < activeCps.length; cp0++) {
+    cpIds[activeCps[cp0].id] = true;
+    events.push(activeCps[cp0].emoji + " CP【" + activeCps[cp0].name + "】发动！" + activeCps[cp0].desc);
+  }
+  // 通用羁绊：普通艺人组合（与CP并行，青色标签区分）
+  var bondIds = {};
+  var bondMember = {};   // uid → 该成员参与的羁绊id
+  var activeBonds = bandActiveGenericBonds(lineup);
+  for (var bd0 = 0; bd0 < activeBonds.length; bd0++) {
+    bondIds[activeBonds[bd0].id] = true;
+    events.push(activeBonds[bd0].emoji + " 羁绊【" + activeBonds[bd0].name + "】发动！" + activeBonds[bd0].desc);
+    for (var bm0 = 0; bm0 < activeBonds[bd0].members.length; bm0++) bondMember[activeBonds[bd0].members[bm0]] = activeBonds[bd0].id;
+  }
+  var hasSpecialMate = lineup.some(function(m) { return !!m.specialId; });   // 天生一对：队里有大牌
+  var cpHaunted = cpIds.crychic && Math.random() < 0.15;                     // CRYCHIC旧事重提（整场一次判定）
+  var cpDrunkHirokita = cpIds.drunkmate && Math.random() < 0.35;             // 醉鬼二人组：预roll广井醉态（山田凉要看结果）
+  var twinShared = cpIds.twins ? Math.random() : null;                       // 双子心弦：双子共享同一发挥roll（同好同坏）
+  var diamondBattle = cpIds.diamond && opts.battle;                          // 孤注一掷CP：Battle全队+10%
+  if (diamondBattle) events.push("💎 孤注一掷！仁菜和智在Battle中目光如炬——全队发挥+10%！");
+  if (cpHaunted) events.push("🕯️ CRYCHIC旧事重提——丰川祥子和高松灯同时失神，两人稳定-25……");
   var gold = 0, fame = 0, stolen = 0;
   for (var i = 0; i < lineup.length; i++) {
     var m = lineup[i];
@@ -6285,26 +6932,92 @@ function bandPerform(band, vocalUid, benchUids) {
     }
     if (hasNijika && m.specialId !== "nijika") stb += 14;
     if (hasCheer && m.perk !== "cheer") stb += 4;
-    // 广井菊里：35%喝醉
-    if (m.specialId === "hirokita" && Math.random() < 0.35) {
+    if (hasSoyo && m.specialId !== "soyo") stb += 6;   // 素世：妈妈桑光环
+    // 修罗场：素世×祥子同台，两人稳定-15
+    if (dramaShura && (m.specialId === "soyo" || m.specialId === "sakiko")) stb -= 15;
+    // 阴招debuff：黑料缠身（稳定-30）
+    if (m.smearActive) { stb -= 30; events.push("💊 " + m.name + " 黑料缠身，稳定-30！"); }
+    // 风云事件：卫冕魔咒（领先方全员稳定-15）
+    if (m.curseActive) { stb -= 15; events.push("🧿 " + m.name + " 中了卫冕魔咒，稳定-15！"); }
+    // 风云事件：绯闻风暴（稳定-40，比黑料更狠）
+    if (m.scandalActive) { stb -= 40; events.push("📉 " + m.name + " 绯闻缠身，稳定-40！"); }
+    // 风云事件：暴雨演出季（全员稳定-20）
+    if (m.rainActive) stb -= 20;
+    // CP效果应用（组合加成，可与光环叠加）
+    if (cpIds.kizuna && m.specialId === "bocchi") stb += 50;      // 纽带：波奇被虹夏稳住
+    if (cpIds.kizuna && m.specialId === "nijika") stb += 20;
+    if (cpIds.guitarhero && (m.specialId === "kita" || m.specialId === "bocchi")) ab += 10;   // 吉他英雄传授
+    if (cpIds.mygo && (m.specialId === "anon" || m.specialId === "tomori")) { ab += 12; stb += 15; }   // 迷子也要唱歌
+    if (cpHaunted && (m.specialId === "sakiko" || m.specialId === "tomori")) stb -= 25;      // CRYCHIC旧事重提
+    // 姐妹CP效果
+    if (cpIds.twins && (m.specialId === "sayo" || m.specialId === "hina")) { ab += 10; stb += 18; }   // 双子心弦
+    if (cpIds.sisters) stb += 12;                                                          // 姐妹双鼓：全队稳定+12
+    if (cpIds.sisters && (m.specialId === "tomoe" || m.specialId === "ako")) ab += 8;      // 姐妹俩能力+8
+    // 百合CP效果
+    if (cpIds.doll && m.specialId === "mutsumi") stb += 20;                                // 牵线人偶：睦稳定+20
+    if (cpIds.umbrella && m.specialId === "anon") stb += 15;                               // 共撑一伞：爱音稳定+15
+    if (cpIds.umbrella && m.specialId === "soyo") ab += 10;                                // 素世能力+10
+    if (cpIds.puzzle && m.specialId === "soyo") stb += 10;                                 // 拼图残片：素世稳定+10
+    // 新批次CP效果
+    if (cpIds.popipa && (m.specialId === "kasumi" || m.specialId === "tae")) ab += 10;     // Popipa双吉他
+    if (cpIds.childhood && (m.specialId === "ran" || m.specialId === "moca")) stb += 15;   // 青梅竹马
+    if (cpIds.diamond && (m.specialId === "nina" || m.specialId === "momoka")) ab += 12;   // 孤注一掷
+    // 通用羁绊效果（普通艺人组合，按成员参与情况；全明星为全队光环）
+    if (bondMember[m.uid] === "twinguitar") ab += 8;    // 吉他双子
+    if (bondMember[m.uid] === "chinatown") ab += 15;    // 唐人街传奇
+    if (bondMember[m.uid] === "eaterduo") ab += 12;     // 干饭二人组
+    if (bondMember[m.uid] === "namesake") stb += 12;    // 老乡见老乡
+    if (bondIds.allstar) stb += 8;                      // 全明星阵容：全队稳定+8
+    // 广井菊里：35%喝醉（醉鬼二人组下用预roll结果，保证山田凉同步看到）
+    var hirokitaDrunk = m.specialId === "hirokita" && (cpIds.drunkmate ? cpDrunkHirokita : Math.random() < 0.35);
+    if (hirokitaDrunk) {
       ab = Math.max(5, ab - 120);
       events.push("🍺 " + m.name + " 演出前喝醉了！能力暴跌……");
     }
-    // 发挥系数：稳定度越高波动越小（稳定>100视为恒定满发挥）
-    var stRoll = stb + Math.floor(Math.random() * 31) - 15;
+    // 醉鬼二人组：广井醉了山田凉反而超常发挥（酒友掩护+30）
+    if (cpIds.drunkmate && m.specialId === "yamada" && cpDrunkHirokita) {
+      ab += 30;
+      events.push("🍻 " + m.name + " 看着醉倒的酒友，莫名进入贤者模式，能力+30！");
+    }
+    // 发挥系数：稳定度越高波动越小（稳定>100视为恒定满发挥；音乐节波动加大；双子共享同一roll）
+    var rnd = (twinShared !== null && (m.specialId === "sayo" || m.specialId === "hina")) ? twinShared : Math.random();
+    var stRoll = stb + Math.floor(rnd * (opts.volatile ? 61 : 31)) - (opts.volatile ? 30 : 15);
     if (stRoll < 0) stRoll = 0; if (stRoll > 100) stRoll = 100;
     var factor = 0.6 + 0.4 * stRoll / 100;
     if (m.perk === "veteran" && factor < 0.9) factor = 0.9;
+    if (m.specialId === "mutsumi" && factor < 0.85) factor = 0.85;   // 睦：人偶般精准
+    if (m.specialId === "sayo" && factor < 0.95) factor = 0.95;      // 纱夜：完美主义
+    if (m.specialId === "moca" && factor < 0.92) factor = 0.92;      // 摩卡：摸鱼但稳
+    if (m.specialId === "ran" && opts.battle) { factor *= 1.35; events.push("🌹 " + m.name + " 在Battle中战意沸腾！个人发挥×1.35！"); }
     if (fullBand) factor *= 1.3;
     var g = ab * factor * 0.55;
-    // 主唱位唱腔生效：知名度基数 = 能力×50% + 唱腔（唱腔仅在担任主唱时生效）
-    var fBase = isVocal ? (ab * 0.5 + (m.vocal || 0)) : ab;
+    // 主唱位唱腔生效：知名度基数 = 能力×50% + 唱腔（唱腔仅在担任主唱时生效；CRYCHIC的CP给灯+12、拼图残片+10）
+    var mVocal = (m.vocal || 0) + (cpIds.crychic && m.specialId === "tomori" ? 12 : 0) + (cpIds.puzzle && m.specialId === "tomori" ? 10 : 0);
+    var fBase = isVocal ? (ab * 0.5 + mVocal) : ab;
     var f = fBase * factor * 0.4;
     if (m.specialId === "kita") f *= 1.3;
+    // 宇田川亚子：30%中二爆发，个人知名度+50%
+    if (m.specialId === "ako" && Math.random() < 0.3) { f *= 1.5; events.push("🦇 " + m.name + " 中二爆发！「漆黑烈焰终焉赞曲」！个人知名度收益+50%！"); }
     if (m.perk === "idol") g *= 1.3;
-    // 赌狗之魂：50%个人收益翻倍，50%减半
+    // 天生一对：与任意特殊艺人同队上场，个人发挥×1.4
+    if (m.perk === "soulmate" && hasSpecialMate && !m.specialId) { g *= 1.4; f *= 1.4; events.push("💗 " + m.name + " 与大牌同台热血沸腾，发挥×1.4！"); }
+    // 宿敌：对方知名度领先时个人发挥×1.6（反滚雪球）
+    if (m.perk === "rivalry" && opts.behind) { g *= 1.6; f *= 1.6; events.push("😤 " + m.name + " 燃起了熊熊斗志！逆风发挥×1.6！"); }
+    // 井芹仁菜：落后×1.5绝不认输，领先×0.95飘了
+    if (m.specialId === "nina") {
+      if (opts.behind) { g *= 1.5; f *= 1.5; events.push("🎧 " + m.name + " 咬着牙吼出来——「才不是错的！」落后爆发×1.5！"); }
+      else { g *= 0.95; f *= 0.95; }
+    }
+    // 要楽奈：35%概率演出中段睡着（大小姐与猫CP下15%——被投喂得很饱）
+    if (m.specialId === "rana" && Math.random() < (cpIds.catlady ? 0.15 : 0.35)) {
+      g *= 0.5; f *= 0.5;
+      events.push("🐱 " + m.name + " 演出到一半睡着了……个人发挥减半（只有猫能这样）");
+    }
+    // 孤注一掷CP：Battle全队+10%
+    if (diamondBattle) { g *= 1.1; f *= 1.1; }
+    // 赌狗之魂：50%个人收益翻倍，50%减半（赌狗天团羁绊下互相怂恿，赌赢65%）
     if (m.perk === "gambler") {
-      if (Math.random() < 0.5) { g *= 2; f *= 2; events.push("🎲 " + m.name + " 赌狗之魂爆发！梭哈成功，个人收益翻倍！！"); }
+      if (Math.random() < (bondIds.gamblerduo ? 0.65 : 0.5)) { g *= 2; f *= 2; events.push("🎲 " + m.name + " 赌狗之魂爆发！梭哈成功，个人收益翻倍！！"); }
       else { g *= 0.5; f *= 0.5; events.push("🎲 " + m.name + " 赌输了……个人收益减半。"); }
     }
     // 人来疯：标准编制达成时个人发挥×1.5
@@ -6312,8 +7025,8 @@ function bandPerform(band, vocalUid, benchUids) {
     // 摇滚巨星：个人知名度收益+50%
     if (m.perk === "rockstar") f *= 1.5;
     gold += g; fame += f;
-    // 山田凉：50%偷50金币（超级败家）
-    if (m.specialId === "yamada" && Math.random() < 0.5) {
+    // 山田凉：50%偷50金币（超级败家；醉鬼二人组CP下断片忘了收敛→70%）
+    if (m.specialId === "yamada" && Math.random() < (cpIds.drunkmate ? 0.7 : 0.5)) {
       stolen += 50;
       events.push("🦎 " + m.name + " 偷走了 50 金币演出收益！！");
     }
@@ -6324,8 +7037,8 @@ function bandPerform(band, vocalUid, benchUids) {
       if (!m.specialId && m.ability > 160) m.ability = 160;
       events.push("🎵 " + m.name + " 越练越强，能力+6" + (oldAb <= 160 && m.ability > 160 ? "，突破极限！" : "") + "！");
     }
-    // 成长系统：演出积累经验，35%概率能力+2~4（练习狂已有必触发成长，不再叠加；特殊艺人无上限，普通艺人封顶160）
-    else if ((m.specialId || m.ability < 160) && Math.random() < 0.35) {
+    // 成长系统：演出积累经验，35%概率能力+2~4（地下时期翻倍至70%；日菜直觉+15%；练习狂已有必触发成长，不再叠加；特殊艺人无上限，普通艺人封顶160）
+    else if ((m.specialId || m.ability < 160) && Math.random() < growthRate + (m.specialId === "hina" ? 0.15 : 0)) {
       var grow = 2 + Math.floor(Math.random() * 3);
       var oldAb2 = m.ability;
       m.ability += grow;
@@ -6333,8 +7046,16 @@ function bandPerform(band, vocalUid, benchUids) {
       events.push("🌟 " + m.name + " 在演出中积累了经验，能力+" + grow + (oldAb2 <= 160 && m.ability > 160 ? "，突破极限！" : "") + "！");
     }
   }
-  gold = Math.max(0, Math.round(gold - stolen));
-  return { gold: gold, fame: Math.round(fame), events: events };
+  // 花园多惠：20秒神solo——20%概率全队知名度+12（Popipa双吉他CP下+18）
+  if (hasTae && Math.random() < 0.2) {
+    var soloFame = cpIds.popipa ? 18 : 12;
+    fame += soloFame;
+    events.push("🐇 " + (lineup.filter(function(x){return x.specialId==="tae";})[0] || {name:"花园多惠"}).name + " 突然来了一段20秒神solo！全场沸腾，全队知名度+" + soloFame + "！");
+  }
+  // 宇田川巴：祭典鼓点——标准编制达成时全队金币+15%
+  if (hasTomoe && fullBand) { gold = gold * 1.15; events.push("🔥 祭典鼓点！宇田川巴的太鼓点燃全场，全队金币收益+15%！"); }
+  gold = Math.max(0, Math.round(gold * goldMul - stolen));
+  return { gold: gold, fame: Math.round(fame * fameMul), events: events };
 }
 
 // 丰川祥子·乐队粉碎机：每过3回合发作——40%逼退一名其他队员，25%自己退队「无可救药」
@@ -6342,11 +7063,27 @@ function bandSakikoTick(band, label, logs) {
   var idx = -1;
   for (var i = 0; i < band.length; i++) if (band[i].specialId === "sakiko") { idx = i; break; }
   if (idx < 0) return null;
+  // 牵线人偶：睦在场时50%按住祥子的发作
+  var hasMutsumi = band.some(function(x) { return x.specialId === "mutsumi"; });
+  if (hasMutsumi && Math.random() < 0.5) {
+    logs.push("🎀 若叶睦轻轻握住丰川祥子的手，粉碎机平息了……（牵线人偶）");
+    return null;
+  }
   var r = Math.random();
   if (r < 0.4 && band.length > 1) {
-    // 随机逼退一名其他队员（戏剧效果拉满）
+    // 随机逼退一名其他队员（戏剧效果拉满；CRYCHIC羁绊：祥子永不逼退高松灯；牵线人偶：睦也受保护）
+    var hasTomori = band.some(function(x) { return x.specialId === "tomori"; });
     var victims = [];
-    for (var v = 0; v < band.length; v++) if (v !== idx) victims.push(v);
+    for (var v = 0; v < band.length; v++) {
+      if (v === idx) continue;
+      if (hasTomori && band[v].specialId === "tomori") continue;
+      if (band[v].specialId === "mutsumi") continue;
+      victims.push(v);
+    }
+    if (!victims.length) {
+      logs.push("🎹 " + label + "的丰川祥子看向高松灯，最终什么都没做……（旧日羁绊）");
+      return null;
+    }
     var pick = victims[Math.floor(Math.random() * victims.length)];
     var out = band.splice(pick, 1)[0];
     logs.push("🎹 " + label + "的丰川祥子突然发作：「你，离开这个乐队。」—— " + out.name + " 被逼退了！！");
@@ -6360,19 +7097,96 @@ function bandSakikoTick(band, label, logs) {
   return null;
 }
 
-// 玩家点击「开始演出」：AI先签人 → 双方演出（含Live加成）→ 随机事件 → 展示战报
+// 整备完成开演：双方演出（含Live/风云/形式加成）→ Battle对决 → 随机事件 → 薪水结算 → 战报
 function bandStartShow() {
   if (!bandState || bandState.phase !== "sign") return;
   var st = bandState;
-  bandAiSign();
+  var p2Name = st.mode === "duo" ? "玩家2" : "AI";
   st.logs.push("—— 第 " + st.round + " 回合演出 ——");
-  // Live House专场：玩家已安排则金币×1.5；AI 30%概率也办（需20金）
+  // 【AI决策】单人模式：AI独立选演出形式+使阴招（落后时更凶）；Battle需双方同意——AI只在玩家下战书时决定应战与否
+  if (st.mode === "single") {
+    var aiBehind = st.fame - st.aiFame;
+    if (st.showType === "battle") {
+      // 玩家下了战书：AI决定是否应战（落后时更倾向应战搏翻盘）
+      var acceptBattle = Math.random() < (aiBehind > 10 ? 0.65 : 0.25);
+      st.aiShowType = acceptBattle ? "battle" : (st.aiGold >= 60 && Math.random() < 0.3 ? "festival" : "street");
+      st.logs.push(acceptBattle
+        ? "⚔️ AI经纪人接受了你的战书！本回合同台Battle，赢家通吃！"
+        : "🛡 AI拒绝战书：「不跟你玩命。」——各演各的（Battle需双方同意）");
+    } else {
+      st.aiShowType = st.aiGold >= 60 && Math.random() < 0.3 ? "festival" : "street";
+    }
+    if (st.aiGold >= 30 && st.aiFame < st.fame && Math.random() < 0.4) {
+      st.aiGold -= 30;
+      var aiHype = 15 + Math.floor(Math.random() * 16);
+      st.aiFame += aiHype;
+      st.logs.push("📢 AI买通营销号炒作！知名度+" + aiHype + "！");
+    }
+    if (st.aiGold >= 20 && st.band.length && Math.random() < 0.25) {
+      var aiVictim = st.band[Math.floor(Math.random() * st.band.length)];
+      aiVictim.smearActive = true;
+      st.logs.push("💊 AI放黑料！" + aiVictim.name + " 本回合演出稳定-30！");
+    }
+    // 【AI挖角】平时25%撬走玩家普通乐手；挖角大战事件下55%优先撬特殊艺人（当面拆完美阵容）
+    if (!st.aiDirty.poach && st.band.length) {
+      var warPoach = st.event && st.event.id === "poachwar";
+      if (Math.random() < (warPoach ? 0.55 : 0.25)) {
+        var poachIdx = -1, poachScore = -1;
+        for (var pi = 0; pi < st.band.length; pi++) {
+          var pm = st.band[pi];
+          if (pm.specialId === "momoka") continue;                // 智：AI也挖不走
+          if (!warPoach && (pm.specialId || pm.legend)) continue;   // 平时只能挖普通乐手
+          var sc = pm.ability + (pm.specialId ? 60 : 0);            // 大战时特殊艺人优先
+          if (sc > poachScore) { poachScore = sc; poachIdx = pi; }
+        }
+        if (poachIdx >= 0) {
+          var pTarget = st.band[poachIdx];
+          var pFee = Math.round(pTarget.price * (warPoach ? 1.5 : 1.3));
+          if (st.aiGold >= pFee) {
+            st.aiDirty.poach = true;
+            st.aiGold -= pFee;
+            st.gold += Math.floor(pFee / 2);
+            st.band.splice(poachIdx, 1);
+            if (st.vocalUid === pTarget.uid) st.vocalUid = null;
+            delete st.benchUids[pTarget.uid];
+            pTarget.uid = ++BAND_UID;
+            pTarget.contractLeft = 6;   // AI挖角=新东家重签6回合新合同
+            st.aiBand.push(pTarget);
+            st.logs.push("🕵 AI趁" + (warPoach ? "挖角大战" : "你不备") + "撬走了 " + pTarget.name + "！转会费 " + pFee + " 金（你得一半）" + (pTarget.specialId ? "——连特殊艺人都被当面拆走！！" : ""));
+          }
+        }
+      }
+    }
+  }
+  // 【风云】卫冕魔咒：领先方全员打标
+  if (st.event && st.event.id === "curse") {
+    var cursedBand = st.event.target === "ai" ? st.aiBand : st.band;
+    for (var cu = 0; cu < cursedBand.length; cu++) cursedBand[cu].curseActive = true;
+  }
+  // 弦卷心：每回合10%乱办活动烧20金换全队知名度+8（大小姐与猫CP下不乱来）
+  bandKokoroTick("p1"); bandKokoroTick("ai");
+  // Battle是否开打（双方都同意才有效，供兰/孤注一掷CP等Battle特化结算）
+  var battleOn = st.showType === "battle" && st.aiShowType === "battle";
+  // 【风云+演出形式】构造双方演出参数
+  var evId = st.event ? st.event.id : null;
+  var baseOpts = {
+    fameMul: evId === "scouting" ? 2 : (evId === "blacklist" ? 0.5 : 1),   // 唱片公司选秀×2 / 黑粉抵制×0.5
+    goldMul: evId === "underground" ? 0.5 : 1,            // 地下时期：金币减半
+    growthRate: evId === "underground" ? 0.7 : 0.35,      // 地下时期：成长率翻倍
+  };
+  // Live House专场：玩家已安排则金币×1.5；duo用P2手动安排，单人AI自动决策（落后且资金充裕时更积极）
   if (st.live) st.logs.push("🎬 你的Live House专场开场！本轮金币收益×1.5！");
-  var aiLive = st.aiGold >= 20 && Math.random() < 0.3;
-  if (aiLive) { st.aiGold -= 20; st.logs.push("🎬 AI也办了Live House专场！"); }
-  // AI自动指派主唱：按唱腔×2+能力×0.5综合评分选最佳主唱
-  var aiVocalUid = null;
-  if (st.aiBand.length) {
+  var aiLive;
+  if (st.mode === "duo") {
+    aiLive = st.aiLive;
+    if (aiLive) st.logs.push("🎬 玩家2的Live House专场开场！本轮金币收益×1.5！");
+  } else {
+    aiLive = st.aiGold >= 20 && Math.random() < (st.fame > st.aiFame && st.aiGold >= 80 ? 0.5 : 0.3);
+    if (aiLive) { st.aiGold -= 20; st.logs.push("🎬 AI也办了Live House专场！"); }
+  }
+  // 主唱：duo用P2手动指派；单人AI自动按唱腔×2+能力×0.5综合评分选最佳
+  var aiVocalUid = st.aiVocalUid;
+  if (st.mode === "single" && st.aiBand.length) {
     var best = null, bestScore = -1;
     for (var av = 0; av < st.aiBand.length; av++) {
       var cand = st.aiBand[av];
@@ -6382,14 +7196,46 @@ function bandStartShow() {
     aiVocalUid = best.uid;
     st.logs.push("🤖 AI指定 " + best.name + " 担任主唱（唱腔" + (best.vocal || 0) + "）！");
   }
-  var mine = bandPerform(st.band, st.vocalUid, st.benchUids);
-  var theirs = bandPerform(st.aiBand, aiVocalUid);
+  // 演出形式加成：音乐节金币×1.6但波动大；街头为基线
+  var mine = bandPerform(st.band, st.vocalUid, st.benchUids, {
+    fameMul: baseOpts.fameMul,
+    goldMul: baseOpts.goldMul * (st.showType === "festival" ? 1.6 : 1),
+    growthRate: baseOpts.growthRate,
+    volatile: st.showType === "festival",
+    behind: st.fame < st.aiFame,               // 宿敌/仁菜：落后方触发
+    battle: battleOn,
+  });
+  var theirs = bandPerform(st.aiBand, aiVocalUid, st.aiBenchUids, {
+    fameMul: baseOpts.fameMul,
+    goldMul: baseOpts.goldMul * (st.aiShowType === "festival" ? 1.6 : 1),
+    growthRate: baseOpts.growthRate,
+    volatile: st.aiShowType === "festival",
+    behind: st.fame > st.aiFame,
+    battle: battleOn,
+  });
+  var showNames = { street: "街头卖艺", festival: "音乐节", battle: "同台Battle" };
   if (st.live) { mine.gold = Math.round(mine.gold * 1.5); }
   if (aiLive) { theirs.gold = Math.round(theirs.gold * 1.5); }
   st.gold += mine.gold; st.fame += mine.fame;
   st.aiGold += theirs.gold; st.aiFame += theirs.fame;
-  st.logs.push("🎤 你的乐队演出结束：+" + mine.gold + " 金币，+" + mine.fame + " 知名度" + (mine.events.length ? "（" + mine.events.join("；") + "）" : ""));
-  st.logs.push("🤖 AI乐队演出结束：+" + theirs.gold + " 金币，+" + theirs.fame + " 知名度" + (theirs.events.length ? "（" + theirs.events.join("；") + "）" : ""));
+  st.logs.push("🎤 你的" + showNames[st.showType] + "结束：+" + mine.gold + " 金币，+" + mine.fame + " 知名度" + (mine.events.length ? "（" + mine.events.join("；") + "）" : ""));
+  st.logs.push((st.mode === "duo" ? "🎮" : "🤖") + " " + p2Name + "的" + showNames[st.aiShowType] + "结束：+" + theirs.gold + " 金币，+" + theirs.fame + " 知名度" + (theirs.events.length ? "（" + theirs.events.join("；") + "）" : ""));
+  // 【演出形式】同台Battle：需双方都选Battle才触发对决（单方下战书=未获应战，各演各的）
+  if (st.showType === "battle" && st.aiShowType === "battle") {
+    if (mine.fame > theirs.fame) {
+      st.fame += 35;
+      st.logs.push("⚔️ 同台Battle！你的演出点燃全场，观众倒戈！知名度额外+35！");
+    } else if (theirs.fame > mine.fame) {
+      st.aiFame += 35;
+      st.logs.push("⚔️ 同台Battle！" + p2Name + "的演出技惊四座！其知名度额外+35……");
+    } else {
+      st.fame += 10; st.aiFame += 10;
+      st.logs.push("⚔️ 同台Battle难分胜负！双方各+10知名度，观众吵翻了天");
+    }
+  } else if (st.showType === "battle" || st.aiShowType === "battle") {
+    var warDecl = st.showType === "battle" ? (st.mode === "duo" ? "玩家1" : "你") : (st.mode === "duo" ? "玩家2" : "AI");
+    st.logs.push("🛡 " + warDecl + "的战书未获应战——Battle取消，各演各的（Battle需双方同意）");
+  }
   // 随机事件：15%概率三选一
   if (Math.random() < 0.15) {
     var ev = Math.floor(Math.random() * 3);
@@ -6421,96 +7267,358 @@ function bandStartShow() {
   if (plDiv) { st.gold += plDiv; st.logs.push("💼 甩手掌柜们躺赚分红 +" + plDiv + " 金币！"); }
   if (aiEat) st.aiGold = Math.max(0, st.aiGold - aiEat);
   if (aiDiv) st.aiGold += aiDiv;
+  // 薪水结算：每人按能力收费（含替补），付不起自动转会最弱者抵债
+  bandPayrollSide("p1");
+  bandPayrollSide("ai");
   // 丰川祥子·乐队粉碎机：每过3回合（第3/6/9回合演出后）发作，双方乐队各自判定
   if (st.round % 3 === 0) {
     var kicked = bandSakikoTick(st.band, "你的乐队", st.logs);
     // 被逼退的恰好是兼任主唱 → 主唱位空缺
     if (kicked && kicked !== "self" && st.vocalUid === kicked.uid) st.vocalUid = null;
-    bandSakikoTick(st.aiBand, "AI乐队", st.logs);
+    var kicked2 = bandSakikoTick(st.aiBand, p2Name + "的乐队", st.logs);
+    if (st.mode === "duo" && kicked2 && kicked2 !== "self" && st.aiVocalUid === kicked2.uid) st.aiVocalUid = null;
   }
-  st.live = false;  // Live为单回合增益，下回合需重新安排
+  // 传奇艺人：每回合演出后35%概率觉得无趣再次隐退
+  for (var lg = st.band.length - 1; lg >= 0; lg--) {
+    if (st.band[lg].legend && Math.random() < 0.35) {
+      st.logs.push("🌟 传奇·" + st.band[lg].name + " 觉得无趣，再次隐退了……");
+      if (st.vocalUid === st.band[lg].uid) st.vocalUid = null;
+      delete st.benchUids[st.band[lg].uid];
+      st.band.splice(lg, 1);
+    }
+  }
+  for (var lg2 = st.aiBand.length - 1; lg2 >= 0; lg2--) {
+    if (st.aiBand[lg2].legend && Math.random() < 0.35) {
+      st.logs.push("🌟 " + p2Name + "的" + st.aiBand[lg2].name + " 觉得无趣，再次隐退了……");
+      if (st.aiVocalUid === st.aiBand[lg2].uid) st.aiVocalUid = null;
+      delete st.aiBenchUids[st.aiBand[lg2].uid];
+      st.aiBand.splice(lg2, 1);
+    }
+  }
+  // 清除本回合debuff（黑料/魔咒/绯闻/流感/暴雨均为单回合）
+  for (var d1 = 0; d1 < st.band.length; d1++) { delete st.band[d1].smearActive; delete st.band[d1].curseActive; delete st.band[d1].scandalActive; delete st.band[d1].sickActive; delete st.band[d1].rainActive; }
+  for (var d2 = 0; d2 < st.aiBand.length; d2++) { delete st.aiBand[d2].smearActive; delete st.aiBand[d2].curseActive; delete st.aiBand[d2].scandalActive; delete st.aiBand[d2].sickActive; delete st.aiBand[d2].rainActive; }
+  // 合同制结算：所有乐手合同-1，到期的自动解约回自由市场（特殊艺人解除唯一标记可再签，传奇消失）
+  bandContractTick("p1");
+  bandContractTick("ai");
+  st.live = false; st.aiLive = false;  // Live为单回合增益，下回合需重新安排
   st.phase = "result";
   bandRender();
 }
 
-// 安排/取消 Live House专场（20金币，本轮金币收益×1.5）
-function bandToggleLive() {
+// 合同到期结算：合同-1，归零者离队回自由市场（重挂9折身价；清理主唱/替补标记；特殊艺人释放唯一性）
+function bandContractTick(side) {
   var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var label = side === "ai" ? (st.mode === "duo" ? "玩家2" : "AI") : "你";
+  for (var i = band.length - 1; i >= 0; i--) {
+    band[i].contractLeft--;
+    if (band[i].contractLeft > 0) continue;
+    var out = band[i];
+    band.splice(i, 1);
+    if (side === "ai") {
+      if (st.aiVocalUid === out.uid) st.aiVocalUid = null;
+      delete st.aiBenchUids[out.uid];
+    } else {
+      if (st.vocalUid === out.uid) st.vocalUid = null;
+      delete st.benchUids[out.uid];
+    }
+    st.logs.push("📜 合同到期！" + out.name + " 与" + label + "的6回合合约履行完毕，恢复自由身回到市场！");
+    // 回自由市场：特殊艺人释放唯一标记可再签；传奇艺人直接消失；二次入市9折重挂
+    if (out.specialId) delete st.usedSpecial[out.specialId];
+    if (!out.legend) {
+      var re = {
+        name: out.name, role: out.role, price: Math.max(5, Math.round(out.price * 0.9)),
+        ability: out.ability, stability: out.stability, vocal: out.vocal,
+        emoji: out.emoji, specialId: out.specialId || null, perk: out.perk || null,
+        perkName: out.perkName || null, perkDesc: out.perkDesc || null,
+        desc: undefined, discounted: false,
+      };
+      if (out.specialId) {
+        for (var sc = 0; sc < BAND_SPECIAL_ARTISTS.length; sc++) {
+          if (BAND_SPECIAL_ARTISTS[sc].specialId === out.specialId) re.desc = BAND_SPECIAL_ARTISTS[sc].desc;
+        }
+      }
+      st.flowed.push(re);
+    }
+  }
+}
+
+// 安排/取消 Live House专场（20金币，本轮金币收益×1.5；side区分玩家1/P2）
+function bandToggleLive(side) {
+  var st = bandState;
+  side = side || "p1";
   if (!st || st.phase !== "sign") return;
-  if (st.live) {
-    st.live = false;
-    st.gold += 20;   // 取消退费
+  if (!bandCanOperate(side)) return;
+  var goldKey = bandGoldKey(side), liveKey = side === "ai" ? "aiLive" : "live";
+  if (st[liveKey]) {
+    st[liveKey] = false;
+    st[goldKey] += 20;   // 取消退费
     showToast("已取消Live House专场，退还 20 金币");
   } else {
-    if (st.gold < 20) { showToast("金币不足，办不起专场……"); return; }
-    st.live = true;
-    st.gold -= 20;
+    if (st[goldKey] < 20) { showToast("金币不足，办不起专场……"); return; }
+    st[liveKey] = true;
+    st[goldKey] -= 20;
     showToast("Live House专场已安排！本轮金币收益×1.5");
   }
   bandRender();
 }
 
-// 指派/取消主唱兼任：个人知名度×1.35，但稳定-12（分心debuff）
-function bandToggleVocal(uid) {
+// 弦卷心：大小姐兴头上来了——10%乱办活动烧20金换全队知名度+8（有楽奈在队就被拴住不办）
+function bandKokoroTick(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var hasKokoro = false, hasCat = false;
+  for (var i = 0; i < band.length; i++) {
+    if (band[i].specialId === "kokoro") hasKokoro = true;
+    if (band[i].specialId === "rana") hasCat = true;
+  }
+  if (!hasKokoro || hasCat || Math.random() >= 0.1) return;
+  st[bandGoldKey(side)] = Math.max(0, st[bandGoldKey(side)] - 20);
+  if (side === "ai") st.aiFame += 8; else st.fame += 8;
+  st.logs.push("🎈 " + bandSideName(side) + "的弦卷心血来潮包下整个游乐园办活动！烧了20金，全队知名度+8！");
+}
+
+// 薪水结算：每人按能力收费（floor(能力/20)+2，含替补）；付不起自动转会最弱者抵债
+function bandPayrollSide(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var label = side === "ai" ? (st.mode === "duo" ? "玩家2的乐队" : "AI乐队") : "你的乐队";
+  var goldKey = bandGoldKey(side);
+  var pay = 0;
+  for (var i = 0; i < band.length; i++) {
+    var p = Math.floor(band[i].ability / 20) + 2;
+    if (band[i].specialId === "moca") p = Math.ceil(p / 2);   // 青叶摩卡：薪水减半（摸鱼大师）
+    pay += p;
+  }
+  if (!pay) return;
+  st[goldKey] -= pay;
+  st.logs.push("💼 " + label + "发放薪水 -" + pay + " 金币（每人按能力收费，替补也要吃饭）");
+  var guard = 0;
+  while (st[goldKey] < 0 && band.length > 0 && guard < 20) {
+    var weakest = 0;
+    for (var w = 1; w < band.length; w++) if (band[w].ability < band[weakest].ability) weakest = w;
+    var out = band.splice(weakest, 1)[0];
+    var back = Math.max(1, Math.floor(out.price * 0.2));
+    st[goldKey] += back;
+    if (side === "ai") {
+      if (st.aiVocalUid === out.uid) st.aiVocalUid = null;
+      delete st.aiBenchUids[out.uid];
+    } else {
+      if (st.vocalUid === out.uid) st.vocalUid = null;
+      delete st.benchUids[out.uid];
+    }
+    st.logs.push("🚨 " + label + "付不起薪水！被迫转会 " + out.name + " 抵债（回收" + back + "金）");
+    guard++;
+  }
+  if (st[goldKey] < 0) st[goldKey] = 0;
+}
+
+// duo模式：玩家1出价完成，交接给玩家2（P1出价密封显示）
+function bandPassTurn() {
+  var st = bandState;
+  if (!st || st.phase !== "sign" || st.mode !== "duo") return;
+  st.turn = "p2";
+  bandRender();
+}
+
+// ===== 阴招系统（每回合各限1次）=====
+
+// 演出形式选择：street街头(基线)/festival音乐节(金币×1.6·波动大)/battle同台对决(赢家+35知名度)
+function bandSetShowType(type, side) {
+  var st = bandState;
+  side = side || "p1";
+  if (!st || st.phase !== "sign") return;
+  if (!bandCanOperate(side)) return;
+  if (side === "ai") st.aiShowType = type; else st.showType = type;
+  bandRender();
+}
+
+// 炒作：花30金买知名度+15~30，20%翻车（假唱被扒，知名度-15）
+function bandTrickHype(side) {
+  var st = bandState;
+  side = side || "p1";
+  if (!st || st.phase !== "sign") return;
+  if (!bandCanOperate(side)) return;
+  var dirty = side === "ai" ? st.aiDirty : st.dirty;
+  var goldKey = bandGoldKey(side);
+  if (dirty.hype) { showToast("本回合已炒作过"); return; }
+  if (st[goldKey] < 30) { showToast("金币不足（需30金）"); return; }
+  dirty.hype = true;
+  st[goldKey] -= 30;
+  if (Math.random() < 0.2) {
+    if (side === "ai") st.aiFame = Math.max(0, st.aiFame - 15); else st.fame = Math.max(0, st.fame - 15);
+    st.logs.push("📢 " + bandSideName(side) + "买通营销号炒作……结果假唱视频被扒！知名度-15！炒作翻车！！");
+  } else {
+    var hype = 15 + Math.floor(Math.random() * 16);
+    if (side === "ai") st.aiFame += hype; else st.fame += hype;
+    st.logs.push("📢 " + bandSideName(side) + "买通营销号炒作成功！知名度+" + hype + "！");
+  }
+  bandRender();
+}
+
+// 黑料：花20金，对方随机一人本回合演出稳定-30
+function bandTrickSmear(side) {
+  var st = bandState;
+  side = side || "p1";
+  if (!st || st.phase !== "sign") return;
+  if (!bandCanOperate(side)) return;
+  var dirty = side === "ai" ? st.aiDirty : st.dirty;
+  var goldKey = bandGoldKey(side);
+  if (dirty.smear) { showToast("本回合已放过黑料"); return; }
+  if (st[goldKey] < 20) { showToast("金币不足（需20金）"); return; }
+  var enemyBand = side === "ai" ? st.band : st.aiBand;
+  if (!enemyBand.length) { showToast("对方没有乐手可黑"); return; }
+  dirty.smear = true;
+  st[goldKey] -= 20;
+  var victim = enemyBand[Math.floor(Math.random() * enemyBand.length)];
+  victim.smearActive = true;
+  st.logs.push("💊 " + bandSideName(side) + "爆出黑料！" + victim.name + " 本回合演出稳定-30！");
+  bandRender();
+}
+
+// 挖角：花对方乐手挂牌价×1.3挖来（对方得一半转会费）；特殊/传奇艺人平时不可挖
+// 风云事件【挖角大战】：解锁特殊/传奇艺人挖角（价×1.5），当面撬对面大牌
+function bandTrickPoach(side) {
+  var st = bandState;
+  side = side || "p1";
+  if (!st || st.phase !== "sign") return;
+  if (!bandCanOperate(side)) return;
+  var dirty = side === "ai" ? st.aiDirty : st.dirty;
+  if (dirty.poach) { showToast("本回合已挖过角"); return; }
+  var enemyBand = side === "ai" ? st.band : st.aiBand;
+  var warOn = st.event && st.event.id === "poachwar";
+  var mul = warOn ? 1.5 : 1.3;
+  var cands = [];
+  for (var i = 0; i < enemyBand.length; i++) {
+    if (enemyBand[i].specialId === "momoka") continue;   // 智：反资本，谁也挖不走
+    if (warOn || (!enemyBand[i].specialId && !enemyBand[i].legend)) cands.push(enemyBand[i]);
+  }
+  if (!cands.length) { showToast("对方没有可挖的乐手（特殊/传奇不可挖）"); return; }
+  var html = '<div style="font-size:14px;line-height:1.6;">🕵 选择要挖角的乐手' + (warOn ? '<br><b style="color:#ff8a65;">⚔️ 挖角大战开启：特殊/传奇艺人也可挖（价×1.5）！</b>' : '') + '<br><small style="color:rgba(224,224,224,0.6);">转会费 = 挂牌价×' + mul + '（对方得一半）</small></div><br>';
+  for (var c = 0; c < cands.length; c++) {
+    var cost = Math.round(cands[c].price * mul);
+    var idx = enemyBand.indexOf(cands[c]);
+    html += '<button style="display:block;width:100%;margin:6px 0;padding:8px;border:none;border-radius:6px;cursor:pointer;background:rgba(255,200,50,0.2);color:#ffc832;font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove();bandPoachConfirm(\'' + side + '\',' + idx + ')">' + cands[c].emoji + " " + cands[c].name + '（💪' + cands[c].ability + '/🛡' + cands[c].stability + '/🎵' + cands[c].vocal + '）—— ' + cost + ' 金</button>';
+  }
+  html += '<button style="display:block;width:100%;margin:6px 0;padding:8px;border:none;border-radius:6px;cursor:pointer;background:rgba(255,255,255,0.06);color:rgba(224,224,224,0.6);font-size:13px;" onclick="this.closest(\'.modal-overlay\').remove();">算了，不挖了</button>';
+  showPopupModal(html);
+}
+
+// 挖角确认执行（挖角大战事件期间允许特殊/传奇艺人，价×1.5）
+function bandPoachConfirm(side, idx) {
   var st = bandState;
   if (!st || st.phase !== "sign") return;
-  if (st.vocalUid === uid) {
-    st.vocalUid = null;
-    showToast("已取消主唱兼任");
+  var enemyBand = side === "ai" ? st.band : st.aiBand;
+  var m = enemyBand[idx];
+  if (!m) return;
+  if (m.specialId === "momoka") { showToast("智拒绝了一切资本诱惑：「我谁也不跟。」"); return; }   // 反资本：挖不动
+  var warOn = st.event && st.event.id === "poachwar";
+  if (!warOn && (m.specialId || m.legend)) return;
+  var dirty = side === "ai" ? st.aiDirty : st.dirty;
+  if (dirty.poach) { showToast("本回合已挖过角"); return; }
+  var cost = Math.round(m.price * (warOn ? 1.5 : 1.3));
+  var goldKey = bandGoldKey(side);
+  if (st[goldKey] < cost) { showToast("金币不足（需" + cost + "金）"); return; }
+  dirty.poach = true;
+  st[goldKey] -= cost;
+  enemyBand.splice(idx, 1);
+  var half = Math.floor(cost / 2);
+  st[bandGoldKey(side === "ai" ? "p1" : "ai")] += half;   // 对方得一半转会费
+  // 清理对方的主唱/替补标记
+  if (side === "ai") {
+    if (st.vocalUid === m.uid) st.vocalUid = null;
+    delete st.benchUids[m.uid];
   } else {
-    st.vocalUid = uid;
+    if (st.aiVocalUid === m.uid) st.aiVocalUid = null;
+    delete st.aiBenchUids[m.uid];
+  }
+  m.uid = ++BAND_UID;   // 换新uid防标记冲突
+  m.contractLeft = 6;   // 挖角=新东家重签6回合新合同
+  if (side === "ai") st.aiBand.push(m); else st.band.push(m);
+  st.logs.push("🕵 " + bandSideName(side) + "挖角成功！" + m.name + " 收到 " + cost + " 金转会费跳槽（对方获得" + half + "金）！");
+  showToast("挖角成功！" + m.name + " 加入你的乐队！");
+  bandRender();
+}
+
+// 指派/取消主唱：主唱位知名度按能力50%+唱腔（专职无惩罚，兼任稳定-12）
+function bandToggleVocal(uid, side) {
+  var st = bandState;
+  side = side || "p1";
+  if (!st || st.phase !== "sign") return;
+  if (!bandCanOperate(side)) return;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var vocalKey = side === "ai" ? "aiVocalUid" : "vocalUid";
+  if (st[vocalKey] === uid) {
+    st[vocalKey] = null;
+    showToast("已取消主唱指派");
+  } else {
+    st[vocalKey] = uid;
     var name = "";
-    for (var i = 0; i < st.band.length; i++) if (st.band[i].uid === uid) name = st.band[i].name;
-    showToast(name + " 兼任主唱！个人知名度×1.35，稳定-12");
+    for (var i = 0; i < band.length; i++) if (band[i].uid === uid) name = band[i].name;
+    showToast(name + " 担任主唱！（专职无惩罚，兼任稳定-12）");
   }
   bandRender();
 }
 
 // 手动切换首发/替补：替补不演出不成长；提回首发时若已满员自动换下最弱的非主唱首发
-function bandToggleBench(uid) {
+function bandToggleBench(uid, side) {
   var st = bandState;
+  side = side || "p1";
   if (!st || st.phase !== "sign") return;
-  if (st.band.length <= 5) { showToast("队伍≤5人时全员上场，不需要替补"); return; }
+  if (!bandCanOperate(side)) return;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var bench = side === "ai" ? st.aiBenchUids : st.benchUids;
+  var vocalUid = side === "ai" ? st.aiVocalUid : st.vocalUid;
+  if (band.length <= 5) { showToast("队伍≤5人时全员上场，不需要替补"); return; }
   var name = "";
-  for (var i = 0; i < st.band.length; i++) if (st.band[i].uid === uid) name = st.band[i].name;
-  var lineup = bandLineup(st.band, st.vocalUid, st.benchUids);
+  for (var i = 0; i < band.length; i++) if (band[i].uid === uid) name = band[i].name;
+  var lineup = bandLineup(band, vocalUid, bench);
   var onStageNow = false;
   for (var l = 0; l < lineup.length; l++) if (lineup[l].uid === uid) onStageNow = true;
   if (onStageNow) {
     // 首发→替补：直接标记
-    st.benchUids[uid] = true;
+    bench[uid] = true;
     showToast(name + " 已换下替补席（不演出不成长）");
   } else {
     // 替补/自动落选→首发：若首发已满，自动换下能力+稳定最弱的非主唱首发腾位置
     var starters = [];
-    for (var j = 0; j < st.band.length; j++) if (!st.benchUids[st.band[j].uid]) starters.push(st.band[j]);
+    for (var j = 0; j < band.length; j++) if (!bench[band[j].uid]) starters.push(band[j]);
     if (starters.length >= 5) {
       var weakest = null;
       for (var k = 0; k < starters.length; k++) {
-        if (st.vocalUid === starters[k].uid) continue;   // 主唱不被自动换下
+        if (vocalUid === starters[k].uid) continue;   // 主唱不被自动换下
         if (!weakest || starters[k].ability + starters[k].stability < weakest.ability + weakest.stability) weakest = starters[k];
       }
-      if (weakest) { st.benchUids[weakest.uid] = true; showToast(weakest.name + " 被换下替补席"); }
+      if (weakest) { bench[weakest.uid] = true; showToast(weakest.name + " 被换下替补席"); }
     }
-    delete st.benchUids[uid];
+    delete bench[uid];
     showToast(name + " 提回首发！");
   }
   bandRender();
 }
 
-// 转会卖出：按签约价20%回收金币（特殊艺人卖出后不回市场）
-function bandSell(idx) {
+// 转会卖出：合同未到期需付违约金（身价20%）且分文不收——解约是纯止损手段；到期自动走人不花钱
+function bandSell(idx, side) {
   var st = bandState;
+  side = side || "p1";
   if (!st || st.phase !== "sign") return;
-  var m = st.band[idx];
+  if (!bandCanOperate(side)) return;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var m = band[idx];
   if (!m) return;
-  var back = Math.max(1, Math.floor(m.price * 0.2));
-  st.gold += back;
-  if (st.vocalUid === m.uid) st.vocalUid = null;   // 卖掉主唱则空缺
-  delete st.benchUids[m.uid];                      // 清理替补名单残留
-  st.band.splice(idx, 1);
-  st.logs.push("💸 " + m.name + " 被转会卖出，回收 " + back + " 金币。");
-  showToast(m.name + " 已卖出，回收 " + back + " 金币");
+  var fee = Math.max(1, Math.floor(m.price * 0.2));   // 违约金=身价20%
+  st[bandGoldKey(side)] = Math.max(0, st[bandGoldKey(side)] - fee);
+  if (side === "ai") {
+    if (st.aiVocalUid === m.uid) st.aiVocalUid = null;
+    delete st.aiBenchUids[m.uid];
+  } else {
+    if (st.vocalUid === m.uid) st.vocalUid = null;
+    delete st.benchUids[m.uid];
+  }
+  band.splice(idx, 1);
+  st.logs.push("💸 " + m.name + " 被解约！合同剩" + m.contractLeft + "回合，支付违约金 " + fee + " 金（无回收）");
+  showToast(m.name + " 已解约，违约金 " + fee + " 金");
   bandRender();
 }
 
@@ -6520,22 +7628,110 @@ function bandNextRound() {
   if (!st || st.phase !== "result") return;
   if (st.round >= st.maxRound) { bandFinish(); return; }
   st.round++;
+  st.dirty = {}; st.aiDirty = {};   // 阴招每回合各限1次，回合开始重置
+  st.turn = "p1";
+  bandRollEvent();                  // 风云事件：每回合随机改写规则
   st.market = bandGenMarket(st.round);
-  st.phase = "sign";
-  bandRender();
+  // 户山香澄：每回合市场刷新时35%概率捡钱（双方各自结算）
+  bandKasumiTick("p1"); bandKasumiTick("ai");
+  bandAuctionGoto(0);   // 新回合从第一件拍品重新开拍
+}
+
+// 户山香澄：闪闪发光探测器——每回合35%概率捡到10~25金
+function bandKasumiTick(side) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var has = band.some(function(m) { return m.specialId === "kasumi"; });
+  if (!has || Math.random() >= 0.35) return;
+  var found = 10 + Math.floor(Math.random() * 16);
+  st[bandGoldKey(side)] += found;
+  st.logs.push("🍀 " + bandSideName(side) + "的户山香澄在市场闲逛时捡到 " + found + " 金币！（闪闪发光探测器）");
 }
 
 // 最终结算
 function bandFinish() {
   var st = bandState;
+  var duo = st.mode === "duo";
   var win = st.fame > st.aiFame;
-  var html = "10 回合巡回演出马拉松落幕！<br><br>"
-    + "🎤 你的乐队：知名度 <b style='color:#ffc832'>" + st.fame + "</b>（" + st.band.length + " 人）<br>"
-    + "🤖 AI乐队：知名度 <b style='color:#ff8a65'>" + st.aiFame + "</b>（" + st.aiBand.length + " 人）<br><br>"
-    + (win ? "🏆 你的乐队轰动了全城，AI经纪人流下了不甘的泪水！" : (st.fame === st.aiFame ? "🤝 平局……AI经纪人侥幸保住了面子。" : "💥 AI乐队的海报贴满了大街小巷，下次再战！"));
+  var html = "12 回合巡回演出马拉松落幕！<br><br>"
+    + "🎤 " + (duo ? "玩家1" : "你的乐队") + "：知名度 <b style='color:#ffc832'>" + st.fame + "</b>（" + st.band.length + " 人）<br>"
+    + (duo ? "🎮" : "🤖") + " " + (duo ? "玩家2" : "AI乐队") + "：知名度 <b style='color:#ff8a65'>" + st.aiFame + "</b>（" + st.aiBand.length + " 人）<br><br>"
+    + (duo
+      ? (win ? "🏆 玩家1的乐队轰动了全城！玩家2乖乖请客吧！" : (st.fame === st.aiFame ? "🤝 平局……这顿饭AA吧。" : "🏆 玩家2的乐队轰动了全城！玩家1乖乖请客吧！"))
+      : (win ? "🏆 你的乐队轰动了全城，AI经纪人流下了不甘的泪水！" : (st.fame === st.aiFame ? "🤝 平局……AI经纪人侥幸保住了面子。" : "💥 AI乐队的海报贴满了大街小巷，下次再战！")));
   bandState = null;
   if (win) unlockAchievement("band_king");
   showPopupModal(html, function() { renderScene("gate"); });
+}
+
+// 阵容渲染（side: "p1"/"ai"；editable: 当前操作方且签约阶段才显示操作按钮）
+function bandRosterHtml(side, editable) {
+  var st = bandState;
+  var band = side === "ai" ? st.aiBand : st.band;
+  var vocalUid = side === "ai" ? st.aiVocalUid : st.vocalUid;
+  var benchUids = side === "ai" ? st.aiBenchUids : st.benchUids;
+  if (!band.length) return '<span class="band-empty">还没有乐手……不签人怎么演出啊！</span>';
+  var lineup = bandLineup(band, vocalUid, benchUids);
+  var onStageMap = {};
+  for (var lu = 0; lu < lineup.length; lu++) onStageMap[lineup[lu].uid] = true;
+  // CP标记：该成员参与的激活CP（基于上场阵容，与演出结算口径一致）
+  var cpTagMap = {};
+  var activeCps = bandActiveCps(lineup);
+  for (var cp = 0; cp < activeCps.length; cp++) {
+    for (var cm = 0; cm < activeCps[cp].members.length; cm++) {
+      var sid = activeCps[cp].members[cm];
+      cpTagMap[sid] = cpTagMap[sid] || [];
+      cpTagMap[sid].push(activeCps[cp]);
+    }
+  }
+  // 通用羁绊标记：按uid建map（普通艺人组合，青色标签）
+  var bondTagMap = {};
+  var activeBonds = bandActiveGenericBonds(lineup);
+  for (var bb = 0; bb < activeBonds.length; bb++) {
+    for (var bi = 0; bi < activeBonds[bb].members.length; bi++) {
+      var buid = activeBonds[bb].members[bi];
+      bondTagMap[buid] = bondTagMap[buid] || [];
+      bondTagMap[buid].push(activeBonds[bb]);
+    }
+  }
+  var benchMode = band.length > 5;
+  var html = "";
+  for (var b = 0; b < band.length; b++) {
+    var p = band[b];
+    var isVocal = vocalUid === p.uid;
+    var onStage = onStageMap[p.uid];
+    var cpTags = "";
+    if (p.specialId && cpTagMap[p.specialId]) {
+      for (var ct = 0; ct < cpTagMap[p.specialId].length; ct++) {
+        var cfg = cpTagMap[p.specialId][ct];
+        cpTags += '<em class="band-cp-tag" title="CP【' + cfg.name + '】' + cfg.desc + '">' + cfg.emoji + " " + cfg.name + '</em>';
+      }
+    }
+    // 通用羁绊标签（青色，普通艺人）
+    if (bondTagMap[p.uid]) {
+      for (var bt = 0; bt < bondTagMap[p.uid].length; bt++) {
+        var bcfg = bondTagMap[p.uid][bt];
+        cpTags += '<em class="band-bond-tag" title="羁绊【' + bcfg.name + '】' + bcfg.desc + '">' + bcfg.emoji + " " + bcfg.name + '</em>';
+      }
+    }
+    // 全明星阵容：全队光环，每个上场成员都挂标
+    if (!cpTags) {
+      for (var as = 0; as < activeBonds.length; as++) {
+        if (activeBonds[as].id === "allstar") {
+          if (onStageMap[p.uid]) cpTags += '<em class="band-bond-tag" title="羁绊【全明星阵容】' + activeBonds[as].desc + '">⭐ 全明星</em>';
+          break;
+        }
+      }
+    }
+    html += '<span class="band-member' + (isVocal ? ' vocal' : '') + (benchMode && !onStage ? ' benched' : '') + '">' + p.emoji + " " + p.name + cpTags + '<small>' + p.ability + '/' + p.stability + '/🎵' + p.vocal + (isVocal ? '·🎤主唱' : '') + (p.perkName ? '·' + p.perkName : '') + '<em class="band-contract-tag" title="合同剩余回合（到期自动解约回自由市场）">📜约' + (p.contractLeft != null ? p.contractLeft : 6) + '</em>' + (benchMode ? (onStage ? '<em class="band-stage-tag">上场</em>' : '<em class="bench-tag">替补</em>') : '') + '</small>'
+      + (editable
+        ? '<i class="band-vocal-btn" onclick="bandToggleVocal(' + p.uid + ',\'' + side + '\')" title="' + (isVocal ? '取消主唱' : '指派主唱：知名度按能力50%+唱腔，专职无惩罚/兼任稳定-12') + '">' + (isVocal ? '🎤' : '🎙') + '</i>'
+          + (benchMode ? '<i class="band-bench-btn" onclick="bandToggleBench(' + p.uid + ',\'' + side + '\')" title="' + (onStage ? '换下替补席（不演出不成长）' : '提回首发（若已满员自动换下最弱首发）') + '">' + (onStage ? '🔄' : '⬆') + '</i>' : '')
+          + '<i class="band-sell-x" onclick="bandSell(' + b + ',\'' + side + '\')" title="解约(违约金' + Math.max(1, Math.floor(p.price * 0.2)) + '金·无回收)">✖</i>'
+        : '')
+      + '</span>';
+  }
+  return html;
 }
 
 // 主渲染
@@ -6544,102 +7740,253 @@ function bandRender() {
   if (!st) return;
   var panel = document.getElementById("band-panel");
   if (!panel) return;
+  var duo = st.mode === "duo";
+  var auc = st.auction;
   var html = "";
 
-  // 市场区
-  html += '<div class="band-section-title">🎼 本回合乐手市场' + (st.phase === "sign" ? '（点击签约，可签多人）' : '（本回合已截止）') + '</div>';
+  // 风云事件横幅（拍卖+整备阶段显示）
+  if (st.event && st.phase !== "result") {
+    html += '<div class="band-event-banner">⚡ 本回合风云：【<b>' + st.event.name + '</b>】' + st.event.desc + '</div>';
+  }
+
+  // duo当前操作方横幅（拍卖+整备阶段显示）
+  if (duo && st.phase !== "result") {
+    var curSide = st.phase === "auction" ? (auc ? auc.decider : "p1") : (st.turn === "p2" ? "ai" : "p1");
+    html += '<div class="band-turn-banner ' + (curSide === "p1" ? "p1" : "p2") + '">🎮 当前操作：<b>' + (curSide === "p1" ? "玩家1" : "玩家2") + '</b>' + (st.phase === "auction" ? '（轮流竞价，当面抬价！）' : '（整备阶段）') + '</div>';
+  }
+
+  // 市场区（拍卖阶段高亮当前拍品）
+  if (st.phase === "auction") {
+    html += '<div class="band-section-title">🔨 拍卖行·第' + st.round + '回合（拍品 ' + ((auc ? auc.idx : 0) + 1) + '/' + st.market.length + '）——明标轮流竞价，价高者得！</div>';
+  } else {
+    html += '<div class="band-section-title">🎼 乐手市场·第' + st.round + '回合' + (st.phase === "sign" ? '（本回合拍卖已结束）' : '（已关闭）') + '</div>';
+  }
   html += '<div class="band-market">';
   for (var i = 0; i < st.market.length; i++) {
     var m = st.market[i];
-    var sold = m.soldTo === "player" ? '<span class="band-sold mine">已签入</span>' : m.soldTo === "ai" ? '<span class="band-sold ai">被AI签走</span>' : "";
-    var canBuy = st.phase === "sign" && !m.soldTo && st.gold >= m.price;
-    html += '<div class="band-card' + (m.specialId ? ' special' : '') + (m.soldTo ? ' sold' : '') + '">';
-    html += '<div class="band-card-top"><span class="band-name">' + m.emoji + " " + m.name + '</span><span class="band-role">' + m.role + (m.specialId ? " ⭐" : "") + '</span>' + sold + '</div>';
-    html += '<div class="band-stats">💪能力 <b>' + m.ability + '</b>　🛡稳定 <b>' + m.stability + '</b>　🎵唱腔 <b>' + m.vocal + '</b>　💰<b>' + m.price + '</b></div>';
-    if (m.specialId) html += '<div class="band-perk">' + m.desc + '</div>';
-    else if (m.perkName) html += '<div class="band-perk">【' + m.perkName + '】' + m.perkDesc + '</div>';
-    if (st.phase === "sign" && !m.soldTo) {
-      html += '<button class="band-sign-btn"' + (canBuy ? ' onclick="bandSign(' + i + ')"' : ' disabled') + '>' + (st.gold >= m.price ? "签约" : "金币不足") + '</button>';
+    var isCurrent = st.phase === "auction" && auc && auc.idx === i;
+    var soldTag = m.soldTo === "player"
+      ? '<span class="band-sold mine">你·' + (m.dealPrice || m.price) + '金</span>'
+      : m.soldTo === "ai"
+        ? '<span class="band-sold ai">' + (duo ? "玩家2" : "AI") + '·' + (m.dealPrice || m.price) + '金</span>'
+        : (isCurrent
+          ? '<span class="band-auction-tag">🔨 竞拍中</span>'
+          : (st.phase === "auction"
+            ? '<span class="band-sold" style="color:rgba(224,224,224,0.4);">待拍</span>'
+            : '<span class="band-sold" style="color:rgba(224,224,224,0.4);">流拍</span>'));
+    var cut = m.discounted && !m.soldTo ? '<span class="band-price-cut">🔻8折</span>' : "";
+    html += '<div class="band-card' + (m.specialId ? ' special' : '') + (m.legend ? ' special legend-card' : '') + (m.soldTo ? ' sold' : '') + (isCurrent ? ' auctioning' : '') + (!m.soldTo && !isCurrent && st.phase === "auction" ? ' waiting' : '') + '">';
+    html += '<div class="band-card-top"><span class="band-name">' + m.emoji + " " + m.name + '</span><span class="band-role">' + m.role + (m.specialId ? " ⭐" : "") + '</span>' + cut + soldTag + '</div>';
+    html += '<div class="band-stats">💪能力 <b>' + m.ability + '</b>　🛡稳定 <b>' + m.stability + '</b>　🎵唱腔 <b>' + m.vocal + '</b>　💰挂牌<b>' + m.price + '</b></div>';
+    if (isCurrent) {
+      html += '<div class="band-auction-status">当前价 <b style="color:#ffc832;">' + auc.price + '</b> 金'
+        + (auc.active ? ' · 领先：<b style="color:' + (auc.leader === "p1" ? "#4fc3f7" : "#ff8a65") + ';">' + (auc.leader === "p1" ? (duo ? "玩家1" : "你") : (duo ? "玩家2" : "AI")) + '</b>' : ' · 尚未起拍')
+        + (auc.thinking ? ' · <span style="color:rgba(224,224,224,0.5);">对方思考中……</span>' : '')
+        + '</div>';
     }
+    if (m.specialId) {
+      html += '<div class="band-perk">' + m.desc + '</div>';
+      // CP组队提示：该特殊艺人可参与的羁绊（帮助玩家凑CP）
+      var cpHints = [];
+      for (var cc = 0; cc < BAND_CP_CONFIG.length; cc++) {
+        var cfgCp = BAND_CP_CONFIG[cc];
+        if (cfgCp.members.indexOf(m.specialId) < 0) continue;
+        var mateName = "";
+        for (var mm = 0; mm < cfgCp.members.length; mm++) {
+          if (cfgCp.members[mm] !== m.specialId) mateName += bandSpecialName(cfgCp.members[mm]) + "&";
+        }
+        cpHints.push(cfgCp.emoji + cfgCp.name + "（搭" + mateName.slice(0, -1) + "）");
+      }
+      if (cpHints.length) html += '<div class="band-cp-hint">💞 可组CP：' + cpHints.join("｜") + '</div>';
+    }
+    else if (m.perkName) html += '<div class="band-perk">【' + m.perkName + '】' + m.perkDesc + '</div>';
     html += '</div>';
   }
   html += '</div>';
 
-  // 我的乐队（签约阶段：🎙指派主唱 / 🔄首发替补切换 / ✖转会卖出；超5人显示上场/替补；标题显示编制状态）
-  var lineupUids = {};
-  var lineupPrev = bandLineup(st.band, st.vocalUid, st.benchUids);
-  for (var lu = 0; lu < lineupPrev.length; lu++) lineupUids[lineupPrev[lu].uid] = true;
-  var benchMode = st.band.length > 5;
-  html += '<div class="band-section-title">🎤 你的乐队（' + st.band.length + '人·上场' + lineupPrev.length + (benchMode ? '<span style="color:rgba(224,224,224,0.4);">（替补' + (st.band.length - lineupPrev.length) + '）</span>' : '') + (bandHasFull(lineupPrev) ? '·<span style="color:#ffc832;">标准编制✓</span>' : '·<span style="color:rgba(224,224,224,0.4);">编制不全</span>') + '）</div><div class="band-roster">';
-  if (!st.band.length) html += '<div class="band-empty">还没有乐手……不签人怎么演出啊！</div>';
-  for (var b = 0; b < st.band.length; b++) {
-    var p = st.band[b];
-    var isVocal = st.vocalUid === p.uid;
-    var onStage = lineupUids[p.uid];
-    html += '<span class="band-member' + (isVocal ? ' vocal' : '') + (benchMode && !onStage ? ' benched' : '') + '">' + p.emoji + " " + p.name + '<small>' + p.ability + '/' + p.stability + '/🎵' + p.vocal + (isVocal ? '·🎤主唱' : '') + (p.perkName ? '·' + p.perkName : '') + (benchMode ? (onStage ? '<em class="band-stage-tag">上场</em>' : '<em class="bench-tag">替补</em>') : '') + '</small>'
-      + (st.phase === "sign"
-        ? '<i class="band-vocal-btn" onclick="bandToggleVocal(' + p.uid + ')" title="' + (isVocal ? '取消主唱' : '指派主唱：知名度按能力50%+唱腔，专职无惩罚/兼任稳定-12') + '">' + (isVocal ? '🎤' : '🎙') + '</i>'
-          + (benchMode ? '<i class="band-bench-btn" onclick="bandToggleBench(' + p.uid + ')" title="' + (onStage ? '换下替补席（不演出不成长）' : '提回首发（若已满员自动换下最弱首发）') + '">' + (onStage ? '🔄' : '⬆') + '</i>' : '')
-          + '<i class="band-sell-x" onclick="bandSell(' + b + ')" title="转会卖出(回收' + Math.max(1, Math.floor(p.price * 0.2)) + '金)">✖</i>'
-        : '')
-      + '</span>';
-  }
+  // 玩家1乐队（拍卖阶段只读；整备阶段当前操作方可编辑）
+  var p1Editable = st.phase === "sign" && bandCanOperate("p1");
+  var p1Lineup = bandLineup(st.band, st.vocalUid, st.benchUids);
+  var p1BenchMode = st.band.length > 5;
+  html += '<div class="band-section-title">🎤 ' + (duo ? "玩家1的乐队" : "你的乐队") + '（' + st.band.length + '人·上场' + p1Lineup.length + (p1BenchMode ? '<span style="color:rgba(224,224,224,0.4);">（替补' + (st.band.length - p1Lineup.length) + '）</span>' : '') + (bandHasFull(p1Lineup) ? '·<span style="color:#ffc832;">标准编制✓</span>' : '·<span style="color:rgba(224,224,224,0.4);">编制不全</span>') + '）</div><div class="band-roster">';
+  html += bandRosterHtml("p1", p1Editable);
   html += '</div>';
 
-  // AI乐队
-  html += '<div class="band-section-title">🤖 AI乐队（' + st.aiBand.length + '人·金币' + st.aiGold + '）</div><div class="band-roster">';
-  if (!st.aiBand.length) html += '<span class="band-empty">AI经纪人还在观望……</span>';
-  for (var a = 0; a < st.aiBand.length; a++) {
-    var q = st.aiBand[a];
-    html += '<span class="band-member ai">' + q.emoji + " " + q.name + '<small>' + q.ability + '/' + q.stability + '/🎵' + q.vocal + '</small></span>';
-  }
+  // 对方乐队（duo模式P2整备阶段可操作；其余只读）
+  var p2Editable = st.phase === "sign" && duo && bandCanOperate("ai");
+  var p2Lineup = bandLineup(st.aiBand, st.aiVocalUid, st.aiBenchUids);
+  html += '<div class="band-section-title">' + (duo ? "🎮 玩家2的乐队" : "🤖 AI乐队") + '（' + st.aiBand.length + '人·上场' + p2Lineup.length + '·金币' + st.aiGold + (bandHasFull(p2Lineup) ? '·<span style="color:#ffc832;">标准编制✓</span>' : '') + '）</div><div class="band-roster">';
+  html += bandRosterHtml("ai", p2Editable);
   html += '</div>';
 
-  // 战报（最近8条）
-  html += '<div class="band-section-title">📜 演出战报</div><div class="band-logs">';
-  var start = Math.max(0, st.logs.length - 8);
+  // 战报（最近12条，拍卖日志多）
+  html += '<div class="band-section-title">📜 拍卖与演出战报</div><div class="band-logs">';
+  var start = Math.max(0, st.logs.length - 12);
   for (var l = start; l < st.logs.length; l++) html += '<div class="band-log-line">' + st.logs[l] + '</div>';
   html += '</div>';
 
   panel.innerHTML = html;
 
   // HUD（描述区）
+  var payHint = 0;
+  for (var pe = 0; pe < st.band.length; pe++) payHint += Math.floor(st.band[pe].ability / 20) + 2;
+  var dispSide = st.phase === "auction" ? (auc ? auc.decider : "p1") : (duo && st.turn === "p2" ? "ai" : "p1");
+  if (!duo) dispSide = "p1";   // 单人模式HUD始终显示玩家资产
+  var whoTurn = "";
+  if (st.phase === "auction" && auc) {
+    if (auc.thinking) whoTurn = "🤖 AI考虑中……";
+    else if (duo) whoTurn = "🔨 轮到" + (auc.decider === "p1" ? "玩家1" : "玩家2") + (auc.active ? "：跟价或放弃" : "：起拍或跳过");
+    else whoTurn = auc.decider === "ai" ? "🤖 AI表态中……" : "🔨 轮到你" + (auc.active ? "：跟价或放弃" : "：起拍或跳过");
+  }
   var descArea = document.getElementById("description-area");
   descArea.innerHTML =
     '<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">' +
-    '<span>🕐 回合 <b style="color:#ffc832;">' + st.round + "/" + st.maxRound + '</b></span>' +
-    '<span>💰 金币 <b style="color:#ffd54f;">' + st.gold + '</b></span></div>' +
+    '<span>🕐 回合 <b style="color:#ffc832;">' + st.round + "/" + st.maxRound + '</b>' + (st.phase !== "result" && duo ? '·<b style="color:' + (dispSide === "p1" ? "#4fc3f7" : "#ff8a65") + ';">' + (dispSide === "p1" ? "玩家1" : "玩家2") + '</b>' : '') + '</span>' +
+    '<span>💰 ' + (duo ? (dispSide === "p1" ? "P1" : "P2") : "") + '金币 <b style="color:#ffd54f;">' + st[bandGoldKey(dispSide)] + '</b>' + (duo ? '｜另一侧 <b style="color:rgba(224,224,224,0.7);">' + st[dispSide === "p1" ? "aiGold" : "gold"] + '</b>' : '') + '</span></div>' +
     '<div style="display:flex;justify-content:space-between;font-size:14px;">' +
     '<span>🎤 你的知名度 <b style="color:#4fc3f7;">' + st.fame + '</b></span>' +
-    '<span>🤖 AI知名度 <b style="color:#ff8a65;">' + st.aiFame + '</b></span></div>' +
+    '<span>' + (duo ? "🎮" : "🤖") + ' ' + (duo ? "玩家2" : "AI") + '知名度 <b style="color:#ff8a65;">' + st.aiFame + '</b></span></div>' +
     '<div style="font-size:11px;color:rgba(224,224,224,0.6);text-align:center;margin-top:3px;">' +
-    (st.phase === "sign"
-      ? "签约/卖人/主唱/Live安排好后开演（上场≤5人：主唱优先+能力强者，AI也会抢人！）" + (st.live ? '<span style="color:#ffc832;"> 🎬Live×1.5</span>' : '') + (bandHasFull(bandLineup(st.band, st.vocalUid)) ? '<span style="color:#ffc832;"> 🎼编制+30%</span>' : '') + (st.vocalUid != null ? '<span style="color:#ffc832;"> 🎤主唱就位</span>' : '')
-      : "演出结束！点击下方进入下一回合") + '</div>';
+    (st.phase === "auction"
+      ? (whoTurn || "") + "（流拍8折回场；演后发薪水💰" + payHint + "）"
+      : (st.phase === "sign"
+        ? "整备阶段：演出形式·阴招·主唱/替补/转会/Live（薪水💰" + payHint + "）｜你的形式：" + (st.showType === "street" ? "🎸街头" : st.showType === "festival" ? "🎪音乐节" : "⚔️战书已下(等对方应战)")
+          + (st.live ? '<span style="color:#ffc832;"> 🎬P1Live×1.5</span>' : '') + (duo && st.aiLive ? '<span style="color:#ffc832;"> 🎬P2Live×1.5</span>' : '') + (bandHasFull(bandLineup(st.band, st.vocalUid)) ? '<span style="color:#ffc832;"> 🎼编制+30%</span>' : '') + (st.vocalUid != null ? '<span style="color:#ffc832;"> 🎤主唱就位</span>' : '')
+        : "演出结束！点击下方进入下一回合")) + '</div>';
 
   // 按钮区
   var actionsArea = document.getElementById("actions-area");
   actionsArea.innerHTML = "";
-  if (st.phase === "sign") {
+  if (st.phase === "auction" && auc) {
+    var me = auc.decider;
+    if (!duo && me === "ai") {
+      // AI思考中：禁用按钮
+      var waitBtn = document.createElement("button");
+      waitBtn.innerHTML = "🤖 AI正在考虑……";
+      waitBtn.className = "action-btn";
+      waitBtn.disabled = true;
+      actionsArea.appendChild(waitBtn);
+    } else if (!auc.active) {
+      // 起拍或跳过
+      var m0 = st.market[auc.idx];
+      var startBtn = document.createElement("button");
+      startBtn.innerHTML = "🏷 起拍 " + m0.price + " 金";
+      startBtn.className = "action-btn special";
+      startBtn.disabled = st[bandGoldKey(me)] < m0.price;
+      startBtn.onclick = (function(side, price) { return function() { bandAuctionBid(side, price); }; })(me, m0.price);
+      actionsArea.appendChild(startBtn);
+      var skipBtn = document.createElement("button");
+      skipBtn.innerHTML = "⏭ 跳过此人";
+      skipBtn.className = "action-btn";
+      skipBtn.onclick = bandAuctionSkip;
+      actionsArea.appendChild(skipBtn);
+    } else {
+      // 跟价或放弃（+1快捷键 或 自定义打字出价）
+      var b1 = document.createElement("button");
+      b1.innerHTML = "🔊 加价 1 金（出 " + (auc.price + 1) + "）";
+      b1.className = "action-btn special";
+      b1.disabled = st[bandGoldKey(me)] < auc.price + 1;
+      b1.onclick = (function(side, price) { return function() { bandAuctionBid(side, price); }; })(me, auc.price + 1);
+      actionsArea.appendChild(b1);
+      // 自定义出价：自己打字，任意金额（加大输入框防误触）
+      var customWrap = document.createElement("div");
+      customWrap.className = "band-bid-row";
+      var bidInput = document.createElement("input");
+      bidInput.type = "number";
+      bidInput.min = auc.price + 1;
+      bidInput.placeholder = "自定义价";
+      bidInput.style.cssText = "flex:1;min-width:0;padding:12px;border-radius:8px;border:1px solid rgba(232,213,183,0.4);background:rgba(0,0,0,0.3);color:#e8d5b7;font-size:16px;outline:none;";
+      var bidGo = document.createElement("button");
+      bidGo.innerHTML = "✍ 出价";
+      bidGo.className = "action-btn";
+      bidGo.onclick = (function(side) {
+        return function() {
+          var v = parseInt(bidInput.value, 10);
+          if (!v || isNaN(v)) { showToast("请输入出价金额"); return; }
+          if (v <= auc.price) { showToast("出价必须高于当前价 " + auc.price + " 金"); return; }
+          if (st[bandGoldKey(side)] < v) { showToast("金币不足！"); return; }
+          bandAuctionBid(side, v);
+        };
+      })(me);
+      bidInput.onkeydown = function(e) { if (e.key === "Enter") bidGo.onclick(); };
+      customWrap.appendChild(bidInput);
+      customWrap.appendChild(bidGo);
+      actionsArea.appendChild(customWrap);
+      var passBtn = document.createElement("button");
+      passBtn.innerHTML = "🏳 放弃争夺";
+      passBtn.className = "action-btn";
+      passBtn.onclick = bandAuctionPass;
+      actionsArea.appendChild(passBtn);
+    }
+  } else if (st.phase === "sign") {
+    // 演出形式选择（街头/音乐节/Battle，当前操作方的选择）
+    var typeSide = (duo && st.turn === "p2") ? "ai" : "p1";
+    var curType = typeSide === "ai" ? st.aiShowType : st.showType;
+    var typeList = [["street", "🎸 街头卖艺(稳)"], ["festival", "🎪 音乐节(金×1.6·波动)"], ["battle", "⚔️ 下战书Battle(需双方同意)"]];
+    for (var ti = 0; ti < typeList.length; ti++) {
+      (function(tid, tname) {
+        var tb = document.createElement("button");
+        tb.innerHTML = tname;
+        tb.className = "action-btn" + (curType === tid ? " special" : "");
+        tb.onclick = function() { bandSetShowType(tid, typeSide); };
+        actionsArea.appendChild(tb);
+      })(typeList[ti][0], typeList[ti][1]);
+    }
+    // 阴招按钮（每回合各限1次，用后置灰；挖角大战事件下挖角按钮变体提示）
+    var trickDirty = typeSide === "ai" ? st.aiDirty : st.dirty;
+    var trickGoldKey = bandGoldKey(typeSide);
+    var poachWarOn = st.event && st.event.id === "poachwar";
+    var tricks = [
+      ["poach", poachWarOn ? "🕵 挖角大战!(特殊也挖)" : "🕵 挖角(价×1.3)", bandTrickPoach, 0],
+      ["hype", "📢 炒作(30金)", bandTrickHype, 30],
+      ["smear", "💊 黑料(20金)", bandTrickSmear, 20],
+    ];
+    for (var tk = 0; tk < tricks.length; tk++) {
+      (function(key, tname, fn, cost) {
+        var tb2 = document.createElement("button");
+        tb2.innerHTML = trickDirty[key] ? tname + "✓" : tname;
+        tb2.className = "action-btn";
+        tb2.disabled = !!trickDirty[key] || st[trickGoldKey] < cost;
+        tb2.onclick = function() { fn(typeSide); };
+        actionsArea.appendChild(tb2);
+      })(tricks[tk][0], tricks[tk][1], tricks[tk][2], tricks[tk][3]);
+    }
     var showBtn = document.createElement("button");
-    showBtn.innerHTML = "🎤 开始演出！";
-    showBtn.className = "special";
-    showBtn.onclick = bandStartShow;
-    actionsArea.appendChild(showBtn);
     var liveBtn = document.createElement("button");
-    liveBtn.innerHTML = st.live ? "🎬 取消Live专场" : "🎬 Live专场(20金)";
-    liveBtn.className = st.live ? "special" : "";
-    liveBtn.onclick = bandToggleLive;
+    if (duo && st.turn === "p1") {
+      showBtn.innerHTML = "✅ 整备完成，交给玩家2";
+      showBtn.className = "action-btn special";
+      showBtn.onclick = bandPassTurn;
+      liveBtn.innerHTML = st.live ? "🎬 取消Live专场" : "🎬 Live专场(20金)";
+      liveBtn.className = "action-btn" + (st.live ? " special" : "");
+      liveBtn.onclick = function() { bandToggleLive("p1"); };
+    } else if (duo && st.turn === "p2") {
+      showBtn.innerHTML = "🎤 双方就位，开演！";
+      showBtn.className = "action-btn special";
+      showBtn.onclick = bandStartShow;
+      liveBtn.innerHTML = st.aiLive ? "🎬 取消Live专场" : "🎬 Live专场(20金)";
+      liveBtn.className = "action-btn" + (st.aiLive ? " special" : "");
+      liveBtn.onclick = function() { bandToggleLive("ai"); };
+    } else {
+      showBtn.innerHTML = "🎤 开始演出！";
+      showBtn.className = "action-btn special";
+      showBtn.onclick = bandStartShow;
+      liveBtn.innerHTML = st.live ? "🎬 取消Live专场" : "🎬 Live专场(20金)";
+      liveBtn.className = "action-btn" + (st.live ? " special" : "");
+      liveBtn.onclick = function() { bandToggleLive("p1"); };
+    }
+    actionsArea.appendChild(showBtn);
     actionsArea.appendChild(liveBtn);
   } else {
     var nextBtn = document.createElement("button");
     nextBtn.innerHTML = st.round >= st.maxRound ? "🏁 查看最终结果" : "➡️ 下一回合";
-    nextBtn.className = "special";
+    nextBtn.className = "action-btn special";
     nextBtn.onclick = bandNextRound;
     actionsArea.appendChild(nextBtn);
   }
   var quitBtn = document.createElement("button");
   quitBtn.innerHTML = "🚪 放弃比赛";
+  quitBtn.className = "action-btn band-quit";
   quitBtn.onclick = function() { bandState = null; renderScene("gate"); };
   actionsArea.appendChild(quitBtn);
 }
@@ -6694,7 +8041,7 @@ function openPortal() {
   html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();startBossFight();">';
   html += '<span class="game-icon">🦑</span>执念鱿鱼决战</button>';
 
-  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderBandGame();">';
+  html += '<button class="portal-game-btn" id="portal-band-btn">';
   html += '<span class="game-icon">🎸</span>乐队大赛</button>';
 
   html += '</div></div>';
@@ -6759,6 +8106,16 @@ function openPortal() {
     gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择沙盘难度</div>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();startSandboxGame(\'normal\');">普通（3×4棋盘，10分获胜）</button>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();startSandboxGame(\'hard\');">困难（4×4棋盘，17分获胜）</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
+  });
+
+  // 乐队大赛按钮：弹出模式选择（单人挑战AI / 双人热座）
+  overlay.querySelector("#portal-band-btn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    var gamesList = overlay.querySelector(".portal-games-list");
+    gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择乐队大赛模式</div>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderBandGame(\'single\');">单人挑战AI（竞拍博弈·你150金 vs AI300金）</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderBandGame(\'duo\');">双人对战（同屏热座·可远程联机）</button>' +
       '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
   });
 
