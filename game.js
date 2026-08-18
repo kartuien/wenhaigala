@@ -898,7 +898,7 @@ var SCENE_CONFIG = {
     buttons: [
       { text: "1F", target: "lab_1f" },
       { text: "2F", target: "lab_2f" },
-      { text: "3F", popup: "前面的区域以后再去探索吧！" },
+      { text: "3F", target: "lab_3f" },
       { text: "4F", popup: "前面的区域以后再去探索吧！" },
       { text: "5F", popup: "前面的区域以后再去探索吧！" },
       { text: "6F", popup: "前面的区域以后再去探索吧！" },
@@ -916,6 +916,12 @@ var SCENE_CONFIG = {
   },
   lab_2f: {
     id: "lab_2f", name: "实验楼二楼", img: "6ab37b0a449e58316f2d983dc8bf696d.jpg",
+    desc: "",
+    buttons: []
+  },
+  // 实验楼三楼（中考冲刺教室，由专用handler渲染）
+  lab_3f: {
+    id: "lab_3f", name: "3F", img: "bb96621627837ac4b13a02f2901a3179.jpg",
     desc: "",
     buttons: []
   },
@@ -1054,6 +1060,9 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.90", date: "2026-08-19", items: [
+    "实验楼3F开放：上楼→走廊回忆（培优和中考那段时光）→中考最后冲刺阶段的教室→门打不开→从窗户看看里面（后续剧情待续，暂以回到楼梯间收尾）",
+  ]},
   { version: "v1.5.89", date: "2026-08-18", items: [
     "新增成就：👑吃草之皇——困难吃草通关5次解锁；每次困难通关toast显示进度（如'困难吃草通关 2/5 次'），达成后与吃草之王同框弹成就",
   ]},
@@ -1660,6 +1669,11 @@ function renderScene(sceneId) {
   // 实验楼二楼 → 企鹅狗沙盘剧情
   if (sceneId === "lab_2f") {
     renderLab2FSequence();
+    return;
+  }
+  // 实验楼三楼 → 中考冲刺教室剧情
+  if (sceneId === "lab_3f") {
+    renderLab3FSequence();
     return;
   }
   // 教学楼一楼 → 初遇剧情
@@ -3113,6 +3127,70 @@ function renderLab2FSequence() {
     }
   }
   var check = setInterval(lab2fCheck, 100);
+}
+
+// 实验楼三楼序列：上楼 → 走廊回忆 → 中考冲刺教室 → 门锁了 → 从窗户看
+function renderLab3FSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopTypewriter();
+
+  var scene = SCENE_CONFIG["lab_3f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 序列图预加载：进入3F即后台预热后续5张图（不阻塞切图，切到时大概率已就绪）
+  var lab3fPreImgs = ["2ad7e4c6851dc500a7784b6c74978717.jpg", "695a4da26692ac6524e10de379eed378.jpg", "a3da50d139339cc6e9a8ee148a754a2f.jpg", "d4a205979a7884d633927ba09e4dffa8.jpg", "6c5d17ff1ca4a1c79b7002fa6458f084.jpg"];
+  for (var pi = 0; pi < lab3fPreImgs.length; pi++) {
+    (new Image()).src = lab3fPreImgs[pi];
+  }
+
+  // 规范切图：同步清src + cancelRAF + 单次RAF设新src
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 图1：楼梯间（场景配置img已预热）
+  switchImg(scene.img);
+  document.getElementById("location-name").textContent = scene.name;
+  seqTypeAndWait("（走路ing.)", function() {
+    // 图2：到三楼
+    switchImg("2ad7e4c6851dc500a7784b6c74978717.jpg");
+    seqTypeAndWait("到三楼了....", function() {
+      // 图3：走廊回忆
+      switchImg("695a4da26692ac6524e10de379eed378.jpg");
+      seqTypeAndWait("这里好像没怎么来过.....|只记得培优和中考那段时间在这里", function() {
+        // 图4：中考冲刺教室
+        switchImg("a3da50d139339cc6e9a8ee148a754a2f.jpg");
+        seqTypeAndWait("到之前中考最后冲刺阶段的教室了.....|进去看看吧....", function() {
+          // 图5：门打不开
+          switchImg("d4a205979a7884d633927ba09e4dffa8.jpg");
+          seqTypeAndWait("唔.....|打不开.......", function() {
+            // 图6：从窗户看（后续剧情待续，暂以回到楼梯间收尾）
+            switchImg("6c5d17ff1ca4a1c79b7002fa6458f084.jpg");
+            seqTypeAndWait("从窗户看看里面吧.....", function() {
+              actionsArea.innerHTML = "";
+              actionsArea.style.display = "flex";
+              var btn = document.createElement("button");
+              btn.className = "action-btn";
+              btn.textContent = "回到楼梯间";
+              btn.onclick = function() { renderScene("lab_floor"); };
+              actionsArea.appendChild(btn);
+            });
+          });
+        });
+      });
+    });
+  });
 }
 
 // 教学楼一楼 → 初遇剧情序列（无聊闲逛 → 眼睛痒揉一揉 → 模糊渐清晰 → 她登场 → 对话 → 陪她逛学校）
