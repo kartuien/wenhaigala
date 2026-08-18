@@ -53,6 +53,7 @@ var ACHIEVEMENT_CONFIG = {
   little_greedy_cat:  { id: "little_greedy_cat",  name: "小馋猫", desc: "吃完了所有的小草，真好吃！", icon: "🐱" },
   eat_to_death:       { id: "eat_to_death",       name: "吃死了", desc: "吃到了毒草被毒死了", icon: "☠️" },
   grass_king:         { id: "grass_king",         name: "吃草之王", desc: "这傻孩子聪明的欸", icon: "🌿" },
+  grass_emperor:      { id: "grass_emperor",      name: "吃草之皇", desc: "困难吃草通关5次，草中之皇！", icon: "👑" },
   nasa_detected:      { id: "nasa_detected",      name: "老美的nasa这么厉害", desc: "老美的nasa这么厉害给我探测出来了", icon: "🛸" },
   beat_alien:         { id: "beat_alien",         name: "击败外星人", desc: "在石头剪刀布中击败了外星人", icon: "👽" },
   pooped_on:          { id: "pooped_on",          name: "被拉shi了", desc: "被外星人在头上拉屎了", icon: "💩" },
@@ -1026,6 +1027,7 @@ var gameState = {
   newAchievements: [],       // 本次新解锁的成就(用于提醒)
   toiletStayCount: 0,        // 厕所蹲坑次数
   confuciusDifficulty: "normal", // 孔子像吃草难度：normal/hard
+  grassHardWinCount: 0,       // 困难吃草通关次数（满5次解锁"吃草之皇"）
   chemDifficulty: "normal",  // 化学决斗难度：easy/normal/hard/nightmare
   hachiDifficulty: "normal", // 哈基高决斗难度：normal/hard
   lastDuelEnemyHP: 0,        // 上一场决斗大脚鸡剩余血量
@@ -1052,6 +1054,9 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.89", date: "2026-08-18", items: [
+    "新增成就：👑吃草之皇——困难吃草通关5次解锁；每次困难通关toast显示进度（如'困难吃草通关 2/5 次'），达成后与吃草之王同框弹成就",
+  ]},
   { version: "v1.5.88", date: "2026-08-18", items: [
     "反抗线女主形象深化：挽留动机从'陪我玩'升级为恐惧孤独——'你走了...这里就只剩我一个人了...永远...'，她的笑容第一次消失，BOSS战由此变成打碎自己留下的绝望",
     "世界合拢窒息感：天台对峙全程屏幕黑边从四周缓缓收窄（45秒渐晕动画），台词穿插环境异变——风停了/楼梯间的门消失了/天台开始震颤，世界正在不让你走",
@@ -2087,6 +2092,13 @@ function renderGrassGame() {
           gameOver = true;
           if (isHard) {
             unlockAchievement("grass_king");
+            // 吃草之皇：困难通关计数，满5次解锁（未满时toast提示进度）
+            gameState.grassHardWinCount++;
+            if (gameState.grassHardWinCount >= 5) {
+              unlockAchievement("grass_emperor");
+            } else {
+              showToast("困难吃草通关 " + gameState.grassHardWinCount + "/5 次");
+            }
           }
           setTimeout(function() {
             renderScene("confucius_win");
@@ -5635,7 +5647,7 @@ var ACHIEVEMENT_GROUPS = [
     "penguin_dog", "sandbox_win", "sandbox_lose", "sandbox_hard_win",
     "canteen_king", "canteen_got_some",
     "band_king", "bocchi_band",
-    "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king",
+    "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king", "grass_emperor",
     "beat_alien", "pooped_on", "nasa_detected", "capture_pig", "desert_pig_sight",
   ]},
   { name: "😈 整活与隐藏", ids: [
