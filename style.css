@@ -226,6 +226,20 @@ body {
   font-weight: 700;
 }
 
+/* ===== 反抗线：世界合拢渐晕 ===== */
+/* 天台对峙期间从四周缓缓收窄的黑边，营造"世界不让你走"的窒息感；
+   进入BOSS战/切场景时由JS移除本元素 */
+#closing-vignette {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 60;
+  animation: vignette-close 45s ease-in forwards;
+}
+@keyframes vignette-close {
+  0% { box-shadow: inset 0 0 30px 10px rgba(0,0,0,0); }
+  40% { box-shadow: inset 0 0 80px 35px rgba(0,0,0,0.5); }
+  100% { box-shadow: inset 0 0 130px 75px rgba(0,0,0,0.82); }
+}
+
 /* ===== 弹窗遮罩 ===== */
 .modal-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;

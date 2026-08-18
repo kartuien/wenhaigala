@@ -1052,6 +1052,11 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.88", date: "2026-08-18", items: [
+    "反抗线女主形象深化：挽留动机从'陪我玩'升级为恐惧孤独——'你走了...这里就只剩我一个人了...永远...'，她的笑容第一次消失，BOSS战由此变成打碎自己留下的绝望",
+    "世界合拢窒息感：天台对峙全程屏幕黑边从四周缓缓收窄（45秒渐晕动画），台词穿插环境异变——风停了/楼梯间的门消失了/天台开始震颤，世界正在不让你走",
+    "梦境篡改选项（meta恐怖）：终章二选一时'我不要留在这里'会随机闪烁成'我想留下来'——闪烁瞬间点击会被她攥住手腕吞掉（震屏+提示'看清楚再选哦'），梦在替你做决定",
+  ]},
   { version: "v1.5.87", date: "2026-08-18", items: [
     "全游戏互动框加大：所有选项按钮字号16→17px、内边距加厚、最小高度锁定52px并垂直居中——不再又小又难点",
     "选项区限高 40vh→56vh：选项多时按钮区整体向上扩展（剧情图自动让位），不再挤在屏幕底部的小窗里滚动，误触大降",
@@ -1506,6 +1511,9 @@ function renderScene(sceneId) {
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
+  // 清理反抗线渐晕（传送门中途逃离天台对峙时，防止黑边残留）
+  var vgClean = document.getElementById("closing-vignette");
+  if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
   // 【必须最先执行】停止打字机+清自动跳转定时器+清"点击继续"onclick
   // （覆盖下方所有小游戏早退分支，防止从传送门进小游戏后残留定时器/点击把玩家拉回旧剧情对话框）
   stopTypewriter();
@@ -3837,13 +3845,49 @@ function showFinaleSequence() {
       var btn1 = document.createElement("button");
       btn1.className = "action-btn";
       btn1.textContent = "是什么";
-      btn1.onclick = renderStayEnding;
       var btn2 = document.createElement("button");
       btn2.className = "action-btn";
       btn2.textContent = "我不要留在这里";
-      btn2.onclick = renderRefusePath;
+      // 梦境篡改选项：「我不要留在这里」会随机短暂闪烁成「我想留下来」
+      // 闪烁瞬间点击会被她攥住手腕吞掉（震屏+提示）——梦在替你做决定，看清楚再点
+      var REAL_TXT = "我不要留在这里";
+      var FAKE_TXT = "我想留下来";
+      var hijacked = false;
+      var hijackTimer = null;
+      btn2.onclick = function() {
+        if (hijacked) {
+          // 被梦境抓住的瞬间：吞掉这次点击，不产生任何选择
+          btn2.textContent = REAL_TXT;
+          hijacked = false;
+          var gc = document.getElementById("game-container");
+          gc.classList.remove("shake");
+          void gc.offsetWidth;
+          gc.classList.add("shake");
+          showToast("她：（紧紧攥住你的手腕）....看清楚再选哦");
+          return;
+        }
+        clearTimeout(hijackTimer);
+        renderRefusePath();
+      };
+      btn1.onclick = function() {
+        clearTimeout(hijackTimer);
+        renderStayEnding();
+      };
       actionsArea.appendChild(btn1);
       actionsArea.appendChild(btn2);
+      // 每2.8~4.2秒随机闪烁一次，每次持续350ms；按钮被移除（已选择/切场景）后自动停止
+      (function scheduleHijack() {
+        hijackTimer = setTimeout(function() {
+          if (!btn2.parentNode) return;
+          hijacked = true;
+          btn2.textContent = FAKE_TXT;
+          setTimeout(function() {
+            hijacked = false;
+            if (btn2.parentNode) btn2.textContent = REAL_TXT;
+            scheduleHijack();
+          }, 350);
+        }, 2800 + Math.floor(Math.random() * 1400));
+      })();
     });
   });
 }
@@ -3901,6 +3945,13 @@ function renderRefusePath() {
   var img = document.getElementById("scene-img");
   var placeholder = document.getElementById("scene-placeholder");
 
+  // 世界合拢：天台对峙期间渐晕从四周缓缓收窄，世界不让你走的压迫感
+  var oldVg = document.getElementById("closing-vignette");
+  if (oldVg && oldVg.parentNode) oldVg.parentNode.removeChild(oldVg);
+  var vg = document.createElement("div");
+  vg.id = "closing-vignette";
+  document.getElementById("game-container").appendChild(vg);
+
   // 图1：戳破虚幻
   img.src = "";
   cancelRAF();
@@ -3910,7 +3961,7 @@ function renderRefusePath() {
     img.style.display = "block";
     placeholder.style.display = "none";
   });
-  seqTypeAndWait("她：欸....为什么？你不是很讨厌外面的生活吗|她：待在这里难道不比外面强吗|她：你可以获得永恒的幸福|她：你不是喜欢我吗？你可以呆在这里陪我啊|你是假的吧|这里的一切....也都是假的吧|外面的世界很痛苦|外面的世界很孤单|外面的世界没有能相伴的人|冰天雪地....|但我还想有承受痛苦的机会|这里不是幸福|我不想拿虚幻的东西敷衍自己了....|我之前是疯了吗...|她：现实的世界充满痛苦....你体会过的|但是我相信在未来某个时刻|属于我的美好会降临我身|她：唔...|难道我会因为水是苦的就不喝水吗....|我已经做了很久的梦了...|你让我看到了生的希望|她：可..这", function() {
+  seqTypeAndWait("她：欸....为什么？你不是很讨厌外面的生活吗|她：待在这里难道不比外面强吗|她：你可以获得永恒的幸福|她：你不是喜欢我吗？你可以呆在这里陪我啊|你是假的吧|这里的一切....也都是假的吧|外面的世界很痛苦|外面的世界很孤单|外面的世界没有能相伴的人|冰天雪地....|（风....不知什么时候停了）|但我还想有承受痛苦的机会|这里不是幸福|我不想拿虚幻的东西敷衍自己了....|我之前是疯了吗...|她：现实的世界充满痛苦....你体会过的|但是我相信在未来某个时刻|属于我的美好会降临我身|她：唔...|难道我会因为水是苦的就不喝水吗....|我已经做了很久的梦了...|她：够了....别再说了....|她：你走了...这里就只剩我一个人了...|她：陪你逛的教室...亭子...食堂...都还会在...|她：可是人没了...就只剩我一个...永远...一个人...|（她的笑容...第一次消失了）|（身后通往楼梯间的门....不知何时消失了）|对不起...|但我的命...不能押在一场梦上|你让我看到了生的希望|她：可..这", function() {
     // 图2：???登场
     img.src = "";
     cancelRAF();
@@ -3919,7 +3970,7 @@ function renderRefusePath() {
       img.src = "af9d888a79b17eaf4139565220713be9.jpg";
       img.style.display = "block";
     });
-    seqTypeAndWait("???：已经晚了....|???：我们本来能好好谈谈，让这里存续下去的|???：我看到了你的【求生意志】|???：这样下去这里会因你而崩坏掉，你在这里的一切，包括'她'，都会消失|???：你真的做好决定了吗|我很确定|???：执迷不悟", function() {
+    seqTypeAndWait("???：已经晚了....|???：我们本来能好好谈谈，让这里存续下去的|???：我看到了你的【求生意志】|???：这样下去这里会因你而崩坏掉，你在这里的一切，包括'她'，都会消失|???：你真的做好决定了吗|我很确定|???：执迷不悟|（脚下的天台...开始微微震颤）", function() {
       // 进入BOSS战
       setTimeout(startBossFight, 600);
     });
@@ -3947,6 +3998,9 @@ function startBossFight() {
   if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
   stopBossFight();
   stopCanteenGame();
+  // BOSS战开始：移除反抗线渐晕，保证弹幕可读性
+  var vgClean = document.getElementById("closing-vignette");
+  if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
 
   document.getElementById("location-name").textContent = "执念鱿鱼";
   var actionsArea = document.getElementById("actions-area");
