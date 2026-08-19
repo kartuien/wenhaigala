@@ -1062,6 +1062,14 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.97", date: "2026-08-19", items: [
+    "一笔画速写评分全面收紧：重合度判定从1.6倍容差收紧到1倍——必须真画进容差内才算覆盖轮廓（描个大概不再给分）",
+    "新增冗长惩罚：玩家线总长超过轮廓1.25倍起扣分，每多10%扣2分（封顶20分）——抖动、绕路、来回描线都会被扣；结算面板显示'冗长描线-x分'",
+  ]},
+  { version: "v1.5.96", date: "2026-08-19", items: [
+    "一笔画速写新增「写生模式」🖼：画布左右分屏——左边稿纸显示参考轮廓，右边是你的白纸；看着稿纸凭观察默画，不能描红",
+    "写生细节：两边网格相位相同可借格子估算比例；左半下笔会被拦截提示；60秒+容差16px（默画误差天然更大）；结算时右半叠加稿纸虚线做「对照」，你的线贴虚线越紧分越高",
+  ]},
   { version: "v1.5.95", date: "2026-08-19", items: [
     "新增小游戏「一笔画速写」（传送门精选直达🎨）：屏幕给出虚线轮廓（器皿/植物/人物剪影），下笔开始倒计时，一笔描完，松手或超时交卷",
     "评分算法：原图按弧长每4px采样，逐点计算玩家线与原图的最短距离——重合度（轮廓被覆盖比例，占65%）+ 精准度（容差内比例，占35%），60分及格，结算回放按偏差着色（绿=精准/黄=偏移/红=跑飞）",
@@ -9062,11 +9070,12 @@ var SKETCH_SHAPES = {
   ]},
 };
 
-// 难度：形状复杂度↑ + 时间↓ + 容差px↓；hard为盲画
+// 难度：形状复杂度↑ + 时间↓ + 容差px↓；hard为盲画；study为写生（左稿纸右白纸分屏默画）
 var SKETCH_DIFFS = {
   easy:   { name: "简单", shape: "vase",   time: 40, tol: 20, blind: false, desc: "器皿轮廓｜40秒｜容差20px" },
   normal: { name: "普通", shape: "cactus", time: 25, tol: 13, blind: false, desc: "植物轮廓｜25秒｜容差13px" },
   hard:   { name: "困难", shape: "person", time: 15, tol: 9,  blind: true,  desc: "人物剪影｜15秒｜容差9px｜盲画" },
+  study:  { name: "写生", shape: "cactus", time: 60, tol: 16, blind: false, split: true, desc: "看左边稿纸｜右边白纸默画｜60秒｜容差16px" },
 };
 
 // 入口：开始一笔画速写（传送门精选直达）
@@ -9109,7 +9118,9 @@ function renderSketchGame(diffKey) {
   html += '<span class="mf-pill mf-pill-btn" onclick="sketchShowRules()">📖 规则</span>';
   html += '</div>';
   html += '<canvas id="sk-canvas"></canvas>';
-  html += '<div class="mf-hint" id="sk-hint">先观察轮廓，下笔后开始计时｜一笔描完，松手即交卷</div>';
+  html += '<div class="mf-hint" id="sk-hint">' + (d.split
+    ? '观察左边稿纸，在右边白纸上凭手感默画｜下笔开始计时，松手交卷对照'
+    : '先观察轮廓，下笔后开始计时｜一笔描完，松手即交卷') + '</div>';
   panel.innerHTML = html;
 
   var canvas = document.getElementById("sk-canvas");
@@ -9117,47 +9128,52 @@ function renderSketchGame(diffKey) {
 
   sketchState = {
     diff: d, diffKey: diffKey || "easy", shape: shape,
+    split: !!d.split,    // 写生模式：左稿纸右白纸分屏
     pts: [],            // 玩家路径采样点（画布CSS像素坐标）
-    targetPts: [],      // 原图重采样点（每4px一点，评分与绘制用）
+    targetPts: [],      // 原图重采样点（每4px一点，评分与绘制用；split模式已偏移到右半）
     drawing: false, done: false,
     timerOn: false, startTs: 0, timeLeft: d.time,
-    result: null, raf: null, size: 0, dpr: 1,
+    result: null, raf: null, size: 0, dpr: 1, cssW: 0,
   };
 
-  // 尺寸自适应：正方形画布，适配面板宽与屏幕高（下一帧布局完成后测量）
+  // 尺寸自适应：描红=正方形画布；写生=左右两半等宽分屏（下一帧布局完成后测量）
   requestAnimationFrame(function() {
     if (!sketchState) return;
     var dpr = window.devicePixelRatio || 1;
+    var st = sketchState;
     var w = panel.clientWidth - 24;
     var h = window.innerHeight * 0.48;
-    var size = Math.max(220, Math.min(460, Math.floor(Math.min(w, h))));
-    var st = sketchState;
-    st.size = size; st.dpr = dpr;
-    canvas.style.width = size + "px";
-    canvas.style.height = size + "px";
-    canvas.width = Math.floor(size * dpr);
-    canvas.height = Math.floor(size * dpr);
+    var side = Math.max(200, Math.min(460, Math.floor(Math.min(st.split ? w / 2 : w, h))));
+    var cssW = st.split ? side * 2 : side;
+    st.size = side; st.cssW = cssW; st.dpr = dpr;
+    canvas.style.width = cssW + "px";
+    canvas.style.height = side + "px";
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(side * dpr);
 
-    // 归一化坐标 → 画布坐标（留7%边距），并按弧长每4px重采样原图
-    var scale = size * 0.86, off = size * 0.07;
+    // 归一化坐标 → 画布坐标（留7%边距，写生模式整体平移到右半），并按弧长每4px重采样原图
+    var scale = side * 0.86, off = side * 0.07, xShift = st.split ? side : 0;
     var raw = [];
     for (var i = 0; i < shape.pts.length; i++) {
-      raw.push([off + shape.pts[i][0] * scale, off + shape.pts[i][1] * scale]);
+      raw.push([xShift + off + shape.pts[i][0] * scale, off + shape.pts[i][1] * scale]);
     }
     st.targetPts = sketchResample(raw, 4);
 
     // 指针事件：一笔 = 一次pointerdown~up，up即交卷
     function pos(e) {
       var r = canvas.getBoundingClientRect();
-      return [ (e.clientX - r.left) * (size / r.width), (e.clientY - r.top) * (size / r.height) ];
+      return [ (e.clientX - r.left) * (cssW / r.width), (e.clientY - r.top) * (side / r.height) ];
     }
     canvas.addEventListener("pointerdown", function(e) {
       if (!sketchState || sketchState.done || sketchState.drawing) return;
       e.preventDefault();
+      var p0 = pos(e);
+      // 写生模式：左半是稿纸，不许在上面画
+      if (sketchState.split && p0[0] < side) { showToast("左边是稿纸，在右边的白纸上画！"); return; }
       try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
       sketchState.drawing = true;
       if (!sketchState.timerOn) { sketchState.timerOn = true; sketchState.startTs = Date.now(); }
-      sketchState.pts.push(pos(e));
+      sketchState.pts.push(p0);
     });
     canvas.addEventListener("pointermove", function(e) {
       var s2 = sketchState;
@@ -9229,14 +9245,15 @@ function sketchResample(pts, step) {
   return out;
 }
 
-// 主循环：倒计时 + 绘制（目标轮廓/玩家线/结算对比）
+// 主循环：倒计时 + 绘制（目标轮廓/玩家线/结算对比；写生模式左右分屏）
 function sketchLoop() {
   var st = sketchState;
   if (!st) return;
   var canvas = document.getElementById("sk-canvas");
   if (!canvas) { stopSketchGame(); return; }
   var ctx = canvas.getContext("2d");
-  var d = st.diff, size = st.size;
+  var d = st.diff, size = st.size, W = st.cssW || size;
+  var half = st.split ? size : 0;   // split模式：右半起点x
 
   // 倒计时（下笔才开始走）
   if (st.timerOn && !st.done) {
@@ -9247,32 +9264,61 @@ function sketchLoop() {
   if (timeEl) timeEl.textContent = st.timerOn ? Math.ceil(st.timeLeft) + "s" : d.time + "s";
 
   ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
-  ctx.clearRect(0, 0, size, size);
+  ctx.clearRect(0, 0, W, size);
 
-  // 背景
-  ctx.fillStyle = "#0d0b14";
-  ctx.fillRect(0, 0, size, size);
-  ctx.strokeStyle = "rgba(232,213,183,0.05)";
-  ctx.lineWidth = 1;
-  for (var g = size / 6; g < size; g += size / 6) {
-    ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(size, g); ctx.stroke();
+  // 背景：split模式左稿纸（暖纸色）右白纸（冷纸色），同相位网格辅助定位比例
+  if (st.split) {
+    ctx.fillStyle = "#1d1826";
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = "#0d0b14";
+    ctx.fillRect(half, 0, size, size);
+    ctx.strokeStyle = "rgba(232,213,183,0.06)";
+    ctx.lineWidth = 1;
+    for (var g = size / 6; g < size; g += size / 6) {
+      ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(half + g, 0); ctx.lineTo(half + g, size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(W, g); ctx.stroke();
+    }
+    // 中缝 + 标签
+    ctx.strokeStyle = "rgba(232,213,183,0.3)";
+    ctx.beginPath(); ctx.moveTo(half, 0); ctx.lineTo(half, size); ctx.stroke();
+    ctx.font = "700 12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(232,213,183,0.55)";
+    ctx.fillText("稿纸", 8, 16);
+    ctx.fillText("你的画", half + 8, 16);
+  } else {
+    ctx.fillStyle = "#0d0b14";
+    ctx.fillRect(0, 0, size, size);
+    ctx.strokeStyle = "rgba(232,213,183,0.05)";
+    ctx.lineWidth = 1;
+    for (var g2 = size / 6; g2 < size; g2 += size / 6) {
+      ctx.beginPath(); ctx.moveTo(g2, 0); ctx.lineTo(g2, size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, g2); ctx.lineTo(size, g2); ctx.stroke();
+    }
   }
 
-  // 目标轮廓：中点平滑曲线 + 虚线
+  // 目标轮廓：中点平滑曲线 + 虚线（split画在左半：整体平移-size；结算时右半再叠加一份做对照）
   var tg = st.targetPts;
+  function traceTarget() {
+    ctx.beginPath();
+    ctx.moveTo(tg[0][0], tg[0][1]);
+    for (var i = 1; i < tg.length - 1; i++) {
+      var mx = (tg[i][0] + tg[i+1][0]) / 2, my = (tg[i][1] + tg[i+1][1]) / 2;
+      ctx.quadraticCurveTo(tg[i][0], tg[i][1], mx, my);
+    }
+    ctx.lineTo(tg[tg.length - 1][0], tg[tg.length - 1][1]);
+    ctx.stroke();
+  }
   ctx.strokeStyle = "rgba(178,190,210,0.75)";
   ctx.lineWidth = 2.5;
   ctx.setLineDash([7, 6]);
   ctx.lineJoin = "round"; ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(tg[0][0], tg[0][1]);
-  for (var i = 1; i < tg.length - 1; i++) {
-    var mx = (tg[i][0] + tg[i+1][0]) / 2, my = (tg[i][1] + tg[i+1][1]) / 2;
-    ctx.quadraticCurveTo(tg[i][0], tg[i][1], mx, my);
+  if (st.split) {
+    ctx.save(); ctx.translate(-size, 0); traceTarget(); ctx.restore();
+  } else {
+    traceTarget();
   }
-  ctx.lineTo(tg[tg.length - 1][0], tg[tg.length - 1][1]);
-  ctx.stroke();
   ctx.setLineDash([]);
 
   // 玩家线：盲画模式下绘制中不可见，结算后按偏差着色回放
@@ -9285,6 +9331,14 @@ function sketchLoop() {
         ctx.strokeStyle = dev <= tol ? "#81c784" : (dev <= tol * 2 ? "#ffb74d" : "#e57373");
         ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
+      }
+      // 写生结算对照：右半叠加目标虚线，和你的画直接比对
+      if (st.split) {
+        ctx.strokeStyle = "rgba(232,213,183,0.85)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 5]);
+        traceTarget();
+        ctx.setLineDash([]);
       }
     } else if (!d.blind) {
       ctx.strokeStyle = "#ffd54f";
@@ -9300,28 +9354,33 @@ function sketchLoop() {
     }
   }
 
-  // 计时条（下笔后显示，不足30%变红）
+  // 计时条（下笔后显示，不足30%变红；split画在右半顶部）
   if (st.timerOn && !st.done) {
     var ratio = st.timeLeft / d.time;
     ctx.fillStyle = ratio < 0.3 ? "#ff6b6b" : "#81d4fa";
-    ctx.fillRect(0, 0, size * ratio, 5);
+    ctx.fillRect(half, 0, size * ratio, 5);
   }
 
-  // 结算文字
+  // 结算文字（split模式面板居中于右半）
   if (st.done && st.result) {
     var r = st.result;
-    ctx.fillStyle = "rgba(13,11,20,0.78)";
-    ctx.fillRect(0, size / 2 - 52, size, 104);
+    var cx = half + size / 2;
+    ctx.fillStyle = "rgba(13,11,20,0.82)";
+    ctx.fillRect(half, size / 2 - 52, size, 116);
     ctx.textAlign = "center";
     ctx.fillStyle = r.score >= 60 ? "#ffd54f" : "#ff6b6b";
     ctx.font = "700 34px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
-    ctx.fillText(r.score + "分", size / 2, size / 2 - 14);
+    ctx.fillText(r.score + "分", cx, size / 2 - 14);
     ctx.fillStyle = "#e8d5b7";
     ctx.font = "14px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
-    ctx.fillText(r.grade, size / 2, size / 2 + 12);
+    ctx.fillText(r.grade, cx, size / 2 + 12);
     ctx.fillStyle = "#b5c4d8";
     ctx.font = "12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
-    ctx.fillText("重合 " + r.cov + "%｜精准 " + r.acc + "%（" + d.tol + "px容差）", size / 2, size / 2 + 34);
+    ctx.fillText("重合 " + r.cov + "%｜精准 " + r.acc + "%（" + d.tol + "px容差）", cx, size / 2 + 34);
+    if (r.penalty > 0) {
+      ctx.fillStyle = "#ff8a65";
+      ctx.fillText("冗长描线 -" + r.penalty + "分", cx, size / 2 + 52);
+    }
   }
 
   st.raf = requestAnimationFrame(sketchLoop);
@@ -9360,27 +9419,35 @@ function sketchSubmit() {
   }
   var acc = Math.round(okP / player.length * 100);
 
-  // 重合度：原图采样点被玩家线覆盖（1.6倍容差内有玩家点）的比例
+  // 重合度：原图采样点被玩家线覆盖（容差内有玩家点，收紧到1倍——必须画进容差才算）的比例
   var okT = 0;
   for (var t = 0; t < target.length; t++) {
     var hit = false;
     for (var j = 0; j < player.length; j++) {
       var dx = target[t][0] - player[j][0], dy = target[t][1] - player[j][1];
-      var lim = tol * 1.6;
-      if (dx * dx + dy * dy <= lim * lim) { hit = true; break; }
+      if (dx * dx + dy * dy <= tol * tol) { hit = true; break; }
     }
     if (hit) okT++;
   }
   var cov = Math.round(okT / target.length * 100);
 
-  var score = Math.round(cov * 0.65 + acc * 0.35);
+  // 冗长惩罚：玩家线总长超过轮廓1.25倍起扣分（抖动/绕路/来回描），每多10%扣2分，最多扣20
+  var playerLen = 0, targetLen = 0;
+  for (var a = 1; a < player.length; a++) playerLen += Math.hypot(player[a][0]-player[a-1][0], player[a][1]-player[a-1][1]);
+  for (var b = 1; b < target.length; b++) targetLen += Math.hypot(target[b][0]-target[b-1][0], target[b][1]-target[b-1][1]);
+  var penalty = 0;
+  if (targetLen > 0 && playerLen > targetLen * 1.25) {
+    penalty = Math.min(20, Math.round((playerLen / targetLen - 1.25) * 20));
+  }
+
+  var score = Math.max(0, Math.round(cov * 0.65 + acc * 0.35 - penalty));
   var grade;
   if (score >= 85) grade = "大师出手！观察力惊人";
   else if (score >= 70) grade = "颇有功底，速写课代表";
   else if (score >= 60) grade = "勉强过关，多加练习";
   else grade = "不及格……线条跑哪儿去了";
   if (d.blind && score >= 60) grade += "（盲画达标！）";
-  st.result = { score: score, cov: cov, acc: acc, grade: grade };
+  st.result = { score: score, cov: cov, acc: acc, penalty: penalty, grade: grade };
   sketchUpdateButtons();
 }
 
@@ -9391,7 +9458,7 @@ function sketchUpdateButtons() {
   var hint = document.getElementById("sk-hint");
   if (hint && st.result) {
     hint.textContent = st.result.score >= 60
-      ? "🏆 过关！绿线=精准段，黄线=偏移段，红线=跑飞段"
+      ? "🏆 过关！绿线=精准段，黄线=偏移段，红线=跑飞段" + (st.split ? "｜虚线=稿纸对照" : "")
       : "💀 不及格……看看红线都跑哪儿去了，再来一次？";
   }
   var actionsArea = document.getElementById("actions-area");
@@ -9415,12 +9482,18 @@ function sketchShowRules() {
     '<b style="color:#ffd54f;">🎨 一笔画速写</b><br>' +
     '· 屏幕给出一个虚线轮廓，用手指/鼠标<b>一笔</b>描完它<br>' +
     '· <b>下笔才开始倒计时</b>，松手或超时立即交卷<br>' +
-    '· 评分 = 重合度65% + 精准度35%：<br>' +
-    '　重合度：轮廓有多少被你的线覆盖（每4px采样比对）<br>' +
+    '· 评分 = 重合度65% + 精准度35% - 冗长惩罚：<br>' +
+    '　重合度：轮廓有多少被你的线<b>画进容差内</b>（每4px采样比对）<br>' +
     '　精准度：你的线有多少落在容差范围内<br>' +
+    '　冗长惩罚：线总长超过轮廓1.25倍起，每多10%扣2分（最多扣20）——抖动绕路来回描都会扣<br>' +
     '· 60分及格；难度越高时间越短、容差越小<br>' +
     '· 困难为<b>盲画模式</b>：画的过程中看不到自己的线，全凭观察和手感！<br>' +
-    '· 结算回放：绿线=精准，黄线=偏移，红线=跑飞' +
+    '· 结算回放：绿线=精准，黄线=偏移，红线=跑飞<br><br>' +
+    '<b style="color:#ffd54f;">🖼 写生模式</b><br>' +
+    '· 屏幕分左右两半：<b>左边是稿纸</b>（参考轮廓），<b>右边是你的白纸</b><br>' +
+    '· 不能描红！看着左边稿纸，在右边白纸上<b>凭观察默画</b>出轮廓<br>' +
+    '· 两边网格相位相同，可以借助格子估算比例和位置<br>' +
+    '· 松手交卷后，右边会<b>叠加稿纸虚线做对照</b>：你的线贴着虚线越紧，分越高' +
     '</div>'
   );
 }
@@ -9567,6 +9640,7 @@ function openPortal() {
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'easy\');">🏺 简单：器皿轮廓｜40秒｜容差20px</button>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'normal\');">🌵 普通：植物轮廓｜25秒｜容差13px</button>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'hard\');">🧍 困难：人物剪影｜15秒｜容差9px｜盲画！</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'study\');">🖼 写生：看左稿纸·右白纸默画｜60秒｜容差16px</button>' +
       '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
   });
 
