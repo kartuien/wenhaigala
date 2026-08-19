@@ -3172,21 +3172,32 @@ function renderLab3FSequence() {
         // 图4：中考冲刺教室
         switchImg("a3da50d139339cc6e9a8ee148a754a2f.jpg");
         seqTypeAndWait("到之前中考最后冲刺阶段的教室了.....|进去看看吧....", function() {
-          // 图5：门打不开
-          switchImg("d4a205979a7884d633927ba09e4dffa8.jpg");
-          seqTypeAndWait("唔.....|打不开.......", function() {
-            // 图6：从窗户看（后续剧情待续，暂以回到楼梯间收尾）
-            switchImg("6c5d17ff1ca4a1c79b7002fa6458f084.jpg");
-            seqTypeAndWait("从窗户看看里面吧.....", function() {
-              actionsArea.innerHTML = "";
-              actionsArea.style.display = "flex";
-              var btn = document.createElement("button");
-              btn.className = "action-btn";
-              btn.textContent = "回到楼梯间";
-              btn.onclick = function() { renderScene("lab_floor"); };
-              actionsArea.appendChild(btn);
+          // 选项：开门 → 点击后才显示门打不开
+          actionsArea.innerHTML = "";
+          actionsArea.style.display = "flex";
+          var openBtn = document.createElement("button");
+          openBtn.className = "action-btn special";
+          openBtn.textContent = "开门";
+          openBtn.onclick = function() {
+            actionsArea.innerHTML = "";
+            actionsArea.style.display = "none";
+            // 图5：门打不开
+            switchImg("d4a205979a7884d633927ba09e4dffa8.jpg");
+            seqTypeAndWait("唔.....|打不开.......", function() {
+              // 图6：从窗户看（后续剧情待续，暂以回到楼梯间收尾）
+              switchImg("6c5d17ff1ca4a1c79b7002fa6458f084.jpg");
+              seqTypeAndWait("从窗户看看里面吧.....", function() {
+                actionsArea.innerHTML = "";
+                actionsArea.style.display = "flex";
+                var btn = document.createElement("button");
+                btn.className = "action-btn";
+                btn.textContent = "回到楼梯间";
+                btn.onclick = function() { renderScene("lab_floor"); };
+                actionsArea.appendChild(btn);
+              });
             });
-          });
+          };
+          actionsArea.appendChild(openBtn);
         });
       });
     });
