@@ -1060,6 +1060,17 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.93", date: "2026-08-19", items: [
+    "奶味试炼新增3个攻击技能：默写风暴（语📝指定一整行各打1）、语法重拳（英✍️指定敌人打2）、电学实验（科⚡所在十字范围各打2），输出手段更足",
+    "奶味试炼状态栏新增「📖规则」按钮：弹窗内含基础玩法说明+全部试炼体图鉴（含杂兵召唤物），怪物能力一目了然",
+    "奶味试炼新增杂兵召唤系统：作文怪偶数回合离你3格外60%搓出🧻废稿纸（1血），背书偶没人可奶时50%蹦出✏️错题精（2血），小怪上限3只；杂兵每回合逼近贴身咬1，清小怪刷成就感",
+  ]},
+  { version: "v1.5.92", date: "2026-08-19", items: [
+    "修复乐队大赛金币不显示的bug：v1.5.87隐藏描述区时误伤了写在其中的金币HUD，现HUD改为插在游戏面板顶部（回合/金币/知名度一排可见）",
+    "新增小游戏「马桶奶蛙试炼」（传送门精选直达🐸 + 实验楼3F剧情入口⚔️接受试炼）：5×5格子战棋，每回合限1次移动+1次能力，AP与理智双资源，15回合内全灭试炼体或撑满回合获胜",
+    "奶味试炼能力系统：语数英科社各3个共15个学科能力，每回合随机刷新6张手牌（每科保底1张+随机1张）；意图默认隐藏，可用阅读理解/听力测试侦察敌方行动",
+    "奶味试炼5种试炼体：作文怪（隔回合行动+跑题拽人）、函数蛇（折线二连步）、听力波（远程打人还砍你手牌）、实验瓶（死亡爆炸敌我不分）、背书偶（给同伴回血）",
+  ]},
   { version: "v1.5.91", date: "2026-08-19", items: [
     "3F后续：从窗户看进去→马桶奶蛙登场（亚嘞亚嘞+aptapt+作者乱入吐槽）→奶味试炼空间开启（试炼玩法待接）",
   ]},
@@ -1524,10 +1535,11 @@ var typewriterSession = null;  // 当前打字机会话参数（跳过按钮用�
 
 // 渲染当前场景
 function renderScene(sceneId) {
-  // 切场景时若食堂抢饭/BOSS战仍在运行，强制停止并清理画布
+  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼仍在运行，强制停止并清理画布
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
+  stopMilkFrogGame();
   // 清理反抗线渐晕（传送门中途逃离天台对峙时，防止黑边残留）
   var vgClean = document.getElementById("closing-vignette");
   if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
@@ -3193,16 +3205,21 @@ function renderLab3FSequence() {
                 // 图7：马桶奶蛙登场
                 switchImg("562814a3cbe292157e77e1ad6e9c4fde.jpg");
                 seqTypeAndWait("？|这tm什么鬼|马桶奶蛙：亚嘞亚嘞.....好久不见|这tm什么猎奇游戏我能退出吗|马桶奶蛙：不不不不不不不不不不不不不不不不不不|aptapt|马桶奶蛙：aptapt|不是这什么傻逼文案|马桶奶蛙：对啊我也觉得这文案很sb|作者：我也觉得|停停停赶紧进入正题吧|马桶奶蛙：亚嘞亚嘞，你这次回来，实力有没有退步呢...|马桶奶蛙：这真是一个有趣的问题呢.....|马桶奶蛙：让我试试你几斤几两吧！！！|好老套的剧情....|（我真没灵感了啊）", function() {
-                  // 图8：奶味试炼空间（试炼玩法待接，暂以回到楼梯间收尾）
+                  // 图8：奶味试炼空间 → 进入马桶奶蛙试炼（v1.5.92）
                   switchImg("fcb9b30552dc026e8bd862be9bc05239.jpg");
                   seqTypeAndWait("（一股奶味扑面而来.....）", function() {
                     actionsArea.innerHTML = "";
                     actionsArea.style.display = "flex";
-                    var btn = document.createElement("button");
-                    btn.className = "action-btn";
-                    btn.textContent = "回到楼梯间";
-                    btn.onclick = function() { renderScene("lab_floor"); };
-                    actionsArea.appendChild(btn);
+                    var fightBtn = document.createElement("button");
+                    fightBtn.className = "action-btn special";
+                    fightBtn.textContent = "⚔️ 接受试炼";
+                    fightBtn.onclick = function() { renderMilkFrogGame("lab_floor"); };
+                    actionsArea.appendChild(fightBtn);
+                    var backBtn = document.createElement("button");
+                    backBtn.className = "action-btn band-quit";
+                    backBtn.textContent = "🚪 回到楼梯间";
+                    backBtn.onclick = function() { renderScene("lab_floor"); };
+                    actionsArea.appendChild(backBtn);
                   });
                 });
               });
@@ -8004,8 +8021,8 @@ function bandRender() {
     else if (duo) whoTurn = "🔨 轮到" + (auc.decider === "p1" ? "玩家1" : "玩家2") + (auc.active ? "：跟价或放弃" : "：起拍或跳过");
     else whoTurn = auc.decider === "ai" ? "🤖 AI表态中……" : "🔨 轮到你" + (auc.active ? "：跟价或放弃" : "：起拍或跳过");
   }
-  var descArea = document.getElementById("description-area");
-  descArea.innerHTML =
+  // HUD（回合/金币/知名度）：v1.5.92修复——描述区在乐队模式已被隐藏导致金币不显示，HUD改为插到游戏面板顶部
+  var hudHtml =
     '<div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">' +
     '<span>🕐 回合 <b style="color:#ffc832;">' + st.round + "/" + st.maxRound + '</b>' + (st.phase !== "result" && duo ? '·<b style="color:' + (dispSide === "p1" ? "#4fc3f7" : "#ff8a65") + ';">' + (dispSide === "p1" ? "玩家1" : "玩家2") + '</b>' : '') + '</span>' +
     '<span>💰 ' + (duo ? (dispSide === "p1" ? "P1" : "P2") : "") + '金币 <b style="color:#ffd54f;">' + st[bandGoldKey(dispSide)] + '</b>' + (duo ? '｜另一侧 <b style="color:rgba(224,224,224,0.7);">' + st[dispSide === "p1" ? "aiGold" : "gold"] + '</b>' : '') + '</span></div>' +
@@ -8019,6 +8036,7 @@ function bandRender() {
         ? "整备阶段：演出形式·阴招·主唱/替补/转会/Live（薪水💰" + payHint + "）｜你的形式：" + (st.showType === "street" ? "🎸街头" : st.showType === "festival" ? "🎪音乐节" : "⚔️战书已下(等对方应战)")
           + (st.live ? '<span style="color:#ffc832;"> 🎬P1Live×1.5</span>' : '') + (duo && st.aiLive ? '<span style="color:#ffc832;"> 🎬P2Live×1.5</span>' : '') + (bandHasFull(bandLineup(st.band, st.vocalUid)) ? '<span style="color:#ffc832;"> 🎼编制+30%</span>' : '') + (st.vocalUid != null ? '<span style="color:#ffc832;"> 🎤主唱就位</span>' : '')
         : "演出结束！点击下方进入下一回合")) + '</div>';
+  panel.insertAdjacentHTML("afterbegin", '<div class="band-hud">' + hudHtml + '</div>');
 
   // 按钮区
   var actionsArea = document.getElementById("actions-area");
@@ -8157,6 +8175,804 @@ function bandRender() {
   actionsArea.appendChild(quitBtn);
 }
 
+// ====================== 马桶奶蛙·奶味试炼空间（实验楼3F试炼 / 传送门精选直达） ======================
+// 玩法：5×5格子战棋。每回合限1次移动+1次能力；能力消耗AP；被打扣理智，理智归零失败；
+//       15回合内全灭试炼体、或撑满回合即获胜。手牌每回合刷新6个（语数英科社各保底1+随机1）。
+var milkFrogState = null;
+
+// 玩家能力库（语数英科社各3个，共15个；图标只给模糊的学科感觉）
+var MILK_FROG_ABILITIES = [
+  { id: "idiom",  subj: "yu",   icon: "🖋", name: "成语连击",  ap: 1, target: "none",  desc: "对相邻敌人各打2；若完成击杀，返还本次移动" },
+  { id: "dict",   subj: "yu",   icon: "📝", name: "默写风暴",  ap: 1, target: "row",   desc: "指定一行：整行敌人各打1" },
+  { id: "read",   subj: "yu",   icon: "📖", name: "阅读理解",  ap: 1, target: "enemy", desc: "看穿1名试炼体下回合的行动意图" },
+  { id: "pen",    subj: "yu",   icon: "✒️", name: "奋笔疾书",  ap: 2, target: "none",  desc: "本回合受到的伤害全部-2" },
+  { id: "geo",    subj: "shu",  icon: "📐", name: "几何风暴",  ap: 1, target: "none",  desc: "所在行列十字范围的敌人各打1" },
+  { id: "dice",   subj: "shu",  icon: "🎲", name: "概率女神",  ap: 2, target: "none",  desc: "下一个伤害类能力伤害×2" },
+  { id: "equa",   subj: "shu",  icon: "🧮", name: "爆肝方程",  ap: 1, target: "none",  desc: "AP+1，但理智-1" },
+  { id: "bomb",   subj: "ying", icon: "🔤", name: "单词轰炸",  ap: 1, target: "none",  desc: "随机3名敌人各打1" },
+  { id: "gram",   subj: "ying", icon: "✍️", name: "语法重拳",  ap: 1, target: "enemy", desc: "对指定敌人打2" },
+  { id: "listen", subj: "ying", icon: "🎧", name: "听力测试",  ap: 1, target: "none",  desc: "全体敌人下回合意图可见" },
+  { id: "speak",  subj: "ying", icon: "💬", name: "口语速答",  ap: 1, target: "none",  desc: "本回合可以再移动一次" },
+  { id: "acid",   subj: "ke",   icon: "⚗️", name: "化学喷溅",  ap: 1, target: "cell",  desc: "泼酸到一格（点任意格），敌人停留/经过每回合扣1，持续3回合" },
+  { id: "volt",   subj: "ke",   icon: "⚡", name: "电学实验",  ap: 2, target: "none",  desc: "所在行列十字范围的敌人各打2" },
+  { id: "grav",   subj: "ke",   icon: "🌍", name: "重力压制",  ap: 2, target: "row",   desc: "点一格锁定其所在行：该行敌人下回合无法移动" },
+  { id: "photo",  subj: "ke",   icon: "🌿", name: "光合作用",  ap: 1, target: "none",  desc: "理智+2" },
+  { id: "hist",   subj: "she",  icon: "📜", name: "历史重演",  ap: 2, target: "none",  desc: "重复上一个用过的能力（免其AP）" },
+  { id: "tp",     subj: "she",  icon: "🗺", name: "地理大发现", ap: 1, target: "cell",  desc: "传送到任意空格" },
+  { id: "debat",  subj: "she",  icon: "🎤", name: "政治辩论",  ap: 1, target: "none",  desc: "相邻敌人下回合被拉进辩论，无法行动" },
+];
+
+// 试炼体种类（语数英科社各一，各有行动规律；minion:true 的小怪由大怪召唤）
+var MILK_FROG_ENEMY_TYPES = {
+  essay:  { emoji: "📄", name: "作文怪", hp: 6, desc: "每2回合行动1次：贴身咬2；与你距离2时用「跑题」把你拽到它旁边；远离你时会写废稿召唤小怪" },
+  snake:  { emoji: "🐍", name: "函数蛇", hp: 3, desc: "每回合折线走2格逼近，贴身咬1" },
+  wave:   { emoji: "🔊", name: "听力波", hp: 2, desc: "3格内远程打1并「干扰」（你下回合手牌-1）" },
+  flask:  { emoji: "⚗️", name: "实验瓶", hp: 4, desc: "不攻击只逼近；死亡时爆炸波及周围8格各1点（敌我不分）" },
+  puppet: { emoji: "🎭", name: "背书偶", hp: 3, desc: "不攻击不移动，每2回合给其他试炼体回1血，偶尔背出错题精——优先拆掉" },
+  scrap:  { emoji: "🧻", name: "废稿纸", hp: 1, minion: true, desc: "作文怪跑题时搓出来的小杂兵：每回合逼近1格，贴身咬1；只有1血，随手撕掉" },
+  wrong:  { emoji: "✏️", name: "错题精", hp: 2, minion: true, desc: "背书偶背岔了蹦出来的小杂兵：每回合逼近1格，贴身咬1；2血，也不禁打" },
+};
+
+var MILK_FROG_QUIPS = [
+  "亚嘞亚嘞~这题初中生都会哦~",
+  "aptapt~就这？",
+  "唔哇~你好像有点东西呢...",
+  "别抖~奶都是甜的哦~",
+  "试炼体的皮都是奶味的~",
+  "唔嘿嘿~慌了慌了~",
+  "坐在马桶上想题~是我的浪漫~",
+  "你的理智~好像牛奶一样在减少呢~",
+];
+
+function mfAbilityById(id) {
+  for (var i = 0; i < MILK_FROG_ABILITIES.length; i++) if (MILK_FROG_ABILITIES[i].id === id) return MILK_FROG_ABILITIES[i];
+  return MILK_FROG_ABILITIES[0];
+}
+
+function mfEnemyAt(r, c) {
+  var st = milkFrogState;
+  if (!st) return null;
+  for (var i = 0; i < st.enemies.length; i++) if (st.enemies[i].r === r && st.enemies[i].c === c) return st.enemies[i];
+  return null;
+}
+
+// 入口：开始奶味试炼（3F剧情 / 传送门调用）
+function renderMilkFrogGame(returnScene) {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+  stopBossFight();
+  stopBandGame();
+  stopMilkFrogGame();
+
+  document.getElementById("location-name").textContent = "奶味试炼空间";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  // 复用乐队双列大按钮布局：手机友好、按钮大防误触
+  actionsArea.style.display = "grid";
+  actionsArea.className = "band-actions";
+  document.getElementById("description-area").style.display = "none";
+
+  var area = document.getElementById("image-area");
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var panel = document.createElement("div");
+  panel.id = "mf-panel";
+  area.appendChild(panel);
+
+  milkFrogState = {
+    returnScene: returnScene || "gate",
+    round: 1, maxRound: 15,
+    sanity: 10, maxSanity: 10,
+    ap: 3, maxAp: 4,
+    player: { r: 2, c: 2 },
+    moved: false, extraMove: false,
+    guard: 0, critNext: false,
+    enemies: [
+      { type: "essay",  hp: 6, maxHp: 6, r: 0, c: 1, counter: 0, stun: false, root: false, revealed: false, intent: "" },
+      { type: "wave",   hp: 2, maxHp: 2, r: 1, c: 4, counter: 0, stun: false, root: false, revealed: false, intent: "" },
+      { type: "snake",  hp: 3, maxHp: 3, r: 3, c: 3, counter: 0, stun: false, root: false, revealed: false, intent: "", zig: 0 },
+      { type: "flask",  hp: 4, maxHp: 4, r: 4, c: 0, counter: 0, stun: false, root: false, revealed: false, intent: "" },
+      { type: "puppet", hp: 3, maxHp: 3, r: 0, c: 3, counter: 0, stun: false, root: false, revealed: false, intent: "" },
+    ],
+    acid: [],
+    hand: [],
+    handCut: false,
+    selHand: null,        // 当前选中的手牌下标（按钮高亮）
+    pendingCast: null,    // 等待点目标释放的能力
+    replayMode: false,    // 历史重演免AP标记
+    lastAbility: null,    // 上一个用过的能力id（历史重演用）
+    quip: MILK_FROG_QUIPS[Math.floor(Math.random() * MILK_FROG_QUIPS.length)],
+    over: false, resultWin: false, resultReason: "",
+    logs: ["🐸 马桶奶蛙：欢迎来到奶味试炼空间~让我看看你几斤几两吧！"],
+  };
+  mfRefreshHand();
+  mfComputeIntents();
+  mfRender();
+}
+
+// 退出清理：删面板、恢复常规布局
+function stopMilkFrogGame() {
+  var panel = document.getElementById("mf-panel");
+  if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+  milkFrogState = null;
+}
+
+// 刷新手牌：语数英科社各随机1个+全库随机1个（听力波干扰时-1）
+function mfRefreshHand() {
+  var st = milkFrogState;
+  var bySubj = {};
+  for (var i = 0; i < MILK_FROG_ABILITIES.length; i++) {
+    var a = MILK_FROG_ABILITIES[i];
+    if (!bySubj[a.subj]) bySubj[a.subj] = [];
+    bySubj[a.subj].push(a.id);
+  }
+  var hand = [];
+  var subjects = ["yu", "shu", "ying", "ke", "she"];
+  for (var s = 0; s < subjects.length; s++) {
+    var pool = bySubj[subjects[s]];
+    hand.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  // 第6个：全库随机（尽量去重）
+  for (var tries = 0; tries < 10; tries++) {
+    var extra = MILK_FROG_ABILITIES[Math.floor(Math.random() * MILK_FROG_ABILITIES.length)].id;
+    if (hand.indexOf(extra) === -1) { hand.push(extra); break; }
+  }
+  if (hand.length < 6) hand.push(MILK_FROG_ABILITIES[Math.floor(Math.random() * MILK_FROG_ABILITIES.length)].id);
+  if (st.handCut) {
+    hand.pop();
+    st.handCut = false;
+    st.logs.push("🔊 听力波「干扰」生效：本回合手牌只有5个！");
+  }
+  st.hand = hand;
+  st.selHand = null;
+  st.pendingCast = null;
+  st.replayMode = false;
+}
+
+// 计算敌方下回合意图（阅读理解/听力测试可看穿）
+function mfComputeIntents() {
+  var st = milkFrogState;
+  for (var i = 0; i < st.enemies.length; i++) {
+    var e = st.enemies[i];
+    e.revealed = false;
+    var d = Math.abs(e.r - st.player.r) + Math.abs(e.c - st.player.c);
+    if (e.type === "essay") {
+      if ((e.counter + 1) % 2 !== 0) e.intent = "💤休整";
+      else if (d === 1) e.intent = "⚔️咬2";
+      else if (d === 2) e.intent = "🧲跑题";
+      else e.intent = "👣逼近";
+    } else if (e.type === "snake") {
+      e.intent = d === 1 ? "⚔️咬1" : "👣折线×2";
+    } else if (e.type === "wave") {
+      e.intent = d <= 3 ? "🔊远程1" : "👣逼近";
+    } else if (e.type === "flask") {
+      e.intent = "👣逼近";
+    } else if (e.type === "puppet") {
+      e.intent = (e.counter + 1) % 2 === 0 ? "💚回血" : "💤背诵";
+    } else if (e.type === "scrap" || e.type === "wrong") {
+      e.intent = d === 1 ? "⚔️咬1" : "👣逼近";
+    }
+  }
+}
+
+// 敌人朝玩家走1格（优先距离更大的轴）
+function mfStepToward(e, pr, pc) {
+  var st = milkFrogState;
+  var dr = pr - e.r, dc = pc - e.c;
+  var tries = [];
+  if (Math.abs(dr) >= Math.abs(dc)) {
+    if (dr !== 0) tries.push([Math.sign(dr), 0]);
+    if (dc !== 0) tries.push([0, Math.sign(dc)]);
+  } else {
+    if (dc !== 0) tries.push([0, Math.sign(dc)]);
+    if (dr !== 0) tries.push([Math.sign(dr), 0]);
+  }
+  for (var i = 0; i < tries.length; i++) {
+    var nr = e.r + tries[i][0], nc = e.c + tries[i][1];
+    if (nr < 0 || nr > 4 || nc < 0 || nc > 4) continue;
+    if (mfEnemyAt(nr, nc)) continue;
+    if (nr === st.player.r && nc === st.player.c) continue;
+    e.r = nr; e.c = nc;
+    return true;
+  }
+  return false;
+}
+
+// 函数蛇单步：按轴偏好折线走1格，经过酸液池会被腐蚀
+function mfSnakeStep(e, pr, pc, horizFirst) {
+  var st = milkFrogState;
+  var dr = Math.sign(pr - e.r), dc = Math.sign(pc - e.c);
+  var opts = horizFirst ? [[0, dc], [dr, 0]] : [[dr, 0], [0, dc]];
+  for (var i = 0; i < 2; i++) {
+    var mor = opts[i][0], moc = opts[i][1];
+    if (mor === 0 && moc === 0) continue;
+    var nr = e.r + mor, nc = e.c + moc;
+    if (nr < 0 || nr > 4 || nc < 0 || nc > 4) continue;
+    if (mfEnemyAt(nr, nc)) continue;
+    if (nr === st.player.r && nc === st.player.c) continue;
+    for (var k = 0; k < st.acid.length; k++) {
+      if (st.acid[k].r === nr && st.acid[k].c === nc) { mfHitEnemy(e, 1); break; }
+    }
+    if (st.enemies.indexOf(e) === -1) return true;
+    e.r = nr; e.c = nc;
+    return true;
+  }
+  return false;
+}
+
+// 敌方行动AI
+function mfEnemyAct(e) {
+  var st = milkFrogState;
+  var t = MILK_FROG_ENEMY_TYPES[e.type];
+  var pr = st.player.r, pc = st.player.c;
+  var d = Math.abs(e.r - pr) + Math.abs(e.c - pc);
+  e.counter++;
+
+  if (e.type === "essay") {
+    if (e.counter % 2 !== 0) return;   // 隔回合行动
+    if (d === 1) {
+      mfDamagePlayer(2, t.name);
+    } else if (d === 2) {
+      // 跑题：把玩家往作文怪方向拽1格
+      var dr = Math.sign(e.r - pr), dc = Math.sign(e.c - pc);
+      var nr = pr, nc = pc;
+      if (Math.abs(e.r - pr) >= Math.abs(e.c - pc) && dr !== 0) nr = pr + dr;
+      else nc = pc + dc;
+      if (!mfEnemyAt(nr, nc)) {
+        st.player.r = nr; st.player.c = nc;
+        st.logs.push("📄 作文怪「跑题」！你被拽到了它旁边！");
+      }
+    } else if (!e.root) {
+      mfStepToward(e, pr, pc);
+    }
+    return;
+  }
+  if (e.type === "snake") {
+    if (!e.root) {
+      var steps = 0;
+      while (steps < 2) {
+        if (Math.abs(e.r - st.player.r) + Math.abs(e.c - st.player.c) === 1) break;
+        var horizFirst = (e.zig % 2 === 0);
+        e.zig++;
+        var movedOk = mfSnakeStep(e, st.player.r, st.player.c, horizFirst);
+        if (st.enemies.indexOf(e) === -1) return;   // 踩酸溶了
+        if (!movedOk) break;
+        steps++;
+      }
+    }
+    if (Math.abs(e.r - st.player.r) + Math.abs(e.c - st.player.c) === 1) mfDamagePlayer(1, t.name);
+    return;
+  }
+  if (e.type === "wave") {
+    if (d <= 3) {
+      mfDamagePlayer(1, t.name);
+      st.handCut = true;
+      st.logs.push("🔊 听力波「干扰」！你下回合的手牌将减少1个！");
+    } else if (!e.root) {
+      mfStepToward(e, pr, pc);
+    }
+    return;
+  }
+  if (e.type === "flask") {
+    if (!e.root) mfStepToward(e, pr, pc);
+    return;
+  }
+  if (e.type === "puppet") {
+    if (e.counter % 2 === 0) {
+      var healed = 0;
+      for (var i = 0; i < st.enemies.length; i++) {
+        var o = st.enemies[i];
+        if (o !== e && o.hp < o.maxHp) { o.hp++; healed++; }
+      }
+      if (healed > 0) st.logs.push("🎭 背书偶背诵重点！其他试炼体共回复" + healed + "点血！");
+    }
+    return;
+  }
+  // 小杂兵（废稿纸/错题精）：每回合逼近1格，贴身咬1
+  if (e.type === "scrap" || e.type === "wrong") {
+    if (d === 1) {
+      mfDamagePlayer(1, t.name);
+    } else if (!e.root) {
+      mfStepToward(e, pr, pc);
+    }
+    return;
+  }
+}
+
+// 杂兵生成：作文怪偶数回合搓废稿纸、背书偶奇数回合蹦错题精（场上小怪上限3）
+function mfSpawnMinions() {
+  var st = milkFrogState;
+  var minionCount = 0;
+  for (var i = 0; i < st.enemies.length; i++) if (MILK_FROG_ENEMY_TYPES[st.enemies[i].type].minion) minionCount++;
+  if (minionCount >= 3) return;
+
+  var spawn = null;   // { type, r, c }
+  var essay = null, puppet = null;
+  for (var j = 0; j < st.enemies.length; j++) {
+    if (st.enemies[j].type === "essay") essay = st.enemies[j];
+    if (st.enemies[j].type === "puppet") puppet = st.enemies[j];
+  }
+  // 作文怪离玩家3格开外才腾得出手写废稿
+  if (essay && st.round % 2 === 0 && Math.random() < 0.6 &&
+      Math.abs(essay.r - st.player.r) + Math.abs(essay.c - st.player.c) >= 3) {
+    var spot = mfFreeNeighbor(essay);
+    if (spot) { spawn = { type: "scrap", r: spot[0], c: spot[1] }; st.logs.push("📄 作文怪写跑题了！搓出一张🧻废稿纸！"); }
+  }
+  // 背书偶没人可奶的时候背岔了，蹦出错题精
+  if (!spawn && puppet && st.round % 2 === 1 && Math.random() < 0.5) {
+    var needHeal = false;
+    for (var k = 0; k < st.enemies.length; k++) {
+      if (st.enemies[k] !== puppet && st.enemies[k].hp < st.enemies[k].maxHp) needHeal = true;
+    }
+    if (!needHeal) {
+      var spot2 = mfFreeNeighbor(puppet);
+      if (spot2) { spawn = { type: "wrong", r: spot2[0], c: spot2[1] }; st.logs.push("🎭 背书偶背岔了！蹦出一只✏️错题精！"); }
+    }
+  }
+  if (spawn) {
+    var t = MILK_FROG_ENEMY_TYPES[spawn.type];
+    st.enemies.push({ type: spawn.type, hp: t.hp, maxHp: t.hp, r: spawn.r, c: spawn.c, counter: 0, stun: false, root: false, revealed: false, intent: "" });
+  }
+}
+
+// 找某怪相邻的空格（不含玩家所在格）
+function mfFreeNeighbor(e) {
+  var st = milkFrogState;
+  var dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  var spots = [];
+  for (var i = 0; i < dirs.length; i++) {
+    var nr = e.r + dirs[i][0], nc = e.c + dirs[i][1];
+    if (nr < 0 || nr > 4 || nc < 0 || nc > 4) continue;
+    if (mfEnemyAt(nr, nc)) continue;
+    if (nr === st.player.r && nc === st.player.c) continue;
+    spots.push([nr, nc]);
+  }
+  if (spots.length === 0) return null;
+  return spots[Math.floor(Math.random() * spots.length)];
+}
+
+// 结算回合：敌方行动 → 酸液 → 判定 → 新回合刷新
+function mfEndTurn() {
+  var st = milkFrogState;
+  if (!st || st.over) return;
+  st.pendingCast = null; st.selHand = null; st.replayMode = false;
+
+  var acting = st.enemies.slice();
+  for (var i = 0; i < acting.length; i++) {
+    var e = acting[i];
+    if (st.enemies.indexOf(e) === -1) continue;   // 已被波及致死
+    if (e.stun) {
+      e.stun = false;
+      st.logs.push("🎤 " + MILK_FROG_ENEMY_TYPES[e.type].name + "被卷进辩论，无法行动！");
+      continue;
+    }
+    mfEnemyAct(e);
+    if (st.sanity <= 0) break;
+  }
+  for (var j = 0; j < st.enemies.length; j++) st.enemies[j].root = false;
+
+  // 酸液结算：站在池里的试炼体扣1，池子耗尽消失
+  for (var ai = st.acid.length - 1; ai >= 0; ai--) {
+    var pool = st.acid[ai];
+    var onIt = mfEnemyAt(pool.r, pool.c);
+    if (onIt) mfHitEnemy(onIt, 1);
+    pool.left--;
+    if (pool.left <= 0) st.acid.splice(ai, 1);
+  }
+
+  if (st.sanity <= 0) { mfGameOver(false, "理智归零，眼前一黑……"); return; }
+  if (st.enemies.length === 0) { mfGameOver(true, "试炼体全灭！"); return; }
+
+  // 杂兵生成（全灭即胜不召唤；作文怪/背书偶活着才会搓小怪）
+  mfSpawnMinions();
+
+  st.round++;
+  if (st.round > st.maxRound) { mfGameOver(true, "你撑到了最后，马桶奶蛙悻悻收场！"); return; }
+
+  st.ap = Math.min(st.maxAp, st.ap + 1);
+  st.moved = false; st.extraMove = false; st.guard = 0;
+  st.quip = MILK_FROG_QUIPS[Math.floor(Math.random() * MILK_FROG_QUIPS.length)];
+  mfRefreshHand();
+  mfComputeIntents();
+  mfRender();
+}
+
+// 玩家受伤（奋笔疾书可减免）
+function mfDamagePlayer(dmg, srcName, ignoreGuard) {
+  var st = milkFrogState;
+  var real = ignoreGuard ? dmg : Math.max(0, dmg - st.guard);
+  if (real <= 0) {
+    st.logs.push("🛡 " + srcName + "的攻击被「奋笔疾书」完全挡下！");
+    return;
+  }
+  st.sanity -= real;
+  st.logs.push("💔 " + srcName + "造成" + real + "点理智伤害！（剩" + Math.max(0, st.sanity) + "）");
+  if (st.sanity <= 3) st.quip = "哦莫哦莫~要疯了吗~？";
+}
+
+// 打试炼体（实验瓶死亡会爆炸）
+function mfHitEnemy(e, dmg) {
+  var st = milkFrogState;
+  var t = MILK_FROG_ENEMY_TYPES[e.type];
+  e.hp -= dmg;
+  if (e.hp > 0) {
+    st.logs.push("🎯 " + t.name + "受到" + dmg + "点伤害（剩" + e.hp + "）");
+    return false;
+  }
+  var idx = st.enemies.indexOf(e);
+  if (idx !== -1) st.enemies.splice(idx, 1);
+  st.logs.push("💥 " + t.name + "被溶解了！");
+  if (e.type === "flask") mfExplode(e);
+  return true;
+}
+
+// 实验瓶爆炸：周围8格（切比雪夫距离1）敌我不分各1点
+function mfExplode(e) {
+  var st = milkFrogState;
+  st.logs.push("🧪 实验瓶爆炸！周围8格受到冲击！");
+  if (Math.max(Math.abs(st.player.r - e.r), Math.abs(st.player.c - e.c)) <= 1) mfDamagePlayer(1, "实验瓶爆炸");
+  var others = st.enemies.slice();
+  for (var i = 0; i < others.length; i++) {
+    var o = others[i];
+    if (Math.max(Math.abs(o.r - e.r), Math.abs(o.c - e.c)) <= 1) mfHitEnemy(o, 1);
+  }
+}
+
+// 目标能力可选格子
+function mfValidTargets(ab) {
+  var st = milkFrogState;
+  var t = [];
+  for (var r = 0; r < 5; r++) {
+    for (var c = 0; c < 5; c++) {
+      if (ab.target === "enemy") {
+        if (mfEnemyAt(r, c)) t.push(r + "," + c);
+      } else if (ab.id === "tp") {
+        if (!mfEnemyAt(r, c) && !(st.player.r === r && st.player.c === c)) t.push(r + "," + c);
+      } else {
+        t.push(r + "," + c);   // 酸液/重力：任意格
+      }
+    }
+  }
+  return t;
+}
+
+// 点格子：优先结算目标指定，否则尝试移动
+function mfCellClick(r, c) {
+  var st = milkFrogState;
+  if (!st || st.over) return;
+  if (st.pendingCast) {
+    var ab = st.pendingCast;
+    if (mfValidTargets(ab).indexOf(r + "," + c) !== -1) {
+      if (!st.replayMode) st.ap = Math.max(0, st.ap - ab.ap);
+      st.pendingCast = null;
+      var replay = st.replayMode;
+      st.replayMode = false;
+      st.selHand = null;
+      mfExecute(ab, r, c);
+      if (replay) st.logs.push("📜 历史重演完毕！");
+    } else {
+      showToast("无效目标");
+    }
+    return;
+  }
+  // 移动：相邻空格，每回合1次（口语速答可再来1次）
+  var dr = Math.abs(r - st.player.r), dc = Math.abs(c - st.player.c);
+  if (dr + dc === 1 && !mfEnemyAt(r, c)) {
+    if (st.moved && !st.extraMove) { showToast("本回合已移动过"); return; }
+    if (st.moved && st.extraMove) st.extraMove = false;
+    st.moved = true;
+    st.player.r = r; st.player.c = c;
+    mfRender();
+  }
+}
+
+// 点能力按钮：瞬发类立即结算，目标类进入指定模式
+function mfAbilityClick(idx) {
+  var st = milkFrogState;
+  if (!st || st.over) return;
+  var ab = mfAbilityById(st.hand[idx]);
+  // 再点一次=取消选择
+  if (st.selHand === idx && st.pendingCast) {
+    st.selHand = null; st.pendingCast = null; st.replayMode = false;
+    mfRender();
+    return;
+  }
+  if (st.pendingCast) { st.pendingCast = null; st.replayMode = false; }
+  if (st.ap < ab.ap) { showToast("AP不足（需要" + ab.ap + "⚡）"); mfRender(); return; }
+  if (ab.target === "none") {
+    st.ap -= ab.ap;
+    st.selHand = null;
+    if (ab.id === "hist") { mfDoReplay(); return; }
+    mfExecute(ab);
+  } else {
+    st.selHand = idx;
+    st.pendingCast = ab;
+    mfRender();
+  }
+}
+
+// 历史重演：重复上一个能力（目标类免AP再指定一次）
+function mfDoReplay() {
+  var st = milkFrogState;
+  if (!st.lastAbility || st.lastAbility === "hist") {
+    st.ap += 2;   // 无史可重演，退还
+    showToast("还没有可重演的历史！");
+    mfRender();
+    return;
+  }
+  var ab = mfAbilityById(st.lastAbility);
+  if (ab.target === "none") {
+    mfExecute(ab);
+  } else {
+    st.pendingCast = ab;
+    st.replayMode = true;
+    mfRender();
+    showToast("📜 重演「" + ab.name + "」：点击目标格");
+  }
+}
+
+// 能力效果结算
+function mfExecute(ab, r, c) {
+  var st = milkFrogState;
+  var mult = st.critNext ? 2 : 1;
+  var dmgUsed = false;
+
+  if (ab.id === "idiom") {
+    var before = st.enemies.length;
+    var near = st.enemies.filter(function(x) { return Math.abs(x.r - st.player.r) + Math.abs(x.c - st.player.c) === 1; });
+    for (var q = 0; q < near.length; q++) mfHitEnemy(near[q], 2 * mult);
+    dmgUsed = true;
+    if (st.enemies.length < before && st.moved) {
+      st.moved = false;
+      st.logs.push("🖋 成语连击完成击杀！返还本次移动。");
+    }
+  } else if (ab.id === "dict") {
+    // 默写风暴：指定一行，整行敌人各打1
+    var rowHit = st.enemies.filter(function(x) { return x.r === r; });
+    for (var q = 0; q < rowHit.length; q++) mfHitEnemy(rowHit[q], 1 * mult);
+    dmgUsed = true;
+    st.logs.push("📝 默写风暴！第" + (r + 1) + "行命中" + rowHit.length + "个目标。");
+  } else if (ab.id === "gram") {
+    // 语法重拳：对指定敌人打2
+    var ge = mfEnemyAt(r, c);
+    if (ge) {
+      mfHitEnemy(ge, 2 * mult);
+      dmgUsed = true;
+      st.logs.push("✍️ 语法重拳！狠狠砸向" + MILK_FROG_ENEMY_TYPES[ge.type].name + "！");
+    }
+  } else if (ab.id === "volt") {
+    // 电学实验：所在行列十字范围的敌人各打2
+    var voltHit = st.enemies.filter(function(x) { return x.r === st.player.r || x.c === st.player.c; });
+    for (var q = 0; q < voltHit.length; q++) mfHitEnemy(voltHit[q], 2 * mult);
+    dmgUsed = true;
+    st.logs.push("⚡ 电学实验！十字电流命中" + voltHit.length + "个目标。");
+  } else if (ab.id === "read") {
+    var e = mfEnemyAt(r, c);
+    if (e) {
+      e.revealed = true;
+      st.logs.push("📖 阅读理解：看穿了" + MILK_FROG_ENEMY_TYPES[e.type].name + "的意图（" + e.intent + "）");
+    }
+  } else if (ab.id === "pen") {
+    st.guard = 2;
+    st.logs.push("✒️ 奋笔疾书！本回合受到的伤害-2。");
+  } else if (ab.id === "geo") {
+    var cross = st.enemies.filter(function(x) { return x.r === st.player.r || x.c === st.player.c; });
+    for (var q = 0; q < cross.length; q++) mfHitEnemy(cross[q], 1 * mult);
+    dmgUsed = true;
+    st.logs.push("📐 几何风暴！十字范围命中" + cross.length + "个目标。");
+  } else if (ab.id === "dice") {
+    st.critNext = true;
+    st.logs.push("🎲 概率女神眷顾！下一个伤害类能力×2！");
+  } else if (ab.id === "equa") {
+    st.ap += 1;
+    st.sanity -= 1;
+    st.logs.push("🧮 爆肝方程：AP+1，理智-1……（剩" + Math.max(0, st.sanity) + "）");
+  } else if (ab.id === "bomb") {
+    var pool = st.enemies.slice();
+    for (var q = pool.length - 1; q > 0; q--) {
+      var rnd = Math.floor(Math.random() * (q + 1));
+      var tmp = pool[q]; pool[q] = pool[rnd]; pool[rnd] = tmp;
+    }
+    var n = Math.min(3, pool.length);
+    for (var q = 0; q < n; q++) mfHitEnemy(pool[q], 1 * mult);
+    dmgUsed = true;
+    st.logs.push("🔤 单词轰炸！随机命中" + n + "个目标。");
+  } else if (ab.id === "listen") {
+    for (var q = 0; q < st.enemies.length; q++) st.enemies[q].revealed = true;
+    st.logs.push("🎧 听力测试！全体试炼体意图可见。");
+  } else if (ab.id === "speak") {
+    st.moved = false;
+    st.logs.push("💬 口语速答！可以再移动一次。");
+  } else if (ab.id === "acid") {
+    st.acid.push({ r: r, c: c, left: 3 });
+    st.logs.push("⚗️ 化学喷溅！(" + (r + 1) + "行" + (c + 1) + "列)化为酸液池（3回合）。");
+  } else if (ab.id === "grav") {
+    var cnt = 0;
+    for (var q = 0; q < st.enemies.length; q++) if (st.enemies[q].r === r) { st.enemies[q].root = true; cnt++; }
+    st.logs.push("🌍 重力压制！第" + (r + 1) + "行" + cnt + "个试炼体下回合无法移动。");
+  } else if (ab.id === "photo") {
+    st.sanity = Math.min(st.maxSanity, st.sanity + 2);
+    st.logs.push("🌿 光合作用！理智+2（剩" + st.sanity + "）。");
+  } else if (ab.id === "tp") {
+    st.player.r = r; st.player.c = c;
+    st.logs.push("🗺 地理大发现！传送到了(" + (r + 1) + "行" + (c + 1) + "列)。");
+  } else if (ab.id === "debat") {
+    var dd = st.enemies.filter(function(x) { return Math.abs(x.r - st.player.r) + Math.abs(x.c - st.player.c) === 1; });
+    for (var q = 0; q < dd.length; q++) dd[q].stun = true;
+    st.logs.push("🎤 政治辩论！相邻" + dd.length + "个试炼体下回合无法行动。");
+  }
+
+  if (dmgUsed) st.critNext = false;
+  st.lastAbility = ab.id;
+
+  if (st.sanity <= 0) { mfGameOver(false, "理智归零，眼前一黑……"); return; }
+  if (st.enemies.length === 0) { mfGameOver(true, "试炼体全灭！"); return; }
+  mfRender();
+}
+
+function mfGameOver(win, reason) {
+  var st = milkFrogState;
+  if (st.over) return;
+  st.over = true;
+  st.resultWin = win;
+  st.resultReason = reason;
+  st.quip = win ? "aptapt！！……有、有点东西……下次再来玩哦~" : "亚嘞亚嘞~就这点程度吗？回厕所反省去吧~";
+  st.logs.push((win ? "🏆 " : "💀 ") + reason);
+  mfRender();
+}
+
+// 规则弹窗：基础玩法 + 试炼体图鉴（含杂兵）
+function mfShowRules() {
+  var html = '<div style="text-align:left; font-size:14px; line-height:1.7;">';
+  html += '<b style="color:#ffd54f;">🐸 基础规则</b><br>';
+  html += '· 每回合可以「移动1格」+「释放任意个能力」（受AP限制）<br>';
+  html += '· 能力消耗⚡AP，回合结束AP+1（上限4）；受伤扣🧠理智，归零失败<br>';
+  html += '· 15回合内打爆全部试炼体（含杂兵）即胜利，撑满15回合也算过<br>';
+  html += '· 手牌每回合刷新6个（语数英科社各保底1个），想输出就攒好攻击技能<br><br>';
+  html += '<b style="color:#ffd54f;">👹 试炼体图鉴</b><br>';
+  var ids = Object.keys(MILK_FROG_ENEMY_TYPES);
+  for (var i = 0; i < ids.length; i++) {
+    var t = MILK_FROG_ENEMY_TYPES[ids[i]];
+    if (t.minion) continue;   // 杂兵单独一组
+    html += '<span style="font-size:16px;">' + t.emoji + '</span> <b>' + t.name + '</b>（' + t.hp + '血）：' + t.desc + '<br>';
+  }
+  html += '<br><b style="color:#ff9e80;">🗡 小杂兵（大怪召唤物，顺手清掉刷成就感）</b><br>';
+  for (var j = 0; j < ids.length; j++) {
+    var m = MILK_FROG_ENEMY_TYPES[ids[j]];
+    if (!m.minion) continue;
+    html += '<span style="font-size:16px;">' + m.emoji + '</span> <b>' + m.name + '</b>（' + m.hp + '血）：' + m.desc + '<br>';
+  }
+  html += '</div>';
+  showPopupModal(html);
+}
+
+// 总渲染：面板（奶蛙吐槽+状态+战场+日志）+ 按钮区（手牌/结束回合）
+function mfRender() {
+  var st = milkFrogState;
+  var panel = document.getElementById("mf-panel");
+  if (!st || !panel) return;
+
+  var html = '';
+  html += '<div class="mf-head"><div class="mf-frog">🐸</div><div class="mf-bubble">马桶奶蛙：' + st.quip + '</div></div>';
+  html += '<div class="mf-pills">';
+  html += '<span class="mf-pill">回合 <b>' + Math.min(st.round, st.maxRound) + '/' + st.maxRound + '</b></span>';
+  html += '<span class="mf-pill">🧠理智 <b' + (st.sanity <= 3 ? ' class="mf-danger"' : '') + '>' + Math.max(0, st.sanity) + '/' + st.maxSanity + '</b></span>';
+  html += '<span class="mf-pill">⚡AP <b>' + st.ap + '</b></span>';
+  html += '<span class="mf-pill">' + (st.moved ? '已移动✓' : '未移动') + (st.extraMove ? '＋速' : '') + '</span>';
+  html += '<span class="mf-pill mf-pill-btn" onclick="mfShowRules()">📖 规则</span>';
+  html += '</div>';
+
+  if (st.over) {
+    html += '<div class="mf-result"><div class="t ' + (st.resultWin ? 'mf-win' : 'mf-lose') + '">' + (st.resultWin ? '🏆 试炼通过' : '💀 试炼失败') + '</div>';
+    html += '<div class="mf-s">' + st.resultReason + '</div>';
+    html += '<div class="mf-s" style="margin-top:4px;">耗时 ' + Math.min(st.round, st.maxRound) + ' 回合｜剩余理智 ' + Math.max(0, st.sanity) + '</div></div>';
+  }
+
+  // 战场5×5
+  var valid = st.pendingCast ? mfValidTargets(st.pendingCast) : [];
+  var canMove = !st.over && (!st.moved || st.extraMove);
+  html += '<div class="mf-grid">';
+  for (var r = 0; r < 5; r++) {
+    for (var c = 0; c < 5; c++) {
+      var e = mfEnemyAt(r, c);
+      var isPlayer = st.player.r === r && st.player.c === c;
+      var cls = "mf-cell";
+      if (isPlayer) cls += " mf-player";
+      if (valid.indexOf(r + "," + c) !== -1) cls += " mf-target";
+      if (canMove && !st.pendingCast && !isPlayer && !e && Math.abs(r - st.player.r) + Math.abs(c - st.player.c) === 1) cls += " mf-move";
+      html += '<div class="' + cls + '" onclick="mfCellClick(' + r + ',' + c + ')">';
+      if (e) {
+        html += MILK_FROG_ENEMY_TYPES[e.type].emoji;
+        html += '<div class="mf-hp">';
+        for (var h = 0; h < e.maxHp; h++) html += '<i' + (h < e.hp ? '' : ' class="off"') + '></i>';
+        html += '</div>';
+        if (e.revealed && e.intent) html += '<span class="mf-intent">' + e.intent + '</span>';
+      } else if (isPlayer) {
+        html += '🧑‍🎓';
+      }
+      for (var ai = 0; ai < st.acid.length; ai++) {
+        if (st.acid[ai].r === r && st.acid[ai].c === c) { html += '<span class="mf-acid">🧪' + st.acid[ai].left + '</span>'; break; }
+      }
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+
+  if (st.pendingCast) {
+    html += '<div class="mf-hint">' + st.pendingCast.icon + ' ' + st.pendingCast.name + '：' + st.pendingCast.desc + ' —— 点击高亮格' + (st.replayMode ? '（📜重演免AP）' : '') + '</div>';
+  } else {
+    html += '<div class="mf-hint">点相邻虚线格移动｜点下方能力释放（每回合各限1次）</div>';
+  }
+
+  html += '<div class="mf-logs">';
+  var start = Math.max(0, st.logs.length - 5);
+  for (var l = start; l < st.logs.length; l++) html += '<div>' + st.logs[l] + '</div>';
+  html += '</div>';
+
+  panel.innerHTML = html;
+
+  // 按钮区
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  if (st.over) {
+    var ret = st.returnScene;
+    var retryBtn = document.createElement("button");
+    retryBtn.innerHTML = "🔄 再试一次";
+    retryBtn.className = "action-btn special";
+    retryBtn.onclick = function() { renderMilkFrogGame(ret); };
+    actionsArea.appendChild(retryBtn);
+    var leaveBtn = document.createElement("button");
+    leaveBtn.innerHTML = "🚪 离开试炼";
+    leaveBtn.className = "action-btn";
+    leaveBtn.onclick = function() { stopMilkFrogGame(); renderScene(ret); };
+    actionsArea.appendChild(leaveBtn);
+    return;
+  }
+  for (var i = 0; i < st.hand.length; i++) {
+    (function(idx) {
+      var ab = mfAbilityById(st.hand[idx]);
+      var btn = document.createElement("button");
+      btn.className = "action-btn" + (st.selHand === idx ? " mf-sel" : "") + (st.ap < ab.ap ? " mf-poor" : "");
+      btn.innerHTML = ab.icon + " " + ab.name + ' <span class="mf-apcost">' + ab.ap + "⚡</span>";
+      btn.title = ab.desc;
+      btn.onclick = function() { mfAbilityClick(idx); };
+      actionsArea.appendChild(btn);
+    })(i);
+  }
+  if (st.pendingCast) {
+    var cancelBtn = document.createElement("button");
+    cancelBtn.innerHTML = "✖ 取消选择";
+    cancelBtn.className = "action-btn";
+    cancelBtn.onclick = function() {
+      st.pendingCast = null; st.selHand = null; st.replayMode = false;
+      mfRender();
+    };
+    actionsArea.appendChild(cancelBtn);
+  }
+  var endBtn = document.createElement("button");
+  endBtn.innerHTML = "⏭️ 结束回合";
+  endBtn.className = "action-btn special";
+  endBtn.onclick = mfEndTurn;
+  actionsArea.appendChild(endBtn);
+  var quitBtn = document.createElement("button");
+  quitBtn.innerHTML = "🚪 放弃试炼";
+  quitBtn.className = "action-btn band-quit";
+  quitBtn.onclick = function() {
+    var ret = st.returnScene;
+    stopMilkFrogGame();
+    renderScene(ret);
+  };
+  actionsArea.appendChild(quitBtn);
+}
+
 // ===== 游玩提示 =====
 function showTips() {
   showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>本游戏纯前端，没有存档功能，若想再次游玩可借助传送门和背包控制台手动回到上次游玩进度……<br><br>教学楼是剧情主线，实验楼像小游戏大全，地下室算主线前传，其他算奇异古怪搞笑猎奇路线大全……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>作者语文很差，所以剧情写的很烂，ai标也懒得去……<br><br>技术力有限，十分低质……<br><br>如果看的云里雾里一头雾水那就对了，因为凡人是无法理解神的（bushi）<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
@@ -8209,6 +9025,9 @@ function openPortal() {
 
   html += '<button class="portal-game-btn" id="portal-band-btn">';
   html += '<span class="game-icon">🎸</span>乐队大赛</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderMilkFrogGame(\'gate\');">';
+  html += '<span class="game-icon">🐸</span>马桶奶蛙试炼</button>';
 
   html += '</div></div>';
 

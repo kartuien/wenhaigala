@@ -642,6 +642,91 @@ body {
 }
 
 /* ===== 乐队互动框优化：双列网格 + 大触控面积，解决太靠下/太小/易误触 ===== */
+/* 乐队HUD（回合/金币/知名度）：插在游戏面板顶部 */
+.band-hud {
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid rgba(232,213,183,0.15);
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px 8px 0 0;
+}
+
+/* ===== 马桶奶蛙·奶味试炼空间 ===== */
+#mf-panel {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto; box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(22,18,30,0.97), rgba(12,10,18,0.99));
+  color: #e8d5b7; padding: 10px 12px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.mf-head { display: flex; gap: 8px; align-items: flex-start; flex-shrink: 0; }
+.mf-frog {
+  width: 46px; height: 46px; border-radius: 10px; flex: none;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+  background: rgba(129,212,250,0.12); border: 1px solid rgba(129,212,250,0.4);
+}
+.mf-bubble {
+  flex: 1; font-size: 13px; line-height: 1.5; color: #b5c4d8;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(232,213,183,0.2);
+  border-radius: 8px; padding: 6px 10px;
+}
+.mf-pills { display: flex; flex-wrap: wrap; gap: 4px; flex-shrink: 0; }
+.mf-pill {
+  font-size: 12px; border: 1px solid rgba(232,213,183,0.3); border-radius: 999px;
+  padding: 2px 8px; color: #e8d5b7; white-space: nowrap;
+}
+.mf-pill b { color: #ffd54f; }
+.mf-pill b.mf-danger { color: #ff6b6b; }
+.mf-pill.mf-pill-btn {
+  cursor: pointer; background: rgba(129,212,250,0.12);
+  border-color: rgba(129,212,250,0.5); color: #81d4fa;
+}
+.mf-pill.mf-pill-btn:active { background: rgba(129,212,250,0.3); }
+.mf-result {
+  text-align: center; padding: 14px 10px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(232,213,183,0.25);
+}
+.mf-result .t { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.mf-result .t.mf-win { color: #ffd54f; }
+.mf-result .t.mf-lose { color: #ff6b6b; }
+.mf-result .mf-s { font-size: 13px; color: #b5c4d8; }
+.mf-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+  width: 100%; max-width: 440px; margin: 0 auto; flex-shrink: 0;
+}
+.mf-cell {
+  position: relative; aspect-ratio: 1/1; border-radius: 8px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(232,213,183,0.14);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mf-cell:active { transform: scale(0.94); }
+.mf-cell.mf-player { background: rgba(232,213,183,0.14); border-color: rgba(232,213,183,0.55); }
+.mf-cell.mf-move {
+  border-style: dashed; border-color: rgba(232,213,183,0.5);
+  background: rgba(232,213,183,0.07);
+}
+.mf-cell.mf-target {
+  border-color: #ff8a65; box-shadow: inset 0 0 0 2px rgba(255,138,101,0.55);
+  background: rgba(255,138,101,0.1);
+}
+.mf-hp { position: absolute; bottom: 2px; left: 3px; right: 3px; display: flex; gap: 1.5px; }
+.mf-hp i { flex: 1; height: 3px; border-radius: 2px; background: #ff6b6b; }
+.mf-hp i.off { background: rgba(255,255,255,0.15); }
+.mf-intent { position: absolute; top: 0; right: 2px; font-size: 10px; color: #ffab91; white-space: nowrap; }
+.mf-acid { position: absolute; bottom: 2px; right: 3px; font-size: 11px; }
+.mf-hint { font-size: 12px; color: #ffcc80; text-align: center; min-height: 16px; flex-shrink: 0; }
+.mf-logs {
+  font-size: 11px; color: rgba(224,224,224,0.65); line-height: 1.6; flex-shrink: 0;
+  border-top: 1px solid rgba(232,213,183,0.12); padding-top: 6px;
+}
+/* 手牌按钮：AP不足半透明 / 选中高亮 */
+#actions-area.band-actions > .action-btn.mf-poor { opacity: 0.5; }
+#actions-area.band-actions > .action-btn.mf-sel {
+  border: 2px solid #ff8a65; background: linear-gradient(135deg, #ffab91, #ff8a65);
+}
+.mf-apcost { font-size: 11px; opacity: 0.75; font-weight: 400; }
 #actions-area.band-actions {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   align-content: start;
