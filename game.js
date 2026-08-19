@@ -1062,6 +1062,12 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.95", date: "2026-08-19", items: [
+    "新增小游戏「一笔画速写」（传送门精选直达🎨）：屏幕给出虚线轮廓（器皿/植物/人物剪影），下笔开始倒计时，一笔描完，松手或超时交卷",
+    "评分算法：原图按弧长每4px采样，逐点计算玩家线与原图的最短距离——重合度（轮廓被覆盖比例，占65%）+ 精准度（容差内比例，占35%），60分及格，结算回放按偏差着色（绿=精准/黄=偏移/红=跑飞）",
+    "三档难度：简单（🏺器皿·40秒·容差20px）/ 普通（🌵植物·25秒·容差13px）/ 困难（🧍人物剪影·15秒·容差9px·盲画模式——画的时候看不到自己的线）",
+    "画布支持鼠标+触控（Pointer Events+采样节流），面板内置规则说明弹窗，与其他小游戏互斥清理已接入",
+  ]},
   { version: "v1.5.94", date: "2026-08-19", items: [
     "奶味试炼结算接入剧情：结果界面改为「继续」按钮，播放马桶奶蛙结算感言（胜利/失败各一套台词）",
     "胜利线：奶蛙认输感言播完自动回到楼道（3F线回楼梯间，传送门线回入口）；失败线：奶蛙训话播完给「再来一次」选项（可重开试炼）",
@@ -1542,11 +1548,12 @@ var typewriterSession = null;  // 当前打字机会话参数（跳过按钮用�
 
 // 渲染当前场景
 function renderScene(sceneId) {
-  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼仍在运行，强制停止并清理画布
+  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼/一笔画速写仍在运行，强制停止并清理画布
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
   stopMilkFrogGame();
+  stopSketchGame();
   // 清理反抗线渐晕（传送门中途逃离天台对峙时，防止黑边残留）
   var vgClean = document.getElementById("closing-vignette");
   if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
@@ -4134,6 +4141,7 @@ function startBossFight() {
   if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
   stopBossFight();
   stopCanteenGame();
+  stopSketchGame();
   // BOSS战开始：移除反抗线渐晕，保证弹幕可读性
   var vgClean = document.getElementById("closing-vignette");
   if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
@@ -6429,6 +6437,7 @@ function renderBandGame(mode) {
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
+  stopSketchGame();
 
   document.getElementById("location-name").textContent = "乐队大赛";
   var actionsArea = document.getElementById("actions-area");
@@ -8251,6 +8260,7 @@ function renderMilkFrogGame(returnScene) {
   stopBossFight();
   stopBandGame();
   stopMilkFrogGame();
+  stopSketchGame();
 
   document.getElementById("location-name").textContent = "奶味试炼空间";
   var actionsArea = document.getElementById("actions-area");
@@ -9021,6 +9031,400 @@ function mfRender() {
   actionsArea.appendChild(quitBtn);
 }
 
+// ====================== 一笔画速写（传送门精选直达🎨） ======================
+// 玩法：屏幕给出一个复杂轮廓（器皿/植物/人物剪影），下笔后开始倒计时，
+//       必须一笔描完全部轮廓；松手或超时即交卷。
+//       评分：路径按弧长采样，逐点计算与原图的最短距离——
+//       重合度（原图被你覆盖的比例，占65分）+ 精准度（你的线在容差内的比例，占35分）。
+//       困难为「盲画」模式：画的过程中看不到自己的线。
+var sketchState = null;
+
+// 形状库：归一化(0~1)坐标点列，按一笔顺序连接（密 enough → 直线连也平滑）
+var SKETCH_SHAPES = {
+  vase:   { name: "器皿", emoji: "🏺", pts: [
+    [0.38,0.08],[0.36,0.16],[0.32,0.24],[0.24,0.36],[0.19,0.50],[0.22,0.64],[0.30,0.74],
+    [0.34,0.84],[0.33,0.92],[0.42,0.93],[0.50,0.93],[0.58,0.93],[0.67,0.92],[0.66,0.84],
+    [0.70,0.74],[0.78,0.64],[0.81,0.50],[0.76,0.36],[0.68,0.24],[0.64,0.16],[0.62,0.08],[0.50,0.06],
+  ]},
+  cactus: { name: "植物", emoji: "🌵", pts: [
+    [0.42,0.95],[0.41,0.70],[0.41,0.47],[0.39,0.44],[0.30,0.42],[0.26,0.38],[0.25,0.30],
+    [0.27,0.25],[0.32,0.24],[0.36,0.27],[0.37,0.33],[0.40,0.36],[0.44,0.28],[0.44,0.18],
+    [0.47,0.11],[0.53,0.11],[0.56,0.18],[0.56,0.36],[0.58,0.39],[0.62,0.38],[0.68,0.36],
+    [0.71,0.31],[0.71,0.25],[0.67,0.22],[0.62,0.24],[0.60,0.28],[0.59,0.33],[0.59,0.40],
+    [0.58,0.60],[0.58,0.88],[0.57,0.95],[0.50,0.96],
+  ]},
+  person: { name: "人物剪影", emoji: "🧍", pts: [
+    [0.50,0.05],[0.58,0.08],[0.61,0.14],[0.58,0.20],[0.56,0.23],[0.66,0.27],[0.71,0.32],
+    [0.72,0.45],[0.70,0.55],[0.64,0.52],[0.63,0.60],[0.64,0.66],[0.66,0.78],[0.65,0.92],
+    [0.58,0.94],[0.56,0.85],[0.50,0.70],[0.44,0.85],[0.42,0.94],[0.35,0.92],[0.34,0.78],
+    [0.36,0.66],[0.37,0.60],[0.36,0.52],[0.30,0.55],[0.28,0.45],[0.29,0.32],[0.34,0.27],
+    [0.44,0.23],[0.42,0.20],[0.39,0.14],[0.42,0.08],
+  ]},
+};
+
+// 难度：形状复杂度↑ + 时间↓ + 容差px↓；hard为盲画
+var SKETCH_DIFFS = {
+  easy:   { name: "简单", shape: "vase",   time: 40, tol: 20, blind: false, desc: "器皿轮廓｜40秒｜容差20px" },
+  normal: { name: "普通", shape: "cactus", time: 25, tol: 13, blind: false, desc: "植物轮廓｜25秒｜容差13px" },
+  hard:   { name: "困难", shape: "person", time: 15, tol: 9,  blind: true,  desc: "人物剪影｜15秒｜容差9px｜盲画" },
+};
+
+// 入口：开始一笔画速写（传送门精选直达）
+function renderSketchGame(diffKey) {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+  stopBossFight();
+  stopBandGame();
+  stopMilkFrogGame();
+  stopSketchGame();
+
+  var d = SKETCH_DIFFS[diffKey] || SKETCH_DIFFS.easy;
+  var shape = SKETCH_SHAPES[d.shape];
+
+  document.getElementById("location-name").textContent = "一笔画速写";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "grid";
+  actionsArea.className = "band-actions";
+  document.getElementById("description-area").style.display = "none";
+
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var area = document.getElementById("image-area");
+  var panel = document.createElement("div");
+  panel.id = "sk-panel";
+  area.appendChild(panel);
+
+  var html = '';
+  html += '<div class="mf-head"><div class="mf-frog">🎨</div><div class="mf-bubble">速写课开始！' + d.name + '难度：' + d.desc + (d.blind ? '（画的时候看不到自己的线！）' : '') + '</div></div>';
+  html += '<div class="mf-pills">';
+  html += '<span class="mf-pill">难度 <b>' + d.name + '</b></span>';
+  html += '<span class="mf-pill">形状 <b>' + shape.emoji + ' ' + shape.name + '</b></span>';
+  html += '<span class="mf-pill">容差 <b>' + d.tol + 'px</b></span>';
+  html += '<span class="mf-pill">⏱ <b id="sk-time">--</b></span>';
+  html += '<span class="mf-pill mf-pill-btn" onclick="sketchShowRules()">📖 规则</span>';
+  html += '</div>';
+  html += '<canvas id="sk-canvas"></canvas>';
+  html += '<div class="mf-hint" id="sk-hint">先观察轮廓，下笔后开始计时｜一笔描完，松手即交卷</div>';
+  panel.innerHTML = html;
+
+  var canvas = document.getElementById("sk-canvas");
+  canvas.oncontextmenu = function(e) { e.preventDefault(); return false; };
+
+  sketchState = {
+    diff: d, diffKey: diffKey || "easy", shape: shape,
+    pts: [],            // 玩家路径采样点（画布CSS像素坐标）
+    targetPts: [],      // 原图重采样点（每4px一点，评分与绘制用）
+    drawing: false, done: false,
+    timerOn: false, startTs: 0, timeLeft: d.time,
+    result: null, raf: null, size: 0, dpr: 1,
+  };
+
+  // 尺寸自适应：正方形画布，适配面板宽与屏幕高（下一帧布局完成后测量）
+  requestAnimationFrame(function() {
+    if (!sketchState) return;
+    var dpr = window.devicePixelRatio || 1;
+    var w = panel.clientWidth - 24;
+    var h = window.innerHeight * 0.48;
+    var size = Math.max(220, Math.min(460, Math.floor(Math.min(w, h))));
+    var st = sketchState;
+    st.size = size; st.dpr = dpr;
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+    canvas.width = Math.floor(size * dpr);
+    canvas.height = Math.floor(size * dpr);
+
+    // 归一化坐标 → 画布坐标（留7%边距），并按弧长每4px重采样原图
+    var scale = size * 0.86, off = size * 0.07;
+    var raw = [];
+    for (var i = 0; i < shape.pts.length; i++) {
+      raw.push([off + shape.pts[i][0] * scale, off + shape.pts[i][1] * scale]);
+    }
+    st.targetPts = sketchResample(raw, 4);
+
+    // 指针事件：一笔 = 一次pointerdown~up，up即交卷
+    function pos(e) {
+      var r = canvas.getBoundingClientRect();
+      return [ (e.clientX - r.left) * (size / r.width), (e.clientY - r.top) * (size / r.height) ];
+    }
+    canvas.addEventListener("pointerdown", function(e) {
+      if (!sketchState || sketchState.done || sketchState.drawing) return;
+      e.preventDefault();
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+      sketchState.drawing = true;
+      if (!sketchState.timerOn) { sketchState.timerOn = true; sketchState.startTs = Date.now(); }
+      sketchState.pts.push(pos(e));
+    });
+    canvas.addEventListener("pointermove", function(e) {
+      var s2 = sketchState;
+      if (!s2 || !s2.drawing || s2.done) return;
+      var p = pos(e), last = s2.pts[s2.pts.length - 1];
+      if (!last || Math.hypot(p[0] - last[0], p[1] - last[1]) >= 2) s2.pts.push(p);
+    });
+    function finish() {
+      if (sketchState && sketchState.drawing) {
+        sketchState.drawing = false;
+        sketchSubmit();
+      }
+    }
+    canvas.addEventListener("pointerup", finish);
+    canvas.addEventListener("pointercancel", finish);
+    canvas.addEventListener("pointerleave", function(e) {
+      // 捕获失败兜底：笔移出画布视作抬笔
+      if (sketchState && sketchState.drawing && !sketchState.done && e.pointerType === "mouse") finish();
+    });
+
+    sketchLoop();
+  });
+
+  // 按钮区
+  actionsArea.innerHTML = "";
+  var retryBtn = document.createElement("button");
+  retryBtn.innerHTML = "🔄 重新开始";
+  retryBtn.className = "action-btn";
+  retryBtn.onclick = function() { renderSketchGame(sketchState ? sketchState.diffKey : diffKey); };
+  actionsArea.appendChild(retryBtn);
+  var quitBtn = document.createElement("button");
+  quitBtn.innerHTML = "🚪 放弃速写";
+  quitBtn.className = "action-btn band-quit";
+  quitBtn.onclick = function() { stopSketchGame(); renderScene("gate"); };
+  actionsArea.appendChild(quitBtn);
+}
+
+// 退出清理：删面板、停RAF、恢复常规布局
+function stopSketchGame() {
+  var st = sketchState;
+  if (st && st.raf) cancelAnimationFrame(st.raf);
+  var panel = document.getElementById("sk-panel");
+  if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+  sketchState = null;
+}
+
+// 按弧长重采样折线：每隔step像素取一点（评分基准）
+function sketchResample(pts, step) {
+  var out = [pts[0].slice()];
+  var carry = 0;
+  for (var i = 1; i < pts.length; i++) {
+    var ax = pts[i-1][0], ay = pts[i-1][1], bx = pts[i][0], by = pts[i][1];
+    var segLen = Math.hypot(bx - ax, by - ay);
+    var t = step - carry;
+    while (t <= segLen) {
+      out.push([ax + (bx - ax) * (t / segLen), ay + (by - ay) * (t / segLen)]);
+      t += step;
+    }
+    carry = carry + segLen - Math.floor((carry + segLen) / step) * step;
+    // 修正：carry = (carry + segLen) % step
+  }
+  var last = pts[pts.length - 1];
+  var tail = out[out.length - 1];
+  if (Math.hypot(last[0] - tail[0], last[1] - tail[1]) > step * 0.5) out.push(last.slice());
+  return out;
+}
+
+// 主循环：倒计时 + 绘制（目标轮廓/玩家线/结算对比）
+function sketchLoop() {
+  var st = sketchState;
+  if (!st) return;
+  var canvas = document.getElementById("sk-canvas");
+  if (!canvas) { stopSketchGame(); return; }
+  var ctx = canvas.getContext("2d");
+  var d = st.diff, size = st.size;
+
+  // 倒计时（下笔才开始走）
+  if (st.timerOn && !st.done) {
+    st.timeLeft = Math.max(0, d.time - (Date.now() - st.startTs) / 1000);
+    if (st.timeLeft <= 0) { st.drawing = false; sketchSubmit(); }
+  }
+  var timeEl = document.getElementById("sk-time");
+  if (timeEl) timeEl.textContent = st.timerOn ? Math.ceil(st.timeLeft) + "s" : d.time + "s";
+
+  ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size);
+
+  // 背景
+  ctx.fillStyle = "#0d0b14";
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = "rgba(232,213,183,0.05)";
+  ctx.lineWidth = 1;
+  for (var g = size / 6; g < size; g += size / 6) {
+    ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(size, g); ctx.stroke();
+  }
+
+  // 目标轮廓：中点平滑曲线 + 虚线
+  var tg = st.targetPts;
+  ctx.strokeStyle = "rgba(178,190,210,0.75)";
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([7, 6]);
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(tg[0][0], tg[0][1]);
+  for (var i = 1; i < tg.length - 1; i++) {
+    var mx = (tg[i][0] + tg[i+1][0]) / 2, my = (tg[i][1] + tg[i+1][1]) / 2;
+    ctx.quadraticCurveTo(tg[i][0], tg[i][1], mx, my);
+  }
+  ctx.lineTo(tg[tg.length - 1][0], tg[tg.length - 1][1]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 玩家线：盲画模式下绘制中不可见，结算后按偏差着色回放
+  if (st.pts.length > 1) {
+    if (st.done) {
+      var tol = d.tol;
+      for (var k = 1; k < st.pts.length; k++) {
+        var pa = st.pts[k-1], pb = st.pts[k];
+        var dev = (sketchMinDist(pa, tg) + sketchMinDist(pb, tg)) / 2;
+        ctx.strokeStyle = dev <= tol ? "#81c784" : (dev <= tol * 2 ? "#ffb74d" : "#e57373");
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
+      }
+    } else if (!d.blind) {
+      ctx.strokeStyle = "#ffd54f";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(st.pts[0][0], st.pts[0][1]);
+      for (var j = 1; j < st.pts.length; j++) ctx.lineTo(st.pts[j][0], st.pts[j][1]);
+      ctx.stroke();
+      // 笔尖
+      var tip = st.pts[st.pts.length - 1];
+      ctx.fillStyle = "#ffd54f";
+      ctx.beginPath(); ctx.arc(tip[0], tip[1], 4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // 计时条（下笔后显示，不足30%变红）
+  if (st.timerOn && !st.done) {
+    var ratio = st.timeLeft / d.time;
+    ctx.fillStyle = ratio < 0.3 ? "#ff6b6b" : "#81d4fa";
+    ctx.fillRect(0, 0, size * ratio, 5);
+  }
+
+  // 结算文字
+  if (st.done && st.result) {
+    var r = st.result;
+    ctx.fillStyle = "rgba(13,11,20,0.78)";
+    ctx.fillRect(0, size / 2 - 52, size, 104);
+    ctx.textAlign = "center";
+    ctx.fillStyle = r.score >= 60 ? "#ffd54f" : "#ff6b6b";
+    ctx.font = "700 34px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillText(r.score + "分", size / 2, size / 2 - 14);
+    ctx.fillStyle = "#e8d5b7";
+    ctx.font = "14px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillText(r.grade, size / 2, size / 2 + 12);
+    ctx.fillStyle = "#b5c4d8";
+    ctx.font = "12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillText("重合 " + r.cov + "%｜精准 " + r.acc + "%（" + d.tol + "px容差）", size / 2, size / 2 + 34);
+  }
+
+  st.raf = requestAnimationFrame(sketchLoop);
+}
+
+// 点到采样点列的最短距离
+function sketchMinDist(p, pts) {
+  var best = Infinity;
+  for (var i = 0; i < pts.length; i++) {
+    var dx = p[0] - pts[i][0], dy = p[1] - pts[i][1];
+    var d2 = dx * dx + dy * dy;
+    if (d2 < best) best = d2;
+  }
+  return Math.sqrt(best);
+}
+
+// 交卷：采样路径 → 点对点误差 → 重合度+精准度打分
+function sketchSubmit() {
+  var st = sketchState;
+  if (!st || st.done) return;
+  st.done = true;
+  st.drawing = false;
+  var d = st.diff, tol = d.tol;
+  var player = st.pts, target = st.targetPts;
+
+  if (player.length < 30) {
+    st.result = { score: 0, cov: 0, acc: 0, grade: player.length ? "时间到！还没画完……" : "还没下笔就交卷了？" };
+    sketchUpdateButtons();
+    return;
+  }
+
+  // 精准度：玩家点落在容差内的比例
+  var okP = 0;
+  for (var i = 0; i < player.length; i++) {
+    if (sketchMinDist(player[i], target) <= tol) okP++;
+  }
+  var acc = Math.round(okP / player.length * 100);
+
+  // 重合度：原图采样点被玩家线覆盖（1.6倍容差内有玩家点）的比例
+  var okT = 0;
+  for (var t = 0; t < target.length; t++) {
+    var hit = false;
+    for (var j = 0; j < player.length; j++) {
+      var dx = target[t][0] - player[j][0], dy = target[t][1] - player[j][1];
+      var lim = tol * 1.6;
+      if (dx * dx + dy * dy <= lim * lim) { hit = true; break; }
+    }
+    if (hit) okT++;
+  }
+  var cov = Math.round(okT / target.length * 100);
+
+  var score = Math.round(cov * 0.65 + acc * 0.35);
+  var grade;
+  if (score >= 85) grade = "大师出手！观察力惊人";
+  else if (score >= 70) grade = "颇有功底，速写课代表";
+  else if (score >= 60) grade = "勉强过关，多加练习";
+  else grade = "不及格……线条跑哪儿去了";
+  if (d.blind && score >= 60) grade += "（盲画达标！）";
+  st.result = { score: score, cov: cov, acc: acc, grade: grade };
+  sketchUpdateButtons();
+}
+
+// 结算后按钮：再来一次 / 离开
+function sketchUpdateButtons() {
+  var st = sketchState;
+  if (!st) return;
+  var hint = document.getElementById("sk-hint");
+  if (hint && st.result) {
+    hint.textContent = st.result.score >= 60
+      ? "🏆 过关！绿线=精准段，黄线=偏移段，红线=跑飞段"
+      : "💀 不及格……看看红线都跑哪儿去了，再来一次？";
+  }
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  var retryBtn = document.createElement("button");
+  retryBtn.innerHTML = "🔄 再来一次";
+  retryBtn.className = "action-btn special";
+  retryBtn.onclick = function() { renderSketchGame(st.diffKey); };
+  actionsArea.appendChild(retryBtn);
+  var leaveBtn = document.createElement("button");
+  leaveBtn.innerHTML = "🚪 离开速写课";
+  leaveBtn.className = "action-btn";
+  leaveBtn.onclick = function() { stopSketchGame(); renderScene("gate"); };
+  actionsArea.appendChild(leaveBtn);
+}
+
+// 规则弹窗
+function sketchShowRules() {
+  showPopupModal(
+    '<div style="text-align:left;font-size:14px;line-height:1.8;">' +
+    '<b style="color:#ffd54f;">🎨 一笔画速写</b><br>' +
+    '· 屏幕给出一个虚线轮廓，用手指/鼠标<b>一笔</b>描完它<br>' +
+    '· <b>下笔才开始倒计时</b>，松手或超时立即交卷<br>' +
+    '· 评分 = 重合度65% + 精准度35%：<br>' +
+    '　重合度：轮廓有多少被你的线覆盖（每4px采样比对）<br>' +
+    '　精准度：你的线有多少落在容差范围内<br>' +
+    '· 60分及格；难度越高时间越短、容差越小<br>' +
+    '· 困难为<b>盲画模式</b>：画的过程中看不到自己的线，全凭观察和手感！<br>' +
+    '· 结算回放：绿线=精准，黄线=偏移，红线=跑飞' +
+    '</div>'
+  );
+}
+
 // ===== 游玩提示 =====
 function showTips() {
   showPopupModal("亚嘞亚嘞，居然选择游玩这款游戏吗，真是有品呢……<br><br>本游戏没有做任何网络优化，图片加载稍慢可能会影响游戏体验望大家体谅……<br><br>本游戏没有修复任何bug因为作者认为那是游戏体验的一部分……<br><br>本游戏纯前端，没有存档功能，若想再次游玩可借助传送门和背包控制台手动回到上次游玩进度……<br><br>教学楼是剧情主线，实验楼像小游戏大全，地下室算主线前传，其他算奇异古怪搞笑猎奇路线大全……<br><br>可以先尝试集齐我设计的所有成就，虽然我还没有设计多少……<br><br>本作预计想要制作真。galagame线（还没做，以及N条起义神秘猎奇搞笑诡异线路，这个游戏真的是我乱做的非常低质。<br><br>作者语文很差，所以剧情写的很烂，ai标也懒得去……<br><br>技术力有限，十分低质……<br><br>如果看的云里雾里一头雾水那就对了，因为凡人是无法理解神的（bushi）<br><br>总之这是一个半成品的纯唐人剧情向(迫真）猎奇小游戏，请你一定不要认真玩这个游戏，希望你能有糟糕的游戏体验，再见。");
@@ -9076,6 +9480,9 @@ function openPortal() {
 
   html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderMilkFrogGame(\'gate\');">';
   html += '<span class="game-icon">🐸</span>马桶奶蛙试炼</button>';
+
+  html += '<button class="portal-game-btn" id="portal-sketch-btn">';
+  html += '<span class="game-icon">🎨</span>一笔画速写</button>';
 
   html += '</div></div>';
 
@@ -9149,6 +9556,17 @@ function openPortal() {
     gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择乐队大赛模式</div>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderBandGame(\'single\');">单人挑战AI（竞拍博弈·你150金 vs AI300金）</button>' +
       '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderBandGame(\'duo\');">双人对战（同屏热座·可远程联机）</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
+  });
+
+  // 一笔画速写按钮：弹出难度选择（简单/普通/困难盲画）
+  overlay.querySelector("#portal-sketch-btn").addEventListener("click", function(e) {
+    e.stopPropagation();
+    var gamesList = overlay.querySelector(".portal-games-list");
+    gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择速写难度</div>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'easy\');">🏺 简单：器皿轮廓｜40秒｜容差20px</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'normal\');">🌵 普通：植物轮廓｜25秒｜容差13px</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'hard\');">🧍 困难：人物剪影｜15秒｜容差9px｜盲画！</button>' +
       '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
   });
 

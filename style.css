@@ -754,6 +754,22 @@ body {
 #actions-area.band-actions > .action-btn.band-quit {
   opacity: 0.6; font-size: 12px; min-height: 40px; padding: 8px 6px;
 }
+/* ===== 一笔画速写 ===== */
+#sk-panel {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto; box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(22,18,30,0.97), rgba(12,10,18,0.99));
+  color: #e8d5b7; padding: 10px 12px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: stretch;
+}
+#sk-canvas {
+  display: block; margin: 0 auto; flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(232,213,183,0.25);
+  touch-action: none;   /* 画布上手势只用于画画，不滚动页面 */
+  cursor: crosshair;
+}
 .band-section-title {
   font-size: 13px; font-weight: 700; color: #e8d5b7;
   margin: 10px 0 6px; letter-spacing: 1px;
