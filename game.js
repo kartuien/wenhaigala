@@ -1062,6 +1062,11 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.98", date: "2026-08-19", items: [
+    "一笔画速写评分再收紧（暴君版）：全难度时间缩短+容差大砍——简单30s/14px、普通20s/9px、困难12s/6px、写生45s/11px",
+    "重合度权重65%→70%（漏画轮廓比手抖更不可原谅）；冗长惩罚阈值1.25倍→1.1倍、每多10%扣3分、封顶30分",
+    "及格线60→65分，评价档位同步提高（大师90/课代表75/及格65）",
+  ]},
   { version: "v1.5.97", date: "2026-08-19", items: [
     "一笔画速写评分全面收紧：重合度判定从1.6倍容差收紧到1倍——必须真画进容差内才算覆盖轮廓（描个大概不再给分）",
     "新增冗长惩罚：玩家线总长超过轮廓1.25倍起扣分，每多10%扣2分（封顶20分）——抖动、绕路、来回描线都会被扣；结算面板显示'冗长描线-x分'",
@@ -9072,10 +9077,10 @@ var SKETCH_SHAPES = {
 
 // 难度：形状复杂度↑ + 时间↓ + 容差px↓；hard为盲画；study为写生（左稿纸右白纸分屏默画）
 var SKETCH_DIFFS = {
-  easy:   { name: "简单", shape: "vase",   time: 40, tol: 20, blind: false, desc: "器皿轮廓｜40秒｜容差20px" },
-  normal: { name: "普通", shape: "cactus", time: 25, tol: 13, blind: false, desc: "植物轮廓｜25秒｜容差13px" },
-  hard:   { name: "困难", shape: "person", time: 15, tol: 9,  blind: true,  desc: "人物剪影｜15秒｜容差9px｜盲画" },
-  study:  { name: "写生", shape: "cactus", time: 60, tol: 16, blind: false, split: true, desc: "看左边稿纸｜右边白纸默画｜60秒｜容差16px" },
+  easy:   { name: "简单", shape: "vase",   time: 30, tol: 14, blind: false, desc: "器皿轮廓｜30秒｜容差14px" },
+  normal: { name: "普通", shape: "cactus", time: 20, tol: 9,  blind: false, desc: "植物轮廓｜20秒｜容差9px" },
+  hard:   { name: "困难", shape: "person", time: 12, tol: 6,  blind: true,  desc: "人物剪影｜12秒｜容差6px｜盲画" },
+  study:  { name: "写生", shape: "cactus", time: 45, tol: 11, blind: false, split: true, desc: "看左边稿纸｜右边白纸默画｜45秒｜容差11px" },
 };
 
 // 入口：开始一笔画速写（传送门精选直达）
@@ -9368,7 +9373,7 @@ function sketchLoop() {
     ctx.fillStyle = "rgba(13,11,20,0.82)";
     ctx.fillRect(half, size / 2 - 52, size, 116);
     ctx.textAlign = "center";
-    ctx.fillStyle = r.score >= 60 ? "#ffd54f" : "#ff6b6b";
+    ctx.fillStyle = r.score >= 65 ? "#ffd54f" : "#ff6b6b";
     ctx.font = "700 34px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
     ctx.fillText(r.score + "分", cx, size / 2 - 14);
     ctx.fillStyle = "#e8d5b7";
@@ -9431,22 +9436,23 @@ function sketchSubmit() {
   }
   var cov = Math.round(okT / target.length * 100);
 
-  // 冗长惩罚：玩家线总长超过轮廓1.25倍起扣分（抖动/绕路/来回描），每多10%扣2分，最多扣20
+  // 冗长惩罚：玩家线总长超过轮廓1.1倍起扣分（抖动/绕路/来回描），每多10%扣3分，最多扣30
   var playerLen = 0, targetLen = 0;
   for (var a = 1; a < player.length; a++) playerLen += Math.hypot(player[a][0]-player[a-1][0], player[a][1]-player[a-1][1]);
   for (var b = 1; b < target.length; b++) targetLen += Math.hypot(target[b][0]-target[b-1][0], target[b][1]-target[b-1][1]);
   var penalty = 0;
-  if (targetLen > 0 && playerLen > targetLen * 1.25) {
-    penalty = Math.min(20, Math.round((playerLen / targetLen - 1.25) * 20));
+  if (targetLen > 0 && playerLen > targetLen * 1.1) {
+    penalty = Math.min(30, Math.round((playerLen / targetLen - 1.1) * 30));
   }
 
-  var score = Math.max(0, Math.round(cov * 0.65 + acc * 0.35 - penalty));
+  // 重合度权重加重到70%：漏画轮廓比手抖更不可原谅
+  var score = Math.max(0, Math.round(cov * 0.7 + acc * 0.3 - penalty));
   var grade;
-  if (score >= 85) grade = "大师出手！观察力惊人";
-  else if (score >= 70) grade = "颇有功底，速写课代表";
-  else if (score >= 60) grade = "勉强过关，多加练习";
+  if (score >= 90) grade = "大师出手！观察力惊人";
+  else if (score >= 75) grade = "颇有功底，速写课代表";
+  else if (score >= 65) grade = "勉强过关，多加练习";
   else grade = "不及格……线条跑哪儿去了";
-  if (d.blind && score >= 60) grade += "（盲画达标！）";
+  if (d.blind && score >= 65) grade += "（盲画达标！）";
   st.result = { score: score, cov: cov, acc: acc, penalty: penalty, grade: grade };
   sketchUpdateButtons();
 }
@@ -9457,7 +9463,7 @@ function sketchUpdateButtons() {
   if (!st) return;
   var hint = document.getElementById("sk-hint");
   if (hint && st.result) {
-    hint.textContent = st.result.score >= 60
+    hint.textContent = st.result.score >= 65
       ? "🏆 过关！绿线=精准段，黄线=偏移段，红线=跑飞段" + (st.split ? "｜虚线=稿纸对照" : "")
       : "💀 不及格……看看红线都跑哪儿去了，再来一次？";
   }
@@ -9482,11 +9488,11 @@ function sketchShowRules() {
     '<b style="color:#ffd54f;">🎨 一笔画速写</b><br>' +
     '· 屏幕给出一个虚线轮廓，用手指/鼠标<b>一笔</b>描完它<br>' +
     '· <b>下笔才开始倒计时</b>，松手或超时立即交卷<br>' +
-    '· 评分 = 重合度65% + 精准度35% - 冗长惩罚：<br>' +
-    '　重合度：轮廓有多少被你的线<b>画进容差内</b>（每4px采样比对）<br>' +
+    '· 评分 = 重合度70% + 精准度30% - 冗长惩罚：<br>' +
+    '　重合度：轮廓有多少被你的线<b>画进容差内</b>（每4px采样比对，漏画最伤分）<br>' +
     '　精准度：你的线有多少落在容差范围内<br>' +
-    '　冗长惩罚：线总长超过轮廓1.25倍起，每多10%扣2分（最多扣20）——抖动绕路来回描都会扣<br>' +
-    '· 60分及格；难度越高时间越短、容差越小<br>' +
+    '　冗长惩罚：线总长超过轮廓1.1倍起，每多10%扣3分（最多扣30）——抖动绕路来回描都会扣<br>' +
+    '· <b>65分及格</b>；难度越高时间越短、容差越小<br>' +
     '· 困难为<b>盲画模式</b>：画的过程中看不到自己的线，全凭观察和手感！<br>' +
     '· 结算回放：绿线=精准，黄线=偏移，红线=跑飞<br><br>' +
     '<b style="color:#ffd54f;">🖼 写生模式</b><br>' +
@@ -9637,10 +9643,10 @@ function openPortal() {
     e.stopPropagation();
     var gamesList = overlay.querySelector(".portal-games-list");
     gamesList.innerHTML = '<div style="text-align:center;color:#e8d5b7;padding:8px 0;font-size:13px;">选择速写难度</div>' +
-      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'easy\');">🏺 简单：器皿轮廓｜40秒｜容差20px</button>' +
-      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'normal\');">🌵 普通：植物轮廓｜25秒｜容差13px</button>' +
-      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'hard\');">🧍 困难：人物剪影｜15秒｜容差9px｜盲画！</button>' +
-      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'study\');">🖼 写生：看左稿纸·右白纸默画｜60秒｜容差16px</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'easy\');">🏺 简单：器皿轮廓｜30秒｜容差14px</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'normal\');">🌵 普通：植物轮廓｜20秒｜容差9px</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'hard\');">🧍 困难：人物剪影｜12秒｜容差6px｜盲画！</button>' +
+      '<button class="portal-game-btn" style="font-size:12px;" onclick="event.stopPropagation();var ov=this.closest(\'.modal-overlay\');ov.remove();renderSketchGame(\'study\');">🖼 写生：看左稿纸·右白纸默画｜45秒｜容差11px</button>' +
       '<button class="portal-game-btn" style="font-size:12px;background:rgba(255,255,255,0.05);color:rgba(232,213,183,0.6);" onclick="event.stopPropagation();openPortal();">返回</button>';
   });
 
