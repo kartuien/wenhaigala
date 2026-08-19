@@ -81,6 +81,8 @@ var ACHIEVEMENT_CONFIG = {
   dream_eternal:      { id: "dream_eternal",      name: "梦境永续", desc: "选择永远留在了梦境里", icon: "🌌" },
   band_king:          { id: "band_king",          name: "乐队之王", desc: "在乐队大赛中击败了AI经纪人", icon: "👑" },
   bocchi_band:        { id: "bocchi_band",        name: "结成乐队吧！", desc: "签下了社恐吉他英雄后藤独", icon: "🎸" },
+  milk_win:           { id: "milk_win",           name: "奶味试炼胜利", desc: "通过了马桶奶蛙的奶味试炼", icon: "🐸" },
+  milk_lose:          { id: "milk_lose",          name: "奶味试炼失败", desc: "在奶味试炼中被奶味淹没了", icon: "🥛" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -1060,6 +1062,11 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.94", date: "2026-08-19", items: [
+    "奶味试炼结算接入剧情：结果界面改为「继续」按钮，播放马桶奶蛙结算感言（胜利/失败各一套台词）",
+    "胜利线：奶蛙认输感言播完自动回到楼道（3F线回楼梯间，传送门线回入口）；失败线：奶蛙训话播完给「再来一次」选项（可重开试炼）",
+    "新增成就：🐸奶味试炼胜利（打爆全部试炼体）、🥛奶味试炼失败（理智归零）——胜败都给成就，归入「决斗与小游戏」分组",
+  ]},
   { version: "v1.5.93", date: "2026-08-19", items: [
     "奶味试炼新增3个攻击技能：默写风暴（语📝指定一整行各打1）、语法重拳（英✍️指定敌人打2）、电学实验（科⚡所在十字范围各打2），输出手段更足",
     "奶味试炼状态栏新增「📖规则」按钮：弹窗内含基础玩法说明+全部试炼体图鉴（含杂兵召唤物），怪物能力一目了然",
@@ -5763,7 +5770,7 @@ var ACHIEVEMENT_GROUPS = [
     "beat_bigfoot", "easy_bigfoot", "chem_king", "nightmare_bigfoot", "lost_to_bigfoot",
     "penguin_dog", "sandbox_win", "sandbox_lose", "sandbox_hard_win",
     "canteen_king", "canteen_got_some",
-    "band_king", "bocchi_band",
+    "band_king", "bocchi_band", "milk_win", "milk_lose",
     "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king", "grass_emperor",
     "beat_alien", "pooped_on", "nasa_detected", "capture_pig", "desert_pig_sight",
   ]},
@@ -8826,7 +8833,53 @@ function mfGameOver(win, reason) {
   st.resultReason = reason;
   st.quip = win ? "aptapt！！……有、有点东西……下次再来玩哦~" : "亚嘞亚嘞~就这点程度吗？回厕所反省去吧~";
   st.logs.push((win ? "🏆 " : "💀 ") + reason);
+  // 胜败都解锁成就
+  unlockAchievement(win ? "milk_win" : "milk_lose");
   mfRender();
+}
+
+// 结算后剧情：马桶奶蛙感言 → 胜利回楼道 / 失败给再来一次
+function mfPlayOutro(win, ret) {
+  stopMilkFrogGame();
+  // 打字期间清空并隐藏按钮区（防打字机"点击继续"复活旧按钮）
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+  document.getElementById("location-name").textContent = "奶味试炼空间";
+  // 马桶奶蛙立绘（规范切图：同步清src + cancelRAF + 单次RAF设新src）
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  img.src = "";
+  cancelRAF();
+  pendingImageRAF = requestAnimationFrame(function() {
+    pendingImageRAF = null;
+    img.src = "562814a3cbe292157e77e1ad6e9c4fde.jpg";
+    img.style.display = "block";
+    placeholder.style.display = "none";
+  });
+  var text = win
+    ? "马桶奶蛙：看来....你还是很强的|掉！！！！！|马桶奶蛙：小瞧了你了啊...这么强....怎么会...|不处"
+    : "马桶奶蛙：还不够！！！你怎么这么菜！！！|马桶奶蛙：愚蠢！就是你失败的原因|马桶奶蛙：再来一次！！不要在这里就轻易放弃！|马桶奶蛙：给我重新站起来啊！！";
+  seqTypeAndWait(text, function() {
+    if (win) {
+      renderScene(ret);   // 回到楼道
+      return;
+    }
+    // 失败：给再来一次选项
+    var actionsArea = document.getElementById("actions-area");
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "flex";
+    var retryBtn = document.createElement("button");
+    retryBtn.className = "action-btn special";
+    retryBtn.textContent = "🔄 再来一次";
+    retryBtn.onclick = function() { renderMilkFrogGame(ret); };
+    actionsArea.appendChild(retryBtn);
+    var leaveBtn = document.createElement("button");
+    leaveBtn.className = "action-btn band-quit";
+    leaveBtn.textContent = "🚪 离开试炼";
+    leaveBtn.onclick = function() { renderScene(ret); };
+    actionsArea.appendChild(leaveBtn);
+  });
 }
 
 // 规则弹窗：基础玩法 + 试炼体图鉴（含杂兵）
@@ -8924,16 +8977,11 @@ function mfRender() {
   actionsArea.innerHTML = "";
   if (st.over) {
     var ret = st.returnScene;
-    var retryBtn = document.createElement("button");
-    retryBtn.innerHTML = "🔄 再试一次";
-    retryBtn.className = "action-btn special";
-    retryBtn.onclick = function() { renderMilkFrogGame(ret); };
-    actionsArea.appendChild(retryBtn);
-    var leaveBtn = document.createElement("button");
-    leaveBtn.innerHTML = "🚪 离开试炼";
-    leaveBtn.className = "action-btn";
-    leaveBtn.onclick = function() { stopMilkFrogGame(); renderScene(ret); };
-    actionsArea.appendChild(leaveBtn);
+    var goBtn = document.createElement("button");
+    goBtn.innerHTML = "▶️ 继续";
+    goBtn.className = "action-btn special";
+    goBtn.onclick = function() { mfPlayOutro(st.resultWin, ret); };
+    actionsArea.appendChild(goBtn);
     return;
   }
   for (var i = 0; i < st.hand.length; i++) {
