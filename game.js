@@ -83,6 +83,11 @@ var ACHIEVEMENT_CONFIG = {
   bocchi_band:        { id: "bocchi_band",        name: "结成乐队吧！", desc: "签下了社恐吉他英雄后藤独", icon: "🎸" },
   milk_win:           { id: "milk_win",           name: "奶味试炼胜利", desc: "通过了马桶奶蛙的奶味试炼", icon: "🐸" },
   milk_lose:          { id: "milk_lose",          name: "奶味试炼失败", desc: "在奶味试炼中被奶味淹没了", icon: "🥛" },
+  art_pass:           { id: "art_pass",           name: "美术及格", desc: "在大脚鱼的逼迫下画出了及格的速写", icon: "🎨" },
+  art_fail:           { id: "art_fail",           name: "美术不及格", desc: "画的东西连大脚鱼都看不下去了", icon: "🗑️" },
+  art_great:          { id: "art_great",          name: "美术优秀", desc: "速写拿下85分以上，大脚鱼当场沉默", icon: "🖼️" },
+  chu_win:            { id: "chu_win",            name: "神之一手", desc: "在井字棋中击败了褚赢", icon: "⭐" },
+  chu_lose:           { id: "chu_lose",           name: "被炸鱼了", desc: "在井字棋中被褚赢炸鱼", icon: "🐟" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -901,7 +906,7 @@ var SCENE_CONFIG = {
       { text: "1F", target: "lab_1f" },
       { text: "2F", target: "lab_2f" },
       { text: "3F", target: "lab_3f" },
-      { text: "4F", popup: "前面的区域以后再去探索吧！" },
+      { text: "4F", target: "lab_4f" },
       { text: "5F", popup: "前面的区域以后再去探索吧！" },
       { text: "6F", popup: "前面的区域以后再去探索吧！" },
       { text: "回到校门口", target: "gate" },
@@ -924,6 +929,12 @@ var SCENE_CONFIG = {
   // 实验楼三楼（中考冲刺教室，由专用handler渲染）
   lab_3f: {
     id: "lab_3f", name: "3F", img: "bb96621627837ac4b13a02f2901a3179.jpg",
+    desc: "",
+    buttons: []
+  },
+  // 实验楼四楼（厕所→美术教室，由专用handler渲染）
+  lab_4f: {
+    id: "lab_4f", name: "实验楼四楼", img: "0cdb1a7858ea69c2654b1d0541bb0b7a.jpg",
     desc: "",
     buttons: []
   },
@@ -1062,6 +1073,15 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.100", date: "2026-08-19", items: [
+    "实验楼4F后续·美术教室线：大脚🐟登场催交美术作业（美术不及格影响升学！）→ 进入一笔画速写关卡（简单难度，65分及格）",
+    "美术关卡结局：及格解锁成就「🎨美术及格」（85分以上额外叠「🖼️美术优秀」）并进入褚赢线；不及格解锁「🗑️美术不及格」并被大脚鱼骂「给我重画」→ 可无限重试",
+    "新增褚赢井字棋对弈：褚赢执❌先手随机落子，每手随机喊「X之X凌空罩！/一剑封喉/挖断」招式台词，你执⭕后手",
+    "井字棋三分支结局：赢=神之一手（成就「⭐神之一手」）→褚赢服输回楼梯间；输=被炸鱼（成就「🐟被炸鱼了」）→回楼梯间；平局=「没找到神之一手」→可再来一局",
+  ]},
+  { version: "v1.5.99", date: "2026-08-19", items: [
+    "实验楼4F开放：上楼到四楼→有个厕所要不要进去看看→「进厕所」选项→主角怂了（怕又蹲到后室+作者吐槽）→到美术教室（后续剧情待做，暂以回到楼梯间收尾）",
+  ]},
   { version: "v1.5.98", date: "2026-08-19", items: [
     "一笔画速写评分再收紧（暴君版）：全难度时间缩短+容差大砍——简单30s/14px、普通20s/9px、困难12s/6px、写生45s/11px",
     "重合度权重65%→70%（漏画轮廓比手抖更不可原谅）；冗长惩罚阈值1.25倍→1.1倍、每多10%扣3分、封顶30分",
@@ -1561,12 +1581,13 @@ var typewriterSession = null;  // 当前打字机会话参数（跳过按钮用�
 
 // 渲染当前场景
 function renderScene(sceneId) {
-  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼/一笔画速写仍在运行，强制停止并清理画布
+  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼/一笔画速写/井字棋仍在运行，强制停止并清理画布
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
   stopMilkFrogGame();
   stopSketchGame();
+  stopChuTicTacToe();
   // 清理反抗线渐晕（传送门中途逃离天台对峙时，防止黑边残留）
   var vgClean = document.getElementById("closing-vignette");
   if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
@@ -1716,6 +1737,11 @@ function renderScene(sceneId) {
   // 实验楼三楼 → 中考冲刺教室剧情
   if (sceneId === "lab_3f") {
     renderLab3FSequence();
+    return;
+  }
+  // 实验楼四楼 → 厕所→美术教室剧情
+  if (sceneId === "lab_4f") {
+    renderLab4FSequence();
     return;
   }
   // 教学楼一楼 → 初遇剧情
@@ -3256,6 +3282,134 @@ function renderLab3FSequence() {
         });
       });
     });
+  });
+}
+
+// 实验楼四楼序列：到四楼 → 厕所 → 进厕所选项 → 后室吐槽 → 美术教室 → 大脚鱼美术作业 → 速写关卡 → 褚赢井字棋
+function renderLab4FSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopTypewriter();
+
+  var scene = SCENE_CONFIG["lab_4f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 序列图预加载：美术教室/大脚鱼/褚赢（不阻塞切图，切到时大概率已就绪）
+  var preImgs = ["48472b7a6d06f11352af686d162c2e26.jpg", "9dafc50cb761f26d9a5fd466529efd22.jpg", "56cc359aca0b8a0870eba3c71a3fc725.jpg"];
+  for (var pi = 0; pi < preImgs.length; pi++) {
+    (new Image()).src = preImgs[pi];
+  }
+
+  // 规范切图：同步清src + cancelRAF + 单次RAF设新src
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 图1：到四楼
+  switchImg(scene.img);
+  document.getElementById("location-name").textContent = scene.name;
+  seqTypeAndWait("到四楼啦~|有个厕所.....|要不要进去看看....", function() {
+    // 选项：进厕所
+    actionsArea.innerHTML = "";
+    actionsArea.style.display = "flex";
+    var enterBtn = document.createElement("button");
+    enterBtn.className = "action-btn special";
+    enterBtn.textContent = "进厕所";
+    enterBtn.onclick = function() {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "none";
+      seqTypeAndWait("算了吧.....|我怕又给我蹲到后室了|（话说不会有人玩到这里没进过后室吧）", function() {
+        // 图2：美术教室
+        switchImg("48472b7a6d06f11352af686d162c2e26.jpg");
+        seqTypeAndWait("到了啊，美术教室", function() {
+          // 图3：大脚鱼登场
+          switchImg("9dafc50cb761f26d9a5fd466529efd22.jpg");
+          seqTypeAndWait("什么...大脚🐟！！|大脚🐟:你好|你好|大脚🐟：你还有美术作业没交！！美术不及格是会影响升学的！|那和我没有影响了|大脚🐟：我不管你赶紧画|好吧....", function() {
+            // 美术关卡：一笔画速写（简单难度），及格≥65分；不及格被大脚鱼要求重画
+            function startArtLevel() {
+              renderSketchGame("easy", function(pass, score) {
+                stopSketchGame();
+                actionsArea.innerHTML = "";
+                actionsArea.style.display = "none";
+                if (!pass) {
+                  // 不及格：解锁成就 → 大脚鱼要求重画 → 再来一次
+                  unlockAchievement("art_fail");
+                  seqTypeAndWait("大脚🐟：你画的这是啥啊！给我重画！", function() {
+                    actionsArea.innerHTML = "";
+                    actionsArea.style.display = "flex";
+                    var redrawBtn = document.createElement("button");
+                    redrawBtn.className = "action-btn special";
+                    redrawBtn.textContent = "🔄 再来一次";
+                    redrawBtn.onclick = function() {
+                      actionsArea.innerHTML = "";
+                      actionsArea.style.display = "none";
+                      startArtLevel();
+                    };
+                    actionsArea.appendChild(redrawBtn);
+                  });
+                  return;
+                }
+                // 及格：解锁成就（85分以上再叠一个优秀）→ 切褚赢图登场
+                unlockAchievement("art_pass");
+                if (score >= 85) unlockAchievement("art_great");
+                switchImg("56cc359aca0b8a0870eba3c71a3fc725.jpg");
+                seqTypeAndWait("褚赢：亚嘞亚嘞，我看你就知道你是一位棋力很强的对手呢|难道说，居然是褚赢吗？！！|褚赢：正是在下，我想和你对弈一把|不不不你打我就是虐菜啊|褚赢：我就炸鱼你气不气|？？！来！！！！", function() {
+                  startChuGame();
+                });
+              });
+            }
+            // 井字棋对弈：褚赢执❌先手随机落子，你执⭕
+            function startChuGame() {
+              renderChuTicTacToe(function(result) {
+                actionsArea.innerHTML = "";
+                actionsArea.style.display = "none";
+                switchImg("56cc359aca0b8a0870eba3c71a3fc725.jpg");
+                if (result === "win") {
+                  // 赢：神之一手 → 回楼梯间
+                  unlockAchievement("chu_win");
+                  seqTypeAndWait("褚赢：什.....什么！！|褚赢：居然是....神之一手！！|褚赢：这分明就是老鼠洗完头|褚赢：我输了.....", function() {
+                    renderScene("lab_floor");
+                  });
+                } else if (result === "lose") {
+                  // 输：被炸鱼 → 回楼梯间
+                  unlockAchievement("chu_lose");
+                  seqTypeAndWait("褚赢：你个小乐乐直接给我掉好吧|褚赢：我就炸鱼你气不气！", function() {
+                    renderScene("lab_floor");
+                  });
+                } else {
+                  // 平局：没找到神之一手 → 再来
+                  seqTypeAndWait("看来还是没找到神之一手啊...|再来！", function() {
+                    actionsArea.innerHTML = "";
+                    actionsArea.style.display = "flex";
+                    var againBtn = document.createElement("button");
+                    againBtn.className = "action-btn special";
+                    againBtn.textContent = "🔄 再来一次";
+                    againBtn.onclick = function() {
+                      actionsArea.innerHTML = "";
+                      actionsArea.style.display = "none";
+                      startChuGame();
+                    };
+                    actionsArea.appendChild(againBtn);
+                  });
+                }
+              });
+            }
+            startArtLevel();
+          });
+        });
+      });
+    };
+    actionsArea.appendChild(enterBtn);
   });
 }
 
@@ -5792,6 +5946,7 @@ var ACHIEVEMENT_GROUPS = [
     "penguin_dog", "sandbox_win", "sandbox_lose", "sandbox_hard_win",
     "canteen_king", "canteen_got_some",
     "band_king", "bocchi_band", "milk_win", "milk_lose",
+    "art_pass", "art_fail", "art_great", "chu_win", "chu_lose",
     "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king", "grass_emperor",
     "beat_alien", "pooped_on", "nasa_detected", "capture_pig", "desert_pig_sight",
   ]},
@@ -9083,15 +9238,17 @@ var SKETCH_DIFFS = {
   study:  { name: "写生", shape: "cactus", time: 45, tol: 11, blind: false, split: true, desc: "看左边稿纸｜右边白纸默画｜45秒｜容差11px" },
 };
 
-// 入口：开始一笔画速写（传送门精选直达）
-function renderSketchGame(diffKey) {
+// 入口：开始一笔画速写（传送门精选直达 / 剧情关卡调用：onFinish(pass, score)）
+function renderSketchGame(diffKey, onFinish) {
   stopTypewriter();
   if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
   stopMilkFrogGame();
+  stopChuTicTacToe();
   stopSketchGame();
+  var storyMode = !!onFinish;
 
   var d = SKETCH_DIFFS[diffKey] || SKETCH_DIFFS.easy;
   var shape = SKETCH_SHAPES[d.shape];
@@ -9134,6 +9291,7 @@ function renderSketchGame(diffKey) {
   sketchState = {
     diff: d, diffKey: diffKey || "easy", shape: shape,
     split: !!d.split,    // 写生模式：左稿纸右白纸分屏
+    onFinish: onFinish || null,   // 剧情关卡回调：交卷后交还故事流程
     pts: [],            // 玩家路径采样点（画布CSS像素坐标）
     targetPts: [],      // 原图重采样点（每4px一点，评分与绘制用；split模式已偏移到右半）
     drawing: false, done: false,
@@ -9207,12 +9365,12 @@ function renderSketchGame(diffKey) {
   var retryBtn = document.createElement("button");
   retryBtn.innerHTML = "🔄 重新开始";
   retryBtn.className = "action-btn";
-  retryBtn.onclick = function() { renderSketchGame(sketchState ? sketchState.diffKey : diffKey); };
+  retryBtn.onclick = function() { renderSketchGame((sketchState && sketchState.diffKey) || diffKey, onFinish); };
   actionsArea.appendChild(retryBtn);
   var quitBtn = document.createElement("button");
   quitBtn.innerHTML = "🚪 放弃速写";
   quitBtn.className = "action-btn band-quit";
-  quitBtn.onclick = function() { stopSketchGame(); renderScene("gate"); };
+  quitBtn.onclick = function() { stopSketchGame(); renderScene(storyMode ? "lab_floor" : "gate"); };
   actionsArea.appendChild(quitBtn);
 }
 
@@ -9469,10 +9627,23 @@ function sketchUpdateButtons() {
   }
   var actionsArea = document.getElementById("actions-area");
   actionsArea.innerHTML = "";
+  // 剧情关卡模式：结果交还故事流程（及格≥65分）
+  if (st.onFinish) {
+    var goBtn = document.createElement("button");
+    goBtn.innerHTML = "▶️ 继续";
+    goBtn.className = "action-btn special";
+    goBtn.onclick = function() {
+      var cb = st.onFinish, pass = st.result.score >= 65, score = st.result.score;
+      stopSketchGame();
+      cb(pass, score);
+    };
+    actionsArea.appendChild(goBtn);
+    return;
+  }
   var retryBtn = document.createElement("button");
   retryBtn.innerHTML = "🔄 再来一次";
   retryBtn.className = "action-btn special";
-  retryBtn.onclick = function() { renderSketchGame(st.diffKey); };
+  retryBtn.onclick = function() { renderSketchGame(st.diffKey, st.onFinish); };
   actionsArea.appendChild(retryBtn);
   var leaveBtn = document.createElement("button");
   leaveBtn.innerHTML = "🚪 离开速写课";
@@ -9502,6 +9673,154 @@ function sketchShowRules() {
     '· 松手交卷后，右边会<b>叠加稿纸虚线做对照</b>：你的线贴着虚线越紧，分越高' +
     '</div>'
   );
+}
+
+// ====================== 褚赢井字棋（实验楼4F美术教室·剧情关卡） ======================
+// 褚赢执❌先手、落子纯随机，落子时随机喊招式台词；你执⭕后手。
+// 胜/负/平三种结局由剧情回调接手（onFinish("win"|"lose"|"draw")）。
+var chuState = null;
+var CHU_CATCHPHRASES = ["X之X凌空罩！", "X之X一剑封喉", "X之X挖断！"];
+
+// 检查某方是否连成一线（8条线）
+function chuCheckWin(board, mark) {
+  var lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (var i = 0; i < lines.length; i++) {
+    var l = lines[i];
+    if (board[l[0]] === mark && board[l[1]] === mark && board[l[2]] === mark) return true;
+  }
+  return false;
+}
+
+// 入口：开始井字棋对弈（剧情调用）
+function renderChuTicTacToe(onFinish) {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+  stopBossFight();
+  stopBandGame();
+  stopMilkFrogGame();
+  stopSketchGame();
+  stopChuTicTacToe();
+
+  document.getElementById("location-name").textContent = "井字棋对弈";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  document.getElementById("description-area").style.display = "none";
+
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var area = document.getElementById("image-area");
+  var panel = document.createElement("div");
+  panel.id = "chu-panel";
+  area.appendChild(panel);
+
+  chuState = {
+    board: [null,null,null,null,null,null,null,null,null],
+    onFinish: onFinish || null,
+    locked: true,    // 褚赢先手：开局锁着等他落子
+    over: false,
+    say: "褚赢：亚嘞亚嘞~那就让我看看你的实力吧！",
+  };
+  chuRender();
+
+  // 按钮区：认输离场
+  var quitBtn = document.createElement("button");
+  quitBtn.innerHTML = "🚪 拱手认输";
+  quitBtn.className = "action-btn band-quit";
+  quitBtn.onclick = function() { stopChuTicTacToe(); renderScene("lab_floor"); };
+  actionsArea.appendChild(quitBtn);
+
+  // 褚赢先手落子（随机）
+  setTimeout(chuAiMove, 700);
+}
+
+// 褚赢随机落子 + 喊招式台词
+function chuAiMove() {
+  var st = chuState;
+  if (!st || st.over) return;
+  var empties = [];
+  for (var i = 0; i < 9; i++) if (!st.board[i]) empties.push(i);
+  if (!empties.length) return;
+  var cell = empties[Math.floor(Math.random() * empties.length)];
+  st.board[cell] = "X";
+  st.say = "褚赢：" + CHU_CATCHPHRASES[Math.floor(Math.random() * CHU_CATCHPHRASES.length)];
+  if (chuCheckWin(st.board, "X")) { chuEnd("lose"); return; }
+  if (empties.length === 1) { chuEnd("draw"); return; }   // 填满最后一格且未分胜负
+  st.locked = false;   // 轮到玩家
+  chuRender();
+}
+
+// 玩家落子
+function chuCellClick(i) {
+  var st = chuState;
+  if (!st || st.over || st.locked || st.board[i]) return;
+  st.board[i] = "O";
+  st.locked = true;
+  if (chuCheckWin(st.board, "O")) { chuEnd("win"); return; }
+  var full = true;
+  for (var k = 0; k < 9; k++) if (!st.board[k]) full = false;
+  if (full) { chuEnd("draw"); return; }
+  st.say = "褚赢：唔……";
+  chuRender();
+  setTimeout(chuAiMove, 650);
+}
+
+// 终局：展示结果 → 延迟交还剧情流程
+function chuEnd(result) {
+  var st = chuState;
+  if (!st || st.over) return;
+  st.over = true;
+  st.locked = true;
+  st.say = result === "win" ? "褚赢：什.....什么！！"
+         : result === "lose" ? "褚赢：小乐乐~你输了哦~"
+         : "褚赢：平局……有点意思。";
+  chuRender();
+  setTimeout(function() {
+    if (!chuState) return;   // 中途被清理（切场景/传送门）
+    var cb = st.onFinish;
+    stopChuTicTacToe();
+    if (cb) cb(result);
+    else renderScene("lab_floor");
+  }, 1000);
+}
+
+// 渲染：褚赢头像+台词气泡 + 3×3棋盘 + 状态提示
+function chuRender() {
+  var st = chuState;
+  var panel = document.getElementById("chu-panel");
+  if (!st || !panel) return;
+  var html = '';
+  html += '<div class="mf-head"><div class="mf-frog">⚫</div><div class="mf-bubble">褚赢：' + st.say.replace(/^褚赢：/, '') + '</div></div>';
+  html += '<div class="mf-pills">';
+  html += '<span class="mf-pill">你执 <b>⭕</b>｜褚赢执 <b>❌</b></span>';
+  html += '<span class="mf-pill">褚赢先手·落子随机</span>';
+  html += '</div>';
+  html += '<div class="chu-grid">';
+  for (var i = 0; i < 9; i++) {
+    var mark = st.board[i];
+    var cls = "mf-cell chu-cell";
+    if (mark === "X") cls += " chu-x";
+    if (mark === "O") cls += " chu-o";
+    html += '<div class="' + cls + '" onclick="chuCellClick(' + i + ')">' + (mark === "X" ? "❌" : (mark === "O" ? "⭕" : "")) + '</div>';
+  }
+  html += '</div>';
+  html += '<div class="mf-hint">' + (st.over ? "对局结束" : (st.locked ? "褚赢思考中..." : "轮到你落子（点空格放⭕）")) + '</div>';
+  panel.innerHTML = html;
+}
+
+// 退出清理：删面板、恢复常规布局
+function stopChuTicTacToe() {
+  var panel = document.getElementById("chu-panel");
+  if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+  chuState = null;
 }
 
 // ===== 游玩提示 =====
