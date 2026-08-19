@@ -1060,6 +1060,9 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v1.5.91", date: "2026-08-19", items: [
+    "3F后续：从窗户看进去→马桶奶蛙登场（亚嘞亚嘞+aptapt+作者乱入吐槽）→奶味试炼空间开启（试炼玩法待接）",
+  ]},
   { version: "v1.5.90", date: "2026-08-19", items: [
     "实验楼3F开放：上楼→走廊回忆（培优和中考那段时光）→中考最后冲刺阶段的教室→门打不开→从窗户看看里面（后续剧情待续，暂以回到楼梯间收尾）",
   ]},
@@ -3141,8 +3144,8 @@ function renderLab3FSequence() {
   actionsArea.innerHTML = "";
   actionsArea.style.display = "none";
 
-  // 序列图预加载：进入3F即后台预热后续5张图（不阻塞切图，切到时大概率已就绪）
-  var lab3fPreImgs = ["2ad7e4c6851dc500a7784b6c74978717.jpg", "695a4da26692ac6524e10de379eed378.jpg", "a3da50d139339cc6e9a8ee148a754a2f.jpg", "d4a205979a7884d633927ba09e4dffa8.jpg", "6c5d17ff1ca4a1c79b7002fa6458f084.jpg"];
+  // 序列图预加载：进入3F即后台预热后续7张图（不阻塞切图，切到时大概率已就绪）
+  var lab3fPreImgs = ["2ad7e4c6851dc500a7784b6c74978717.jpg", "695a4da26692ac6524e10de379eed378.jpg", "a3da50d139339cc6e9a8ee148a754a2f.jpg", "d4a205979a7884d633927ba09e4dffa8.jpg", "6c5d17ff1ca4a1c79b7002fa6458f084.jpg", "562814a3cbe292157e77e1ad6e9c4fde.jpg", "fcb9b30552dc026e8bd862be9bc05239.jpg"];
   for (var pi = 0; pi < lab3fPreImgs.length; pi++) {
     (new Image()).src = lab3fPreImgs[pi];
   }
@@ -3184,16 +3187,24 @@ function renderLab3FSequence() {
             // 图5：门打不开
             switchImg("d4a205979a7884d633927ba09e4dffa8.jpg");
             seqTypeAndWait("唔.....|打不开.......", function() {
-              // 图6：从窗户看（后续剧情待续，暂以回到楼梯间收尾）
+              // 图6：从窗户看
               switchImg("6c5d17ff1ca4a1c79b7002fa6458f084.jpg");
               seqTypeAndWait("从窗户看看里面吧.....", function() {
-                actionsArea.innerHTML = "";
-                actionsArea.style.display = "flex";
-                var btn = document.createElement("button");
-                btn.className = "action-btn";
-                btn.textContent = "回到楼梯间";
-                btn.onclick = function() { renderScene("lab_floor"); };
-                actionsArea.appendChild(btn);
+                // 图7：马桶奶蛙登场
+                switchImg("562814a3cbe292157e77e1ad6e9c4fde.jpg");
+                seqTypeAndWait("？|这tm什么鬼|马桶奶蛙：亚嘞亚嘞.....好久不见|这tm什么猎奇游戏我能退出吗|马桶奶蛙：不不不不不不不不不不不不不不不不不不|aptapt|马桶奶蛙：aptapt|不是这什么傻逼文案|马桶奶蛙：对啊我也觉得这文案很sb|作者：我也觉得|停停停赶紧进入正题吧|马桶奶蛙：亚嘞亚嘞，你这次回来，实力有没有退步呢...|马桶奶蛙：这真是一个有趣的问题呢.....|马桶奶蛙：让我试试你几斤几两吧！！！|好老套的剧情....|（我真没灵感了啊）", function() {
+                  // 图8：奶味试炼空间（试炼玩法待接，暂以回到楼梯间收尾）
+                  switchImg("fcb9b30552dc026e8bd862be9bc05239.jpg");
+                  seqTypeAndWait("（一股奶味扑面而来.....）", function() {
+                    actionsArea.innerHTML = "";
+                    actionsArea.style.display = "flex";
+                    var btn = document.createElement("button");
+                    btn.className = "action-btn";
+                    btn.textContent = "回到楼梯间";
+                    btn.onclick = function() { renderScene("lab_floor"); };
+                    actionsArea.appendChild(btn);
+                  });
+                });
               });
             });
           };
