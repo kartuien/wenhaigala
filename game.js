@@ -88,6 +88,11 @@ var ACHIEVEMENT_CONFIG = {
   art_great:          { id: "art_great",          name: "美术优秀", desc: "速写拿下85分以上，大脚鱼当场沉默", icon: "🖼️" },
   chu_win:            { id: "chu_win",            name: "神之一手", desc: "在井字棋中击败了褚赢", icon: "⭐" },
   chu_lose:           { id: "chu_lose",           name: "被炸鱼了", desc: "在井字棋中被褚赢炸鱼", icon: "🐟" },
+  hero_jump:          { id: "hero_jump",          name: "勇者传说", desc: "体验了警笛狗的《勇者大战魔王》", icon: "🗡️" },
+  hero_stupid:        { id: "hero_stupid",        name: "被愚蠢击败", desc: "疯狂按按钮GAME OVER了", icon: "🤡" },
+  dog_trial_win:      { id: "dog_trial_win",      name: "通过狗的考验", desc: "在超高灵敏度下躲过了所有障碍", icon: "🐕" },
+  dog_trial_lose:     { id: "dog_trial_lose",     name: "真菜啊", desc: "碰到了障碍物，警笛狗大笑", icon: "💦" },
+  bomb_klee:          { id: "bomb_klee",          name: "蹦蹦炸弹", desc: "高锰酸钾加红磷", icon: "💣" },
 };
 
 // ==================== 剧情事件配置 ====================
@@ -907,8 +912,8 @@ var SCENE_CONFIG = {
       { text: "2F", target: "lab_2f" },
       { text: "3F", target: "lab_3f" },
       { text: "4F", target: "lab_4f" },
-      { text: "5F", popup: "前面的区域以后再去探索吧！" },
-      { text: "6F", popup: "前面的区域以后再去探索吧！" },
+      { text: "5F", target: "lab_5f" },
+      { text: "6F", target: "lab_6f" },
       { text: "回到校门口", target: "gate" },
     ]
   },
@@ -935,6 +940,18 @@ var SCENE_CONFIG = {
   // 实验楼四楼（厕所→美术教室，由专用handler渲染）
   lab_4f: {
     id: "lab_4f", name: "实验楼四楼", img: "0cdb1a7858ea69c2654b1d0541bb0b7a.jpg",
+    desc: "",
+    buttons: []
+  },
+  // 实验楼五楼（电竞室→警笛狗，由专用handler渲染）
+  lab_5f: {
+    id: "lab_5f", name: "实验楼五楼", img: "1d505b0659cff265ea357c3a1d0efa8b.jpg",
+    desc: "",
+    buttons: []
+  },
+  // 实验楼六楼（音乐层→惊吓猪乐队对决→蹦蹦炸弹，由专用handler渲染）
+  lab_6f: {
+    id: "lab_6f", name: "实验楼六楼", img: "b57744cc3bd878ee4d93cfa49dfb32bd.jpg",
     desc: "",
     buttons: []
   },
@@ -1073,6 +1090,25 @@ function hasAchievement(achId) { return gameState.achievements.indexOf(achId) !=
 
 // ===== 更新日志配置 =====
 var CHANGELOG = [
+  { version: "v2.0", date: "2026-08-20", items: [
+    "警笛狗小球试炼「你个狗你作弊！」按钮升级：连点循环触发警笛狗长篇诡辩（规则没写不能调/你输给的是参数不是狗/书面申诉酌情驳回…），toast展示时长延长至3.2秒",
+    "showToast新增可选时长参数（默认仍为2秒，不影响其他调用处）",
+  ]},
+  { version: "v1.5.103", date: "2026-08-20", items: [
+    "警笛狗小球试炼加入传送门精选小游戏库（🐕入口），独立模式结算后可无限「再来一次」或「离开试炼」回校门口，胜利/失败照样给成就",
+    "五楼剧情线小球试炼失败给第二次挑战机会：「真菜啊....」后出「🔄 再来一次」+「🚪 离开试炼」（离开才回楼梯间），不再一败就踢回楼梯间",
+  ]},
+  { version: "v1.5.102", date: "2026-08-20", items: [
+    "实验楼6F开放·音乐层：最后一楼（音乐层！）→惊吓猪拦路（你可曾有过音乐的冲动~我们....一起....比谁更能组乐队吧！！）",
+    "乐队大赛接入剧情模式：与惊吓猪的乐队对决，结算弹窗改为惊吓猪专属文案（击败了惊吓猪！/被惊吓猪的乐队打败了！），失败/平局给「再来一次」按钮，胜利继续剧情",
+    "击败惊吓猪后：乐队高手平行宇宙独白→「去看看」选项→\"可莉\"登场蹦蹦炸弹！！→爆炸级剧烈震动→回楼梯间+成就💣蹦蹦炸弹（高锰酸钾加红磷）",
+  ]},
+  { version: "v1.5.101", date: "2026-08-19", items: [
+    "实验楼5F开放：到五楼（迫不及待要打游戏！）→电竞室门口→警笛狗拦路（可以玩我做的游戏，昨晚花了三个小时）",
+    "新增《勇者大战魔王》（警笛狗自制·像素简陋风）：按按钮→「你跳起来了」→「你又跳起来了」→……没了？→隐藏结局提示→疯狂按3下→GAME OVER→3秒后回故事线；成就🗡️勇者传说+🤡被愚蠢击败",
+    "新增警笛狗小球试炼：鼠标/触屏带小球穿柱缝；灵敏度被「参数优化」成×5.5（轻轻一动直接飞出去），作弊按钮会触发警笛狗名言「这是信息技术，不叫作弊，叫参数优化」",
+    "小球试炼结局：碰到障碍/飞出=💦真菜啊→回楼梯间；穿过全部障碍=🐕通过狗的考验（为你点赞）→回楼梯间",
+  ]},
   { version: "v1.5.100", date: "2026-08-19", items: [
     "实验楼4F后续·美术教室线：大脚🐟登场催交美术作业（美术不及格影响升学！）→ 进入一笔画速写关卡（简单难度，65分及格）",
     "美术关卡结局：及格解锁成就「🎨美术及格」（85分以上额外叠「🖼️美术优秀」）并进入褚赢线；不及格解锁「🗑️美术不及格」并被大脚鱼骂「给我重画」→ 可无限重试",
@@ -1581,13 +1617,15 @@ var typewriterSession = null;  // 当前打字机会话参数（跳过按钮用�
 
 // 渲染当前场景
 function renderScene(sceneId) {
-  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼/一笔画速写/井字棋仍在运行，强制停止并清理画布
+  // 切场景时若食堂抢饭/BOSS战/乐队/奶蛙试炼/一笔画速写/井字棋/勇者大战魔王/小球试炼仍在运行，强制停止并清理画布
   stopCanteenGame();
   stopBossFight();
   stopBandGame();
   stopMilkFrogGame();
   stopSketchGame();
   stopChuTicTacToe();
+  stopHeroVsDemon();
+  stopDogBallTrial();
   // 清理反抗线渐晕（传送门中途逃离天台对峙时，防止黑边残留）
   var vgClean = document.getElementById("closing-vignette");
   if (vgClean && vgClean.parentNode) vgClean.parentNode.removeChild(vgClean);
@@ -1742,6 +1780,16 @@ function renderScene(sceneId) {
   // 实验楼四楼 → 厕所→美术教室剧情
   if (sceneId === "lab_4f") {
     renderLab4FSequence();
+    return;
+  }
+  // 实验楼五楼 → 电竞室→警笛狗剧情
+  if (sceneId === "lab_5f") {
+    renderLab5FSequence();
+    return;
+  }
+  // 实验楼六楼 → 音乐层→惊吓猪乐队对决剧情
+  if (sceneId === "lab_6f") {
+    renderLab6FSequence();
     return;
   }
   // 教学楼一楼 → 初遇剧情
@@ -3411,6 +3459,567 @@ function renderLab4FSequence() {
     };
     actionsArea.appendChild(enterBtn);
   });
+}
+
+// 实验楼五楼序列：到五楼 → 电竞室 → 警笛狗拦路 → 《勇者大战魔王》 → 小球试炼
+function renderLab5FSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopTypewriter();
+
+  var scene = SCENE_CONFIG["lab_5f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 序列图预加载：电竞室/警笛狗
+  var preImgs = ["370360ebac129bb6dfe0901987320d8f.jpg", "5ba5befd3710d360ded84dccd743be67.jpg"];
+  for (var pi = 0; pi < preImgs.length; pi++) {
+    (new Image()).src = preImgs[pi];
+  }
+
+  // 规范切图：同步清src + cancelRAF + 单次RAF设新src
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 图1：到五楼
+  switchImg(scene.img);
+  document.getElementById("location-name").textContent = scene.name;
+  seqTypeAndWait("到五楼了...|我迫不及待要打游戏了！！！", function() {
+    // 图2：电竞室门口
+    switchImg("370360ebac129bb6dfe0901987320d8f.jpg");
+    seqTypeAndWait("嘿嘿嘿|要进去打游戏啦~", function() {
+      // 图3：警笛狗登场
+      switchImg("5ba5befd3710d360ded84dccd743be67.jpg");
+      seqTypeAndWait("警笛狗：何人在此喧嚣|狗狗？！！我要打游戏你滚|警笛狗：你可以玩我做的|警笛狗：这是我昨晚花了三个小时做的游戏。", function() {
+        // 进入《勇者大战魔王》（简陋按钮游戏）
+        renderHeroVsDemon(function() {
+          // GAME OVER后回故事线
+          switchImg("5ba5befd3710d360ded84dccd743be67.jpg");
+          seqTypeAndWait("警笛狗：你被自己的愚蠢击败了。|？你sb|警笛狗：是不是很有教育意义|好神经啊|警笛狗：居然说我神经吗你这家伙|警笛狗：经历我的挑战吧！|警笛狗：这是一场试炼！", function() {
+            // 小球试炼（超灵敏度"参数优化"版）：失败给第二次挑战机会
+            function startDogTrial() {
+              renderDogBallTrial(function(win) {
+                actionsArea.innerHTML = "";
+                actionsArea.style.display = "none";
+                switchImg("5ba5befd3710d360ded84dccd743be67.jpg");
+                if (win) {
+                  // 胜利：通过考验 → 回楼梯间
+                  unlockAchievement("dog_trial_win");
+                  seqTypeAndWait("警笛狗：我去你通过了我的考验|警笛狗：你真棒！为你点赞", function() {
+                    renderScene("lab_floor");
+                  });
+                } else {
+                  // 失败：真菜啊 → 再来一次 / 离开试炼
+                  unlockAchievement("dog_trial_lose");
+                  seqTypeAndWait("警笛狗：真菜啊....", function() {
+                    actionsArea.innerHTML = "";
+                    actionsArea.style.display = "flex";
+                    var retryBtn = document.createElement("button");
+                    retryBtn.className = "action-btn special";
+                    retryBtn.textContent = "🔄 再来一次";
+                    retryBtn.onclick = function() {
+                      actionsArea.innerHTML = "";
+                      actionsArea.style.display = "none";
+                      startDogTrial();
+                    };
+                    actionsArea.appendChild(retryBtn);
+                    var leaveBtn = document.createElement("button");
+                    leaveBtn.className = "action-btn band-quit";
+                    leaveBtn.textContent = "🚪 离开试炼";
+                    leaveBtn.onclick = function() {
+                      actionsArea.innerHTML = "";
+                      actionsArea.style.display = "none";
+                      renderScene("lab_floor");
+                    };
+                    actionsArea.appendChild(leaveBtn);
+                  });
+                }
+              });
+            }
+            startDogTrial();
+          });
+        });
+      });
+    });
+  });
+}
+
+// 实验楼六楼序列：最后一楼音乐层 → 惊吓猪乐队对决（乐队大赛剧情模式） → 平行宇宙独白 → 蹦蹦炸弹
+function renderLab6FSequence() {
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopTypewriter();
+
+  var scene = SCENE_CONFIG["lab_6f"];
+  var img = document.getElementById("scene-img");
+  var placeholder = document.getElementById("scene-placeholder");
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "none";
+
+  // 序列图预加载：惊吓猪/可莉
+  var preImgs = ["a03dd7e46a5bd0928140307ab69b1fe9.jpg", "934c3c758993fbbf69927dd353f47e14.jpg"];
+  for (var pi = 0; pi < preImgs.length; pi++) {
+    (new Image()).src = preImgs[pi];
+  }
+
+  // 规范切图：同步清src + cancelRAF + 单次RAF设新src
+  function switchImg(src) {
+    img.src = "";
+    cancelRAF();
+    pendingImageRAF = requestAnimationFrame(function() {
+      pendingImageRAF = null;
+      img.src = src;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    });
+  }
+
+  // 乐队对决：胜→继续剧情；败/平→再来一次按钮
+  function startBandDuel() {
+    renderBandGame("single", function(win) {
+      actionsArea.innerHTML = "";
+      actionsArea.style.display = "none";
+      document.getElementById("location-name").textContent = scene.name;
+      if (win) {
+        // 胜利：切回六楼走廊图 → 乐队高手独白 → 选项去看看 → 蹦蹦炸弹
+        switchImg(scene.img);
+        seqTypeAndWait("我是乐队高手哈哈哈哈哈|虽然我对音乐有些兴趣......但是开始的还是太晚了|所以最后还是放弃了这条路|一定有个平行宇宙...|我会是一个乐队高手...随便什么位置都行|最好是那种流浪乐队之类的最赞了！|欸....旁边的教室里好像有动静....|去看看吧.....", function() {
+          actionsArea.innerHTML = "";
+          actionsArea.style.display = "flex";
+          var lookBtn = document.createElement("button");
+          lookBtn.className = "action-btn special";
+          lookBtn.textContent = "去看看";
+          lookBtn.onclick = function() {
+            actionsArea.innerHTML = "";
+            actionsArea.style.display = "none";
+            // 可莉登场：蹦蹦炸弹！！
+            switchImg("934c3c758993fbbf69927dd353f47e14.jpg");
+            seqTypeAndWait("....?|等下....|不好？！|\"可莉\"：蹦蹦炸弹！！", function() {
+              // 爆炸级剧烈震动：shake-hard 2.5秒
+              var gc = document.getElementById("game-container");
+              gc.classList.add("shake-hard");
+              setTimeout(function() {
+                gc.classList.remove("shake-hard");
+                // 震动结束：解锁成就（toast展示）→ 回楼梯间
+                unlockAchievement("bomb_klee");
+                renderScene("lab_floor");
+              }, 2500);
+            });
+          };
+          actionsArea.appendChild(lookBtn);
+        });
+      } else {
+        // 失败/平局：切回惊吓猪图，给再来一次按钮重开乐队对决
+        switchImg("a03dd7e46a5bd0928140307ab69b1fe9.jpg");
+        actionsArea.innerHTML = "";
+        actionsArea.style.display = "flex";
+        var retryBtn = document.createElement("button");
+        retryBtn.className = "action-btn special";
+        retryBtn.textContent = "🔄 再来一次";
+        retryBtn.onclick = function() {
+          actionsArea.innerHTML = "";
+          actionsArea.style.display = "none";
+          startBandDuel();
+        };
+        actionsArea.appendChild(retryBtn);
+      }
+    });
+  }
+
+  // 图1：最后一楼音乐层
+  switchImg(scene.img);
+  document.getElementById("location-name").textContent = scene.name;
+  seqTypeAndWait("最后一楼！！音乐层！", function() {
+    // 图2：惊吓猪登场
+    switchImg("a03dd7e46a5bd0928140307ab69b1fe9.jpg");
+    seqTypeAndWait("惊吓猪：你好~你可曾有过音乐的冲动~|比如~|惊吓猪：比如一起组乐队~|惊吓猪：我们....一起....比谁更能组乐队吧！！|来吧！！！", function() {
+      // 进入乐队大赛（单人 vs AI=惊吓猪，剧情模式）
+      startBandDuel();
+    });
+  });
+}
+
+// ====================== 《勇者大战魔王》（警笛狗自制·超简陋按钮游戏） ======================
+// 玩法：按按钮。按一下「你跳起来了」，再按「你又跳起来了」，
+//       警笛狗提示有隐藏结局→疯狂按3下→GAME OVER→3秒后交还剧情。
+var heroState = null;
+
+function renderHeroVsDemon(onFinish) {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+  stopBossFight();
+  stopBandGame();
+  stopMilkFrogGame();
+  stopSketchGame();
+  stopChuTicTacToe();
+  stopHeroVsDemon();
+  stopDogBallTrial();
+
+  document.getElementById("location-name").textContent = "勇者大战魔王";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  document.getElementById("description-area").style.display = "none";
+
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var area = document.getElementById("image-area");
+  var panel = document.createElement("div");
+  panel.id = "hero-panel";
+  area.appendChild(panel);
+
+  heroState = { presses: 0, hint: "", over: false, onFinish: onFinish || null, timer: null };
+  heroRender();
+
+  var jumpBtn = document.createElement("button");
+  jumpBtn.innerHTML = "⚔️ 按钮";
+  jumpBtn.className = "action-btn special";
+  jumpBtn.onclick = heroPress;
+  actionsArea.appendChild(jumpBtn);
+}
+
+// 按按钮：前2下跳起来，之后警笛狗提示隐藏结局，第3下GAME OVER
+function heroPress() {
+  var st = heroState;
+  if (!st || st.over) return;
+  st.presses++;
+  unlockAchievement("hero_jump");   // 玩过就算传说
+  if (st.presses === 1) {
+    st.hint = "你跳起来了。";
+  } else if (st.presses === 2) {
+    st.hint = "你又跳起来了。";
+  } else if (st.presses === 3) {
+    st.hint = "……没了？";
+  } else if (st.presses === 4) {
+    st.hint = "警笛狗：还有隐藏结局。";
+  } else if (st.presses === 5) {
+    st.hint = "警笛狗：疯狂按这个按钮吧";
+  } else {
+    // 第6下起算疯狂按：累计3下疯狂（第6、7、8下）→GAME OVER
+    if (st.presses >= 8) { heroGameOver(); return; }
+    st.hint = "（疯狂按按钮中……" + (st.presses - 5) + "/3）";
+  }
+  heroRender();
+}
+
+// GAME OVER：显示后3秒消失回故事线
+function heroGameOver() {
+  var st = heroState;
+  if (!st || st.over) return;
+  st.over = true;
+  st.hint = "GAME OVER";
+  unlockAchievement("hero_stupid");
+  heroRender();
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  st.timer = setTimeout(function() {
+    var cb = st.onFinish;
+    stopHeroVsDemon();
+    if (cb) cb();
+    else renderScene("lab_floor");
+  }, 3000);
+}
+
+// 渲染：像素风简陋界面——标题+草地+小人+按钮反馈
+function heroRender() {
+  var st = heroState;
+  var panel = document.getElementById("hero-panel");
+  if (!st || !panel) return;
+  var jumped = st.presses >= 1 && !st.over;
+  var html = '';
+  html += '<div class="hero-title">《勇者大战魔王》</div>';
+  html += '<div class="hero-screen">';
+  html += '<div class="hero-sky"></div>';
+  html += '<div class="hero-ground"></div>';
+  html += '<div class="hero-man' + (st.over ? " hero-dead" : (jumped ? " hero-jump" : "")) + '">🧍</div>';
+  if (st.over) html += '<div class="hero-gameover">GAME OVER</div>';
+  html += '</div>';
+  html += '<div class="hero-hint">' + (st.hint || "点击按钮开始冒险！") + '</div>';
+  panel.innerHTML = html;
+}
+
+// 退出清理
+function stopHeroVsDemon() {
+  var st = heroState;
+  if (st && st.timer) clearTimeout(st.timer);
+  var panel = document.getElementById("hero-panel");
+  if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+  heroState = null;
+}
+
+// ====================== 警笛狗小球试炼（超高灵敏度版） ======================
+// 玩法：鼠标/触屏控制小球从左到右穿过障碍通道；碰到障碍即失败。
+//       「参数优化」：灵敏度故意调得极高——轻轻一动球就飞出去。
+var dogBallState = null;
+
+function renderDogBallTrial(onFinish) {
+  stopTypewriter();
+  if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
+  stopCanteenGame();
+  stopBossFight();
+  stopBandGame();
+  stopMilkFrogGame();
+  stopSketchGame();
+  stopChuTicTacToe();
+  stopHeroVsDemon();
+  stopDogBallTrial();
+
+  document.getElementById("location-name").textContent = "警笛狗的试炼";
+  var actionsArea = document.getElementById("actions-area");
+  actionsArea.innerHTML = "";
+  actionsArea.style.display = "flex";
+  document.getElementById("description-area").style.display = "none";
+
+  var img = document.getElementById("scene-img");
+  img.src = "";
+  img.style.display = "none";
+  document.getElementById("scene-placeholder").style.display = "none";
+
+  var area = document.getElementById("image-area");
+  var panel = document.createElement("div");
+  panel.id = "dogball-panel";
+  area.appendChild(panel);
+
+  var html = '';
+  html += '<div class="mf-head"><div class="mf-frog">🐕</div><div class="mf-bubble">警笛狗：一场试炼！用你的手指带小球穿过障碍！</div></div>';
+  html += '<div class="mf-pills">';
+  html += '<span class="mf-pill">距离 <b id="dogball-dist">0%</b></span>';
+  html += '<span class="mf-pill mf-pill-btn" onclick="dogBallRules()">📖 规则</span>';
+  html += '</div>';
+  html += '<canvas id="dogball-canvas"></canvas>';
+  html += '<div class="mf-hint" id="dogball-hint">移动鼠标/手指控制小球｜碰到障碍就输了</div>';
+  panel.innerHTML = html;
+
+  var canvas = document.getElementById("dogball-canvas");
+  canvas.oncontextmenu = function(e) { e.preventDefault(); return false; };
+
+  dogBallState = {
+    onFinish: onFinish || null,
+    raf: null, over: false, won: false,
+    started: false,
+  };
+
+  requestAnimationFrame(function() {
+    if (!dogBallState) return;
+    var dpr = window.devicePixelRatio || 1;
+    var w = panel.clientWidth - 24;
+    var h = window.innerHeight * 0.44;
+    var cw = Math.max(240, Math.min(460, Math.floor(w)));
+    var ch = Math.floor(cw * 0.72);
+    if (ch > h) { ch = Math.floor(h); cw = Math.min(cw, Math.floor(ch / 0.72)); }
+    var st = dogBallState;
+    st.w = cw; st.h = ch; st.dpr = dpr;
+    canvas.style.width = cw + "px";
+    canvas.style.height = ch + "px";
+    canvas.width = Math.floor(cw * dpr);
+    canvas.height = Math.floor(ch * dpr);
+
+    // 小球：起点左侧中央；障碍：上下交错柱子留缝通过
+    st.ball = { x: cw * 0.08, y: ch / 2, r: 7 };
+    st.obstacles = [];
+    var gap = cw * 0.30;              // 柱子间距
+    var gapH = ch * 0.34;             // 通过缝隙高度（偏窄）
+    for (var gx = cw * 0.3; gx < cw * 0.95; gx += gap) {
+      var gy = ch * 0.15 + Math.random() * (ch * 0.7 - gapH);
+      st.obstacles.push({ x: gx, top: gy - gapH / 2, bottom: gy + gapH / 2 });
+    }
+    // 终点线
+    st.goalX = cw * 0.94;
+
+    // 「参数优化」：灵敏度=位移放大倍数，故意极高（正常1.0，这里5.5）
+    st.SENS = 5.5;
+
+    // 指针控制：球位置 = 球位置 + 指针位移 × SENS（轻轻一动就飞）
+    var lastPX = null, lastPY = null;
+    function onMove(e) {
+      var s2 = dogBallState;
+      if (!s2 || s2.over) return;
+      var rect = canvas.getBoundingClientRect();
+      var px = (e.clientX - rect.left) * (cw / rect.width);
+      var py = (e.clientY - rect.top) * (ch / rect.height);
+      if (lastPX !== null && !s2.started) { s2.started = true; }
+      if (lastPX !== null) {
+        s2.ball.x += (px - lastPX) * s2.SENS;
+        s2.ball.y += (py - lastPY) * s2.SENS;
+        // 飞出画布也算撞墙（"直接飞出去"）
+        if (s2.ball.x < 0 || s2.ball.x > cw || s2.ball.y < 0 || s2.ball.y > ch) { dogBallEnd(false); return; }
+      }
+      lastPX = px; lastPY = py;
+    }
+    canvas.addEventListener("pointerdown", function(e) { e.preventDefault(); try { canvas.setPointerCapture(e.pointerId); } catch (err) {} lastPX = null; lastPY = null; });
+    canvas.addEventListener("pointermove", onMove);
+    canvas.addEventListener("pointerup", function() { lastPX = null; lastPY = null; });
+
+    dogBallLoop();
+  });
+
+  // 按钮区：开骂（连点触发警笛狗长篇诡辩，循环）+ 拒绝试炼
+  var angryCount = 0;
+  var angryLines = [
+    "警笛狗：“这是信息技术，不叫作弊，叫参数优化。”",
+    "警笛狗：“规则里可没写灵敏度不能调高。写游戏的是我，玩游戏的才是你，汪。”",
+    "警笛狗：“你输给的是参数，不是我。参数没有感情，也不接受道歉。”",
+    "警笛狗：“有意见可以走流程——先把球运过去，再提交书面申诉，我酌情驳回。”",
+    "警笛狗：“明明是你自己手抖，怪我灵敏度咯？真是的，汪！”",
+  ];
+  var angryBtn = document.createElement("button");
+  angryBtn.innerHTML = "😤 你个狗你作弊！";
+  angryBtn.className = "action-btn";
+  angryBtn.onclick = function() {
+    showToast(angryLines[angryCount % angryLines.length], 3200);
+    angryCount++;
+  };
+  actionsArea.appendChild(angryBtn);
+  var quitBtn = document.createElement("button");
+  quitBtn.innerHTML = "🚪 拒绝试炼";
+  quitBtn.className = "action-btn band-quit";
+  quitBtn.onclick = function() {
+    var story = !!(dogBallState && dogBallState.onFinish);
+    stopDogBallTrial();
+    renderScene(story ? "lab_floor" : "gate");
+  };
+  actionsArea.appendChild(quitBtn);
+}
+
+// 小球主循环：绘制+碰撞+胜利检测
+function dogBallLoop() {
+  var st = dogBallState;
+  if (!st) return;
+  var canvas = document.getElementById("dogball-canvas");
+  if (!canvas) { stopDogBallTrial(); return; }
+  var ctx = canvas.getContext("2d");
+  var cw = st.w, ch = st.h;
+
+  // 碰撞：障碍柱（从上往下/从下往上的矩形）
+  if (!st.over) {
+    for (var i = 0; i < st.obstacles.length; i++) {
+      var o = st.obstacles[i];
+      var wCol = 14;   // 柱宽
+      if (st.ball.x + st.ball.r > o.x && st.ball.x - st.ball.r < o.x + wCol) {
+        if (st.ball.y - st.ball.r < o.top || st.ball.y + st.ball.r > o.bottom) { dogBallEnd(false); break; }
+      }
+    }
+    // 到达终点
+    if (!st.over && st.ball.x >= st.goalX) dogBallEnd(true);
+    var distEl = document.getElementById("dogball-dist");
+    if (distEl) distEl.textContent = Math.min(100, Math.round((st.ball.x - cw * 0.08) / (st.goalX - cw * 0.08) * 100)) + "%";
+  }
+
+  // 绘制
+  ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+  ctx.fillStyle = "#0d0b14";
+  ctx.fillRect(0, 0, cw, ch);
+
+  // 障碍柱：警笛狗配色（红蓝闪的狗粮罐头既视感）
+  for (var j = 0; j < st.obstacles.length; j++) {
+    var ob = st.obstacles[j];
+    ctx.fillStyle = "#5c6bc0";
+    ctx.fillRect(ob.x, 0, 14, ob.top);
+    ctx.fillRect(ob.x, ob.bottom, 14, ch - ob.bottom);
+  }
+  // 终点线
+  ctx.strokeStyle = "#81c784";
+  ctx.lineWidth = 3;
+  ctx.setLineDash([6, 5]);
+  ctx.beginPath(); ctx.moveTo(st.goalX, 0); ctx.lineTo(st.goalX, ch); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 小球
+  ctx.fillStyle = st.over ? (st.won ? "#81c784" : "#e57373") : "#ffd54f";
+  ctx.beginPath(); ctx.arc(st.ball.x, st.ball.y, st.ball.r, 0, Math.PI * 2); ctx.fill();
+
+  // 结果文字
+  if (st.over) {
+    ctx.fillStyle = "rgba(13,11,20,0.8)";
+    ctx.fillRect(0, ch / 2 - 30, cw, 60);
+    ctx.textAlign = "center";
+    ctx.fillStyle = st.won ? "#81c784" : "#e57373";
+    ctx.font = "700 26px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillText(st.won ? "通过试炼！" : "撞到了……", cw / 2, ch / 2 + 9);
+  }
+
+  st.raf = requestAnimationFrame(dogBallLoop);
+}
+
+// 小球终局：剧情模式交还剧情流程；独立模式（小游戏库）保留结果画面，给再来一次/离开按钮
+function dogBallEnd(win) {
+  var st = dogBallState;
+  if (!st || st.over) return;
+  st.over = true;
+  st.won = win;
+  var hint = document.getElementById("dogball-hint");
+  if (hint) hint.textContent = win ? "🐕 警笛狗目瞪口呆……" : "💥 碰到障碍了！";
+  setTimeout(function() {
+    if (!dogBallState) return;
+    var cb = st.onFinish;
+    if (cb) {
+      stopDogBallTrial();
+      cb(win);
+      return;
+    }
+    // 独立模式：停主循环但保留画布上的结果画面，按钮区换成 再来一次/离开
+    if (st.raf) cancelAnimationFrame(st.raf);
+    dogBallState = null;
+    unlockAchievement(win ? "dog_trial_win" : "dog_trial_lose");
+    var aa = document.getElementById("actions-area");
+    aa.innerHTML = "";
+    aa.style.display = "flex";
+    var retryBtn = document.createElement("button");
+    retryBtn.className = "action-btn special";
+    retryBtn.textContent = "🔄 再来一次";
+    retryBtn.onclick = function() { renderDogBallTrial(); };
+    aa.appendChild(retryBtn);
+    var leaveBtn = document.createElement("button");
+    leaveBtn.className = "action-btn band-quit";
+    leaveBtn.textContent = "🚪 离开试炼";
+    leaveBtn.onclick = function() { stopDogBallTrial(); renderScene("gate"); };
+    aa.appendChild(leaveBtn);
+  }, 1200);
+}
+
+// 小球规则弹窗
+function dogBallRules() {
+  showPopupModal(
+    '<div style="text-align:left;font-size:14px;line-height:1.8;">' +
+    '<b style="color:#ffd54f;">🐕 警笛狗的试炼</b><br>' +
+    '· 移动鼠标/手指，控制小球<b>从左到右</b>穿过柱子缝隙<br>' +
+    '· 碰到柱子或飞出边界=失败；到达右边绿色虚线=胜利<br>' +
+    '· 灵敏度被警笛狗「参数优化」过——位移×5.5倍，轻轻一动就飞<br>' +
+    '· 小技巧：手指/鼠标<b>极慢</b>地挪，一次只蹭一点点' +
+    '</div>'
+  );
+}
+
+// 退出清理
+function stopDogBallTrial() {
+  var st = dogBallState;
+  if (st && st.raf) cancelAnimationFrame(st.raf);
+  var panel = document.getElementById("dogball-panel");
+  if (panel && panel.parentNode) panel.parentNode.removeChild(panel);
+  var aa = document.getElementById("actions-area");
+  if (aa) { aa.className = ""; aa.style.display = "flex"; }
+  var da = document.getElementById("description-area");
+  if (da) da.style.display = "";
+  dogBallState = null;
 }
 
 // 教学楼一楼 → 初遇剧情序列（无聊闲逛 → 眼睛痒揉一揉 → 模糊渐清晰 → 她登场 → 对话 → 陪她逛学校）
@@ -5947,6 +6556,7 @@ var ACHIEVEMENT_GROUPS = [
     "canteen_king", "canteen_got_some",
     "band_king", "bocchi_band", "milk_win", "milk_lose",
     "art_pass", "art_fail", "art_great", "chu_win", "chu_lose",
+    "hero_jump", "hero_stupid", "dog_trial_win", "dog_trial_lose", "bomb_klee",
     "confucius_bless", "little_greedy_cat", "eat_to_death", "grass_king", "grass_emperor",
     "beat_alien", "pooped_on", "nasa_detected", "capture_pig", "desert_pig_sight",
   ]},
@@ -6042,12 +6652,12 @@ function updateAchievementBadge() {
 
 // Toast 提示
 var toastTimer = null;
-function showToast(msg) {
+function showToast(msg, duration) {
   var toast = document.getElementById("toast");
   toast.textContent = msg;
   toast.classList.add("show");
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { toast.classList.remove("show"); }, 2000);
+  toastTimer = setTimeout(function() { toast.classList.remove("show"); }, duration || 2000);
 }
 
 // ===== 御前决斗战斗系统 =====
@@ -6598,8 +7208,8 @@ function bandActiveGenericBonds(lineup) {
 var bandState = null;
 var BAND_UID = 0;   // 队员唯一编号（主唱指派用）
 
-// 入口：开始乐队大赛（传送门直接调用）
-function renderBandGame(mode) {
+// 入口：开始乐队大赛（传送门直接调用 / 剧情关卡调用：onStoryFinish(win)——实验楼6F惊吓猪对决）
+function renderBandGame(mode, onStoryFinish) {
   stopTypewriter();
   if (pendingAutoJumpTimer) { clearTimeout(pendingAutoJumpTimer); pendingAutoJumpTimer = null; }
   stopCanteenGame();
@@ -6631,6 +7241,7 @@ function renderBandGame(mode) {
   bandState = {
     round: 1, maxRound: 12, phase: "auction",
     mode: mode, turn: "p1",            // auction阶段用auction.decider轮流竞价；sign阶段duo用turn交接
+    storyFinish: onStoryFinish || null, // 剧情模式回调（实验楼6F惊吓猪对决）：结算后不走传送门流程
     gold: mode === "duo" ? 200 : 230, fame: 0,
     aiGold: mode === "duo" ? 200 : 450, aiFame: 0,
     band: [], aiBand: [],
@@ -8019,16 +8630,23 @@ function bandKasumiTick(side) {
 function bandFinish() {
   var st = bandState;
   var duo = st.mode === "duo";
+  var story = !!st.storyFinish;
   var win = st.fame > st.aiFame;
   var html = "12 回合巡回演出马拉松落幕！<br><br>"
     + "🎤 " + (duo ? "玩家1" : "你的乐队") + "：知名度 <b style='color:#ffc832'>" + st.fame + "</b>（" + st.band.length + " 人）<br>"
-    + (duo ? "🎮" : "🤖") + " " + (duo ? "玩家2" : "AI乐队") + "：知名度 <b style='color:#ff8a65'>" + st.aiFame + "</b>（" + st.aiBand.length + " 人）<br><br>"
-    + (duo
-      ? (win ? "🏆 玩家1的乐队轰动了全城！玩家2乖乖请客吧！" : (st.fame === st.aiFame ? "🤝 平局……这顿饭AA吧。" : "🏆 玩家2的乐队轰动了全城！玩家1乖乖请客吧！"))
-      : (win ? "🏆 你的乐队轰动了全城，AI经纪人流下了不甘的泪水！" : (st.fame === st.aiFame ? "🤝 平局……AI经纪人侥幸保住了面子。" : "💥 AI乐队的海报贴满了大街小巷，下次再战！")));
+    + (duo ? "🎮" : (story ? "🐷" : "🤖")) + " " + (duo ? "玩家2" : (story ? "惊吓猪的乐队" : "AI乐队")) + "：知名度 <b style='color:#ff8a65'>" + st.aiFame + "</b>（" + st.aiBand.length + " 人）<br><br>"
+    + (story
+      ? (win ? "🏆 你的乐队击败了惊吓猪！" : (st.fame === st.aiFame ? "🤝 平局……和惊吓猪打了个平手。" : "💥 被惊吓猪的乐队打败了！"))
+      : (duo
+        ? (win ? "🏆 玩家1的乐队轰动了全城！玩家2乖乖请客吧！" : (st.fame === st.aiFame ? "🤝 平局……这顿饭AA吧。" : "🏆 玩家2的乐队轰动了全城！玩家1乖乖请客吧！"))
+        : (win ? "🏆 你的乐队轰动了全城，AI经纪人流下了不甘的泪水！" : (st.fame === st.aiFame ? "🤝 平局……AI经纪人侥幸保住了面子。" : "💥 AI乐队的海报贴满了大街小巷，下次再战！"))));
+  var cb = st.storyFinish;
   bandState = null;
   if (win) unlockAchievement("band_king");
-  showPopupModal(html, function() { renderScene("gate"); });
+  showPopupModal(html, function() {
+    if (story) { stopBandGame(); cb(win); }
+    else renderScene("gate");
+  });
 }
 
 // 阵容渲染（side: "p1"/"ai"；editable: 当前操作方且签约阶段才显示操作按钮）
@@ -8355,7 +8973,11 @@ function bandRender() {
   var quitBtn = document.createElement("button");
   quitBtn.innerHTML = "🚪 放弃比赛";
   quitBtn.className = "action-btn band-quit";
-  quitBtn.onclick = function() { bandState = null; renderScene("gate"); };
+  quitBtn.onclick = function() {
+    var story = !!(bandState && bandState.storyFinish);
+    bandState = null;
+    renderScene(story ? "lab_floor" : "gate");
+  };
   actionsArea.appendChild(quitBtn);
 }
 
@@ -9881,6 +10503,9 @@ function openPortal() {
 
   html += '<button class="portal-game-btn" id="portal-sketch-btn">';
   html += '<span class="game-icon">🎨</span>一笔画速写</button>';
+
+  html += '<button class="portal-game-btn" onclick="event.stopPropagation();this.closest(\'.modal-overlay\').remove();renderDogBallTrial();">';
+  html += '<span class="game-icon">🐕</span>警笛狗小球试炼</button>';
 
   html += '</div></div>';
 
